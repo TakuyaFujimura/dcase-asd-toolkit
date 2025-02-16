@@ -99,7 +99,7 @@ class BasicCollator(object):
             onehot_tensor = torch.nn.functional.one_hot(
                 idx_tensor.long(), num_classes=label_info.num_class
             ).float()
-            items[key] = idx_tensor[:, None]
+            items[f"idx_{key}"] = idx_tensor[:, None]
             items[f"onehot_{key}"] = onehot_tensor
         return items
 
