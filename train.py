@@ -12,7 +12,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from mypkgs.datasets import BasicDataModule
 from mypkgs.utils.config_class import MainConfig
-from mypkgs.utils.config_class.main_config import BasicDMConfig
+from mypkgs.utils.config_class.main_config import BasicDMSplitConfig
 from mypkgs.utils.pl_utils import NaNCheckCallback, instantiate_tgt
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def setup_datamodule(cfg: MainConfig) -> pl.LightningDataModule:
     if cfg.datamodule_type == "basic":
         logger.info("Create datamodule")
         dm = BasicDataModule(
-            BasicDMConfig(**cfg.datamodule), cfg.data_dir, cfg.label_dict_path
+            BasicDMSplitConfig(**cfg.datamodule), cfg.data_dir, cfg.label_dict_path
         )
     else:
         raise NotImplementedError("I have not checked this")

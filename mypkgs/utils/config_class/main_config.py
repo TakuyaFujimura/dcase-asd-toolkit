@@ -17,7 +17,7 @@ class ModelConfig(BaseModel):
     grad_cfg: GradConfig
 
 
-class BasicDMConfigSet(BaseModel):
+class BasicDMConfig(BaseModel):
 
     class DSConfig(BaseModel):
         npy_name: str
@@ -36,8 +36,8 @@ class BasicDMConfigSet(BaseModel):
     collator: CollatorConfig
 
 
-class BasicDMConfig(BaseModel):
-    train: BasicDMConfigSet
+class BasicDMSplitConfig(BaseModel):
+    train: BasicDMConfig
 
 
 class MainConfig(BaseModel):
