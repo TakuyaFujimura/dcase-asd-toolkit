@@ -149,7 +149,7 @@ class Conv2dEncoderLayer(nn.Module):
         input_size: tuple,
         use_bias: bool,
         emb_base_size: int,
-        resnet_additional_layer,
+        resnet_additional_layer: str,
     ):
         super().__init__()
         if emb_base_size % 8 != 0:

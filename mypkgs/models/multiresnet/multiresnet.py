@@ -15,7 +15,7 @@ class MultiResNet(nn.Module):
         stft_cfg_list: List[dict],
         use_bias: bool = False,
         emb_base_size: int = 128,
-        resnet_additional_layer: str = "normal",
+        resnet_additional_layer: str = "SEBlock",
     ):
         super().__init__()
         self.fft_layer = FFTEncoderLayer(

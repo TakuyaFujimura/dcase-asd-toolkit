@@ -17,7 +17,7 @@ class BasicDisPLModel(BasePLModel):
         optim_cfg: Dict[str, Any],
         scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
-        label_dict_path: Dict[str, Path],
+        label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
     ):
         super().__init__(
             model_cfg=model_cfg,
