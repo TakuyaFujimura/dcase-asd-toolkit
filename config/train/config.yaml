@@ -5,7 +5,7 @@ defaults:
     - trainer: null
     - experiments: null
 
-seed: 2022
+seed: 0
 name: null
 version: null
 tf32: true
