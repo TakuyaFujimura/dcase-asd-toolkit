@@ -1,0 +1,44 @@
+defaults:
+    - _self_
+    - datamodule: null
+    - model: null
+    - trainer: null
+    - experiments: null
+
+seed: 2022
+name: null
+version: null
+tf32: true
+
+refresh_rate: 1
+num_workers: 4
+
+
+callback_opts:
+  best:
+    monitor: "train/main"
+    filename: "epoch={epoch}-loss={train/main:.9f}"
+    save_top_k: 1
+    mode: "min"
+    auto_insert_metric_name: false
+  interval:
+    monitor: "train/main"
+    filename: "interval_epoch={epoch}-loss={train/main:.9f}"
+    save_top_k: -1
+    every_n_epochs: 4
+    save_last: true
+    auto_insert_metric_name: false
+
+every_n_epochs_valid: 1
+
+sampling_rate: 16000
+
+result_dir: "./results"
+
+datamodule_type: "basic"
+label_dict_path: {}
+data_dir: null
+
+hydra:
+    run:
+        dir: ${result_dir}/${name}/${version}

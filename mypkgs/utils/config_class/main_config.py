@@ -50,7 +50,7 @@ class MainConfig(BaseModel):
     callback_opts: Dict[str, Dict[str, Any]]
     every_n_epochs_valid: int
     sampling_rate: int
-    exp_root: Path
+    result_dir: Path
     model: ModelConfig
     trainer: Dict[str, Any]
     datamodule_type: Literal["basic"]

@@ -26,7 +26,7 @@ def make_trainer(cfg: MainConfig, ckpt_dir: Path) -> pl.Trainer:
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
-        save_dir=cfg.exp_root,
+        save_dir=cfg.result_dir,
         name=cfg.name,
         version=cfg.version,
     )
@@ -81,7 +81,7 @@ def setup_plmodel(cfg: MainConfig) -> pl.LightningModule:
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
-    set_logging(cfg.exp_root)
+    set_logging(cfg.result_dir)
     if not cfg.trainer.get("deterministic", False):
         raise ValueError("Not deterministic!!!")
     if cfg.tf32:
@@ -92,7 +92,7 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(cfg.seed, workers=True)
     # torch.autograd.set_detect_anomaly(False)
 
-    ckpt_dir = cfg.exp_root / cfg.name / cfg.version / "checkpoints"
+    ckpt_dir = cfg.result_dir / cfg.name / cfg.version / "checkpoints"
     if ckpt_dir.exists():
         logger.warning("already done")
         return
