@@ -7,12 +7,10 @@ from .utils import get_dec, get_perm
 
 
 class Mixup(nn.Module):
-    def __init__(self, prob: float, label_candidate: List[str]):
+    def __init__(self, prob: float):
         super().__init__()
         self.prob = prob
         assert 0 <= prob <= 1
-        self.label_candidate = label_candidate
-        assert "wave" in label_candidate
 
     @staticmethod
     def process(
@@ -40,9 +38,20 @@ class Mixup(nn.Module):
         dec = get_dec(len(wave), self.prob, wave.device)
 
         for key in batch:
-            if key in self.label_candidate:
+            if isinstance(batch[key], torch.Tensor):
+                assert (
+                    key.startswith("idx_") or key.startswith("onehot_") or key == "wave"
+                )
                 new_batch[key] = self.process(lam, perm, dec, batch[key])
             else:
+                assert key in [
+                    "path",
+                    "machine",
+                    "section",
+                    "attr",
+                    "is_normal",
+                    "is_target",
+                ]
                 new_batch[key] = batch[key]
 
         return new_batch
