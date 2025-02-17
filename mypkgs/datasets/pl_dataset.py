@@ -14,17 +14,15 @@ class BasicDataModule(pl.LightningDataModule):
     def __init__(
         self,
         dm_cfg: BasicDMSplitConfig,
-        data_dir: Path,
         label_dict_path: Dict[str, Path],
     ):
         super().__init__()
         self.dm_cfg = dm_cfg
         self.label_dict_path = label_dict_path
-        self.data_dir = data_dir
 
     def _get_loader(self, datasetconfig: BasicDMConfig):
         dataset = BasicDataset(
-            data_dir=self.data_dir,
+            data_dir=datasetconfig.dataset.data_dir,
             path_list_json=datasetconfig.dataset.path_list_json,
             use_cache=datasetconfig.dataset.use_cache,
         )

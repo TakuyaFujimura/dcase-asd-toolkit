@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+    - override /datamodule: basic
+    - override /model: multiresnet_1024
+    - override /trainer: default
+
+datamodule:
+    dcase: "dcase2023"
+
+
+model:
+    model_cfg:
+        loss_label2lam_dict:
+            machine_attr_domain: 1
+
+
+label_dict_path:
+  machine_attr_domain: "preprocess/label/${datamodule.dcase}/machine_attr_domain.json"

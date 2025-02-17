@@ -1,0 +1,26 @@
+
+
+dcase: null
+
+
+data_dir: null
+batch_size: 64
+sr: 16000
+sec: 18
+num_workers: 4
+
+train:
+    dataloader:
+        batch_size: ${datamodule.batch_size}
+        num_workers: ${datamodule.num_workers}
+        pin_memory: true
+        shuffle: true
+    dataset:
+        data_dir: ${datamodule.data_dir}
+        path_list_json: "preprocess/split/${datamodule.dcase}/train.json"
+    batch_sampler: null
+    collator:
+        sr: ${datamodule.sr}
+        sec: ${datamodule.sec}
+        shuffle: true
+

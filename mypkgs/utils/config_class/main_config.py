@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -20,7 +20,7 @@ class ModelConfig(BaseModel):
 class BasicDMConfig(BaseModel):
 
     class DSConfig(BaseModel):
-        npy_name: str
+        data_dir: Path
         path_list_json: Path
         use_cache: bool = False
 
@@ -28,7 +28,12 @@ class BasicDMConfig(BaseModel):
         sec: float
         sr: int
         shuffle: bool
-        fixed_start_frame: int = 0
+
+        @field_validator("sr")
+        def check_sr(cls, v):
+            if v not in [16000]:
+                raise ValueError("Unexpected sampling rate")
+            return v
 
     dataloader: Dict[str, Any]
     dataset: DSConfig
@@ -38,6 +43,15 @@ class BasicDMConfig(BaseModel):
 
 class BasicDMSplitConfig(BaseModel):
     train: BasicDMConfig
+
+    dcase: str
+
+    @field_validator("dcase", mode="before")
+    def check_dcase(cls, v):
+        if v in [f"dcase202{i}" for i in range(5)]:
+            return v
+        else:
+            raise ValueError("Unexpected dcase type")
 
 
 class MainConfig(BaseModel):
@@ -49,13 +63,11 @@ class MainConfig(BaseModel):
     tf32: bool = False
     callback_opts: Dict[str, Dict[str, Any]]
     every_n_epochs_valid: int
-    sampling_rate: int
     result_dir: Path
     model: ModelConfig
     trainer: Dict[str, Any]
     datamodule_type: Literal["basic"]
     label_dict_path: Dict[str, Path] = {}
-    data_dir: Path
     datamodule: dict
 
     @field_validator("name", mode="before")
@@ -66,9 +78,3 @@ class MainConfig(BaseModel):
             return str(v)
         else:
             raise ValueError("Unexpected name type")
-
-    @field_validator("sampling_rate")
-    def check_sampling_rate(cls, v):
-        if v not in [15000, 12800]:
-            raise ValueError("Unexpected sampling rate")
-        return v

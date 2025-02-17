@@ -31,13 +31,13 @@ callback_opts:
 
 every_n_epochs_valid: 1
 
-sampling_rate: 16000
-
 result_dir: "./results"
 
-datamodule_type: "basic"
 label_dict_path: {}
-data_dir: null
+datamodule_type: "basic"
+
+datamodule:
+  data_dir: "../data" # TODO: change this
 
 hydra:
     run:

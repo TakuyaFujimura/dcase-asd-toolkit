@@ -60,7 +60,7 @@ class BasicDisPLModel(BasePLModel):
     ) -> None:
         self.extractor = instantiate_tgt(extractor_cfg)
         if use_compile:
-            self.extractor = torch.compile(self.extractor)
+            self.extractor = torch.compile(self.extractor)  # type: ignore
         self.loss_cfg = loss_cfg
         self.embedding_size = self.extractor.embedding_size
         self.loss_label2lam_dict = loss_label2lam_dict
