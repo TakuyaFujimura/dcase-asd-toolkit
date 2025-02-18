@@ -2,17 +2,18 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, cast
 
 import hydra
 import lightning.pytorch as pl
+import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from mypkgs.test_utils import evaluate_main, extract_main, score_main
 from mypkgs.utils.config_class import MainTestConfig
 from mypkgs.utils.config_class.main_config import MainConfig
-from mypkgs.utils.io_utils import get_best_path, get_path_glob, read_json, set_logging
+from mypkgs.utils.io_utils import set_logging
 
 logger = logging.getLogger(__name__)
 
@@ -23,27 +24,12 @@ def hydra_to_pydantic(config: DictConfig) -> MainTestConfig:
     return MainTestConfig(**config_dict)
 
 
-def get_machines(past_cfg: MainConfig) -> List[str]:
-    return read_json(f"config/test/machines/{past_cfg.datamodule.dcase}.json")  # type: ignore
-
-
-def get_ckpt_path(cfg: MainTestConfig) -> Path:
-    ckpt_dir = cfg.result_dir / cfg.name / cfg.version / "checkpoints"
-    if cfg.infer_ver == "best":
-        ckpt_path = get_best_path(ckpt_dir)
-    elif cfg.infer_ver == "last":
-        ckpt_path = ckpt_dir / "last.ckpt"
-    elif cfg.infer_ver.startswith("epoch"):
-        epoch = int(cfg.infer_ver.split("_")[-1])
-        ckpt_condition = str(ckpt_dir / f"interval_epoch={epoch-1}-*.ckpt")
-        ckpt_path = Path(get_path_glob(ckpt_condition))
-    return ckpt_path
-
-
 def get_past_cfg(cfg: MainTestConfig) -> MainConfig:
-    ckpt_path = get_ckpt_path(cfg)
-    config_path = ckpt_path.parents[1] / ".hydra/config.yaml"
+    config_path = cfg.result_dir / cfg.name / cfg.version / ".hydra/config.yaml"
     past_cfg = MainConfig(**cast(Dict[str, Any], OmegaConf.load(config_path)))
+    assert cfg.result_dir == past_cfg.result_dir
+    assert cfg.name == past_cfg.name
+    assert cfg.version == past_cfg.version
     return past_cfg
 
 
@@ -60,19 +46,20 @@ def main(hydra_cfg: DictConfig) -> None:
     set_logging(cfg.result_dir, __file__)
     logger.info(f"Start testing: {HydraConfig().get().run.dir}")
     logger.info(f"version: {cfg.version}")
+    if cfg.tf32:
+        torch.set_float32_matmul_precision("high")
+        logger.info("Set float32_matmul_precision to high")
     pl.seed_everything(cfg.seed, workers=True)
 
     infer_dir = make_dir(cfg)
     past_cfg = get_past_cfg(cfg)
-    machines = get_machines(past_cfg)
 
-    for m in machines:
-        if cfg.extract:
-            extract_main(cfg, infer_dir, m)
-        if cfg.score:
-            score_main(cfg, infer_dir, m)
-        if cfg.evaluate:
-            evaluate_main(cfg, infer_dir, m)
+    if cfg.extract:
+        extract_main(cfg=cfg, past_cfg=past_cfg, infer_dir=infer_dir)
+    if cfg.score:
+        score_main(cfg, infer_dir)
+    if cfg.evaluate:
+        evaluate_main(cfg, infer_dir)
 
 
 if __name__ == "__main__":

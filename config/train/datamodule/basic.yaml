@@ -1,9 +1,4 @@
 
-
-dcase: null
-
-
-data_dir: null
 batch_size: 64
 sr: 16000
 sec: 18
@@ -16,8 +11,8 @@ train:
         pin_memory: true
         shuffle: true
     dataset:
-        data_dir: ${datamodule.data_dir}
-        path_list_json: "preprocess/split/${datamodule.dcase}/train.json"
+        path_selector_list:
+            - "${data_dir}/${dcase}/all/raw/*/train/*.wav" # TODO: check this path
     batch_sampler: null
     collator:
         sr: ${datamodule.sr}

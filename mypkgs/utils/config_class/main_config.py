@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -20,8 +20,7 @@ class ModelConfig(BaseModel):
 class BasicDMConfig(BaseModel):
 
     class DSConfig(BaseModel):
-        data_dir: Path
-        path_list_json: Path
+        path_selector_list: List[str]
         use_cache: bool = False
 
     class CollatorConfig(BaseModel):
@@ -44,15 +43,6 @@ class BasicDMConfig(BaseModel):
 class BasicDMSplitConfig(BaseModel):
     train: BasicDMConfig
 
-    dcase: str
-
-    @field_validator("dcase", mode="before")
-    def check_dcase(cls, v):
-        if v in [f"dcase202{i}" for i in range(5)]:
-            return v
-        else:
-            raise ValueError("Unexpected dcase type")
-
 
 class MainConfig(BaseModel):
     seed: int
@@ -70,6 +60,9 @@ class MainConfig(BaseModel):
     label_dict_path: Dict[str, Path] = {}
     datamodule: dict
 
+    data_dir: str
+    dcase: str
+
     @field_validator("name", mode="before")
     def cast_name(cls, v):
         if isinstance(v, str):
@@ -78,3 +71,10 @@ class MainConfig(BaseModel):
             return str(v)
         else:
             raise ValueError("Unexpected name type")
+
+    @field_validator("dcase", mode="before")
+    def check_dcase(cls, v):
+        if v in [f"dcase202{i}" for i in range(5)]:
+            return v
+        else:
+            raise ValueError("Unexpected dcase type")

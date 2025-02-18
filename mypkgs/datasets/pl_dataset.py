@@ -20,10 +20,10 @@ class BasicDataModule(pl.LightningDataModule):
         self.dm_cfg = dm_cfg
         self.label_dict_path = label_dict_path
 
-    def _get_loader(self, datasetconfig: BasicDMConfig):
+    @staticmethod
+    def get_loader(datasetconfig: BasicDMConfig, label_dict_path: Dict[str, Path]):
         dataset = BasicDataset(
-            data_dir=datasetconfig.dataset.data_dir,
-            path_list_json=datasetconfig.dataset.path_list_json,
+            path_selector_list=datasetconfig.dataset.path_selector_list,
             use_cache=datasetconfig.dataset.use_cache,
         )
         if datasetconfig.batch_sampler is None:
@@ -33,7 +33,7 @@ class BasicDataModule(pl.LightningDataModule):
                 {"dataset": dataset, **datasetconfig.batch_sampler}
             )
         collator = BasicCollator(
-            label_dict_path=self.label_dict_path,
+            label_dict_path=label_dict_path,
             **datasetconfig.collator.model_dump(),
         )
         return DataLoader(
@@ -44,7 +44,10 @@ class BasicDataModule(pl.LightningDataModule):
         )
 
     def train_dataloader(self):
-        return self._get_loader(self.dm_cfg.train)
+        return self.get_loader(
+            datasetconfig=self.dm_cfg.train,
+            label_dict_path=self.label_dict_path,
+        )
 
     def val_dataloader(self):
         return None

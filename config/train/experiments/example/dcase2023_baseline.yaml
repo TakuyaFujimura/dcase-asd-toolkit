@@ -4,8 +4,7 @@ defaults:
     - override /model: multiresnet_1024
     - override /trainer: default
 
-datamodule:
-    dcase: "dcase2023"
+dcase: "dcase2023"
 
 
 model:
@@ -15,4 +14,4 @@ model:
 
 
 label_dict_path:
-  machine_attr_domain: "preprocess/label/${datamodule.dcase}/machine_attr_domain.json"
+  machine_attr_domain: "preprocess/label/${dcase}/machine_attr_domain.json"

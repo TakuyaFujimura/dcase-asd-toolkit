@@ -1,0 +1,26 @@
+defaults:
+  - _self_
+  - backend: cosine
+
+extract: true
+score: true
+evaluate: true
+
+
+device: cuda:0 #cpu #
+seed: 0
+name: null
+version: null
+infer_ver: null
+result_dir: "./results"
+
+tf32: true
+
+batch_size: 64
+num_workers: 0
+
+
+hydra:
+  output_subdir: .hydra_test
+  run:
+    dir: ${result_dir}/${name}/${version}

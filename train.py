@@ -59,7 +59,10 @@ def set_logging(dst_dir: Path):
 def setup_datamodule(cfg: MainConfig) -> pl.LightningDataModule:
     if cfg.datamodule_type == "basic":
         logger.info("Create datamodule")
-        dm = BasicDataModule(BasicDMSplitConfig(**cfg.datamodule), cfg.label_dict_path)
+        dm = BasicDataModule(
+            dm_cfg=BasicDMSplitConfig(**cfg.datamodule),
+            label_dict_path=cfg.label_dict_path,
+        )
     else:
         raise NotImplementedError("I have not checked this")
     return dm
