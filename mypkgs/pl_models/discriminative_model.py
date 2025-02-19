@@ -28,8 +28,12 @@ class BasicDisPLModel(BasePLModel):
         )
 
     def check_loss_cfg(self, loss_cfg: Dict[str, Any]):
+        # tgt_class: mypkgs.models.losses.SCAdaCos
         split_loss_tgt = loss_cfg["tgt_class"].split(".")
-        assert split_loss_tgt[2] == "losses"
+        if "mypkgs.models.losses" != ".".join(split_loss_tgt[:-1]):
+            raise ValueError(f"Invalid loss class: {loss_cfg['tgt_class']}")
+
+        # set normalize flag based on loss name
         if split_loss_tgt[3] in ["AdaCos", "ArcFace", "SCAdaCos"]:
             self.normalize = True
         else:
@@ -81,7 +85,7 @@ class BasicDisPLModel(BasePLModel):
             output_dict[f"logits_{label_name}"] = logits
 
         if self.normalize:
-            output_dict["embedding"] = F.normalize(embedding, dim=1)
+            output_dict["embedding"] = F.normalize(embedding, p=2, dim=1)
         else:
             output_dict["embedding"] = embedding
 

@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - backend: "cosine"
+  - backend: "default"
 
 
 extract: true

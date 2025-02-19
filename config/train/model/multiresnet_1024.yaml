@@ -27,7 +27,7 @@ model_cfg:
     use_bias: false
     emb_base_size: 128
   loss_cfg:
-    tgt_class: mypkgs.models.loss.SCAdaCos
+    tgt_class: mypkgs.models.losses.SCAdaCos
     n_subclusters: 16
     dynamic: false
     trainable: true
