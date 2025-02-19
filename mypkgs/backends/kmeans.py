@@ -5,8 +5,8 @@ import pandas as pd
 from pydantic import BaseModel
 from sklearn.cluster import KMeans
 
+from ..utils.io_utils import get_embed_from_df
 from .base import BaseBackend
-from .utils import get_embed_from_df
 
 
 def min_euclid(x: np.ndarray, y: np.ndarray) -> np.ndarray:

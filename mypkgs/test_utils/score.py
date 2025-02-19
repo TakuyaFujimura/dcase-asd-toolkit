@@ -56,7 +56,6 @@ def score_main(cfg: MainTestConfig, infer_dir: Path, machines: List[str]) -> Non
     for m in machines:
         logger.info(f"Start scoring {m}")
         machine_dir = infer_dir / m
-        machine_dir.mkdir(exist_ok=True, parents=True)
 
         org_df_dict, output_df_dict = get_dicts(machine_dir=machine_dir)
 

@@ -6,8 +6,8 @@ from imblearn.over_sampling import SMOTE
 from pydantic import BaseModel
 from sklearn.neighbors import NearestNeighbors
 
+from ..utils.io_utils import get_embed_from_df
 from .base import BaseBackend
-from .utils import get_embed_from_df
 
 
 class KnnConfig(BaseModel):
