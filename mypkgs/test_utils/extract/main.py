@@ -42,33 +42,14 @@ def load_plmodel(cfg: MainTestConfig, past_cfg: MainConfig) -> LightningModule:
     return plmodel
 
 
-def get_all_path_machine(
-    cfg: MainTestConfig, past_cfg: MainConfig
-) -> Tuple[List[str], List[str]]:
-    all_path: List[str] = []
-    machines: List[str] = []
-    for selector in cfg.path_selector_list:
-        all_path += parse_path_selector(selector)
-
-    for p in all_path:
-        # p is in the format of "<data_dir>/<dcase>/all/raw/<machine>/train-test/hoge.wav
-        split_p = p.split("/")
-        machines.append(split_p[-3])
-        data_dir = "/".join(split_p[:-6])
-        dcase = split_p[-6]
-        if data_dir != past_cfg.data_dir:
-            logger.warning(f"Unmatched data_dir: {data_dir} vs {past_cfg.data_dir}")
-        if dcase != past_cfg.dcase:
-            logger.warning(f"Unmatched dcase: {dcase} vs {past_cfg.dcase}")
-
-    machines = list(set(machines))
-    logger.info(f"{len(machines)} machines: {machines}")
-    return all_path, machines
-
-
-def extract_main(cfg: MainTestConfig, past_cfg: MainConfig, infer_dir: Path):
+def extract_main(
+    cfg: MainTestConfig,
+    past_cfg: MainConfig,
+    infer_dir: Path,
+    all_path: List[str],
+    machines: List[str],
+) -> None:
     plmodel = load_plmodel(cfg=cfg, past_cfg=past_cfg)
-    all_path, machines = get_all_path_machine(cfg=cfg, past_cfg=past_cfg)
 
     for m in machines:
         logger.info(f"Start extracting {m}")

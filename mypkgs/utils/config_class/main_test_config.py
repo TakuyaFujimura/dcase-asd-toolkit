@@ -22,6 +22,7 @@ class MainTestConfig(BaseModel):
     backend: List[Dict[str, Any]]
 
     path_selector_list: List[str]
+    hmean_list: List[str]
 
     @field_validator("name", mode="before")
     def cast_name(cls, v):

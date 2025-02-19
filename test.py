@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any, Dict, List, Tuple, cast
 
 import hydra
 import lightning.pytorch as pl
@@ -10,6 +10,7 @@ import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
+from mypkgs.datasets.torch_dataset import parse_path_selector
 from mypkgs.test_utils import evaluate_main, extract_main, score_main
 from mypkgs.utils.config_class import MainTestConfig
 from mypkgs.utils.config_class.main_config import MainConfig
@@ -40,6 +41,30 @@ def make_dir(cfg: MainTestConfig) -> Path:
     return infer_dir
 
 
+def get_all_path_machine(
+    cfg: MainTestConfig, past_cfg: MainConfig
+) -> Tuple[List[str], List[str]]:
+    all_path: List[str] = []
+    machines: List[str] = []
+    for selector in cfg.path_selector_list:
+        all_path += parse_path_selector(selector)
+
+    for p in all_path:
+        # p is in the format of "<data_dir>/<dcase>/all/raw/<machine>/train-test/hoge.wav
+        split_p = p.split("/")
+        machines.append(split_p[-3])
+        data_dir = "/".join(split_p[:-6])
+        dcase = split_p[-6]
+        if data_dir != past_cfg.data_dir:
+            logger.warning(f"Unmatched data_dir: {data_dir} vs {past_cfg.data_dir}")
+        if dcase != past_cfg.dcase:
+            logger.warning(f"Unmatched dcase: {dcase} vs {past_cfg.dcase}")
+
+    machines = list(set(machines))
+    logger.info(f"{len(machines)} machines: {machines}")
+    return all_path, machines
+
+
 @hydra.main(version_base=None, config_path="config_test", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
@@ -53,13 +78,20 @@ def main(hydra_cfg: DictConfig) -> None:
 
     infer_dir = make_dir(cfg)
     past_cfg = get_past_cfg(cfg)
+    all_path, machines = get_all_path_machine(cfg=cfg, past_cfg=past_cfg)
 
     if cfg.extract:
-        extract_main(cfg=cfg, past_cfg=past_cfg, infer_dir=infer_dir)
+        extract_main(
+            cfg=cfg,
+            past_cfg=past_cfg,
+            infer_dir=infer_dir,
+            all_path=all_path,
+            machines=machines,
+        )
     if cfg.score:
-        score_main(cfg, infer_dir)
+        score_main(cfg=cfg, infer_dir=infer_dir, machines=machines)
     if cfg.evaluate:
-        evaluate_main(cfg, infer_dir)
+        evaluate_main(cfg=cfg, infer_dir=infer_dir, machines=machines)
 
 
 if __name__ == "__main__":
