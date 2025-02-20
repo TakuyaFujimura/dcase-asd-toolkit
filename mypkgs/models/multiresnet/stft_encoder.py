@@ -304,3 +304,11 @@ class STFTEncoderLayer(nn.Module):
             emb_base_size=emb_base_size,
             resnet_additional_layer=resnet_additional_layer,
         )
+
+    def forward(self, x):
+        """
+        Args
+            x: wave (B, T)
+        """
+        x = self.stft(x)
+        return self.layer(x)

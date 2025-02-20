@@ -30,11 +30,11 @@ class BasicDisPLModel(BasePLModel):
     def check_loss_cfg(self, loss_cfg: Dict[str, Any]):
         # tgt_class: mypkgs.models.losses.SCAdaCos
         split_loss_tgt = loss_cfg["tgt_class"].split(".")
-        if "mypkgs.models.losses" != ".".join(split_loss_tgt[:-1]):
+        if "mypkgs.losses" != ".".join(split_loss_tgt[:-1]):
             raise ValueError(f"Invalid loss class: {loss_cfg['tgt_class']}")
 
         # set normalize flag based on loss name
-        if split_loss_tgt[3] in ["AdaCos", "ArcFace", "SCAdaCos"]:
+        if split_loss_tgt[-1] in ["AdaCos", "ArcFace", "SCAdaCos"]:
             self.normalize = True
         else:
             raise NotImplementedError()
@@ -44,7 +44,7 @@ class BasicDisPLModel(BasePLModel):
         for label_name in loss_label2lam_dict:
             loss_cfg = {
                 "n_classes": self.num_class_dict[label_name],
-                "embed_size": self.embedding_size,
+                "embed_size": self.embed_size,
                 **self.loss_cfg,
             }
             self.head_dict[label_name] = instantiate_tgt(loss_cfg)
@@ -66,7 +66,7 @@ class BasicDisPLModel(BasePLModel):
         if use_compile:
             self.extractor = torch.compile(self.extractor)  # type: ignore
         self.loss_cfg = loss_cfg
-        self.embedding_size = self.extractor.embedding_size
+        self.embed_size = self.extractor.embed_size
         self.loss_label2lam_dict = loss_label2lam_dict
         self.check_loss_cfg(self.loss_cfg)
         self.set_head_dict(self.loss_label2lam_dict)

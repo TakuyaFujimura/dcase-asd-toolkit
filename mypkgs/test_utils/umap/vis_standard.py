@@ -4,7 +4,7 @@ from typing import Dict
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from .visualize import PlotConfig, get_u_idx, plot_ax_cfg
+from .vis_utils import PlotConfig, get_u_idx, plot_ax_cfg
 
 
 def get_cfg_dict(umap_df: pd.DataFrame) -> Dict[str, PlotConfig]:

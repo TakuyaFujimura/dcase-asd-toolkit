@@ -25,3 +25,9 @@
 └── dcase2024 # TODO: check the directory structure
 ```
 </details>
+
+
+1. preprocess/download
+2. preprocess/formatting
+3. preprocess/labeling
+4. jobs/example/exec0.sh

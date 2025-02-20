@@ -1,11 +1,8 @@
-from pathlib import Path
 from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
-
-from .vis_standard import vis_standard
 
 
 class PlotConfig(BaseModel):
@@ -47,10 +44,3 @@ def get_u_idx(umap_df: pd.DataFrame, label: str) -> np.ndarray:
         raise ValueError(f"Unexpected label: {label}")
 
     return u_idx  # type: ignore
-
-
-def visualize_umap(umap_df: pd.DataFrame, machine_dir: Path, vis_type: str) -> None:
-    if vis_type == "standard":
-        vis_standard(umap_df, machine_dir)
-    else:
-        raise ValueError(f"Unexpected vis_type: {vis_type}")

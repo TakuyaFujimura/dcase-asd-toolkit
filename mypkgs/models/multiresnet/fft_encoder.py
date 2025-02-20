@@ -28,9 +28,13 @@ class Conv1dEncoderLayer(nn.Module):
         logger.info("===Conv1dEncoderLayer==========")
         for i, param_dict in enumerate(conv_param_list):
             length = calc_filtered_size_1d(
-                length, param_dict["k"], param_dict["s"], param_dict.get("d", 1)
+                input_length=length,
+                p=0,
+                k=param_dict["k"],
+                s=param_dict["s"],
+                d=param_dict.get("d", 1),
             )
-            print(f"{i}th: [{length}]")
+            logger.info(f"{i}th: [{length}]")
         logger.info("===============================")
 
         self.layer = nn.Sequential(

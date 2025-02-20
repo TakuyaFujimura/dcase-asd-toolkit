@@ -7,11 +7,5 @@ defaults:
 dcase: "dcase2023"
 
 
-model:
-    model_cfg:
-        loss_label2lam_dict:
-            machine_attr_domain: 1
-
-
 label_dict_path:
-  machine_attr_domain: "preprocess/label/${dcase}/machine_attr_domain.json"
+  main_label: "labels/${dcase}/machine_attr_domain.json"

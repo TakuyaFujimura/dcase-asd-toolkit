@@ -32,6 +32,7 @@ class MultiResNet(nn.Module):
                 resnet_additional_layer=resnet_additional_layer,
             )
             self.stft_layer_list.append(stft_encoder)
+        self.embed_size = emb_base_size * (1 + len(stft_cfg_list))
 
     def forward(self, x_time: torch.Tensor):
         """

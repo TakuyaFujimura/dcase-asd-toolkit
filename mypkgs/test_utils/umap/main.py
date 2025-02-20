@@ -6,7 +6,7 @@ from typing import List
 
 from ...utils.config_class.main_test_config import UmapConfig
 from .trans import get_umap_df
-from .visualize import visualize_umap
+from .vis_main import visualize
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def umap_main(
             metric=umap_cfg.metric,
             overwrite=umap_cfg.overwrite,
         )
-        visualize_umap(
+        visualize(
             umap_df=umap_df,
             machine_dir=machine_dir,
             vis_type=umap_cfg.vis_type,
