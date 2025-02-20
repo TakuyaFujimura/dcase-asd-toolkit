@@ -24,7 +24,7 @@ def get_idx(
     domain = auc_type.split("_")[1]
     if domain == "s":
         domain_idx = is_target == 0
-    elif auc_type == "t":
+    elif domain == "t":
         domain_idx = is_target == 1
     elif domain == "smix":
         domain_idx = (is_target == 0) | (is_normal == 0)

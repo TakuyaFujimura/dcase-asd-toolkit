@@ -18,10 +18,8 @@ def min_euclid(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray : minimum euclidean distance from x to y
     """
-    x_squared_sum = np.sum(x**2, axis=-1)[:, np.newaxis]  # (N, 1)
-    y_squared_sum = np.sum(y**2, axis=-1)[np.newaxis, :]  # (1, M)
-    inner_product = np.dot(x, y.transpose())  # (N, M)
-    distances_squared = x_squared_sum + y_squared_sum - 2 * inner_product
+    distances_squared = np.sum((x[:, None, :] - y[None, :, :]) ** 2, axis=-1)
+    # (N, 1, D) - (1, M, D) -> (N, M, D) -> (N, M)
     distances = np.sqrt(distances_squared)  # (N, M)
     return np.min(distances, axis=-1)  # (N,)
 

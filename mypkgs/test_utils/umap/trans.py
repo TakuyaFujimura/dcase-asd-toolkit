@@ -27,7 +27,8 @@ def get_umap_df(machine_dir: Path, metric: str, overwrite: bool) -> pd.DataFrame
         {
             "path": df.path.values,
             "is_normal": df.is_normal.values,
-            "is_eval": df.is_test.values,
+            "is_target": df.is_target.values,
+            "is_test": df.is_test.values,
             "u0": umap_embed[:, 0],  # type: ignore
             "u1": umap_embed[:, 1],  # type: ignore
         }

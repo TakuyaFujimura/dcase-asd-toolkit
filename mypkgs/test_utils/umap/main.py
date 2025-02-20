@@ -1,6 +1,7 @@
 # Copyright 2024 Takuya Fujimura
 
 import logging
+import warnings
 from pathlib import Path
 from typing import List
 
@@ -9,6 +10,15 @@ from .trans import get_umap_df
 from .vis_main import visualize
 
 logger = logging.getLogger(__name__)
+
+warnings.filterwarnings(
+    "ignore",
+    message=".*n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism..*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=".*'force_all_finite' was renamed to 'ensure_all_finite' in 1.6 and will be removed in 1.8..*",
+)
 
 
 def umap_main(

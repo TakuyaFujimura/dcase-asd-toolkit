@@ -69,6 +69,6 @@ def score_main(cfg: MainTestConfig, infer_dir: Path, machines: List[str]) -> Non
 
         # Save
         for split, output_df in output_df_dict.items():
-            output_path = infer_dir / f"{split}_score.csv"
+            output_path = machine_dir / f"{split}_score.csv"
             output_df.to_csv(output_path, index=False)
             logging.info(f"Saved at {str(output_path)}")
