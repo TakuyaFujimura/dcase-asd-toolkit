@@ -28,6 +28,13 @@ class AdaCos(nn.Module):
         self.loss_fn = nn.CrossEntropyLoss(reduction=reduction)
         self.dynamic = dynamic
 
+    def calc_logits(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.normalize(x, p=2, dim=1)
+        W = F.normalize(self.W, p=2, dim=0)
+        logits = torch.mm(x, W)
+        logits *= self.s
+        return logits
+
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
         x = F.normalize(x, p=2, dim=1)
         W = F.normalize(self.W, p=2, dim=0)

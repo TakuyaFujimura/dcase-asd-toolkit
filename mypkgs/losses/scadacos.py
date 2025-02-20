@@ -31,8 +31,22 @@ class SCAdaCos(nn.Module):
 
         # Scale factor
         self.s = nn.Parameter(torch.tensor(self.s_init), requires_grad=False)
-        self.loss_fn = nn.CrossEntropyLoss(reduction=reduction)
+        self.reduction = reduction
         self.dynamic = dynamic
+
+    def calc_logits(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.normalize(x, p=2, dim=1)
+        W = F.normalize(self.W, p=2, dim=0)
+        logits = torch.mm(x, W)
+        logits *= self.s
+        prob = F.softmax(logits, dim=1)
+        prob = prob.view(-1, self.n_classes, self.n_subclusters)
+        # (B, C, n_subclusters)
+        prob = torch.sum(prob, dim=2)  # (B, C)
+        logits = torch.log(prob)
+        # softmax(logits) = softmax(log(softmax(logits)))
+        #                 = softmax(log(prob))
+        return logits
 
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
         y_org = y.clone()
@@ -60,5 +74,13 @@ class SCAdaCos(nn.Module):
         prob = prob.view(-1, self.n_classes, self.n_subclusters)
         # (B, C, n_subclusters)
         prob = torch.sum(prob, dim=2)  # (B, C)
-        loss = self.loss_fn(torch.log(prob), y_org)
+        loss = torch.sum(-torch.log(prob) * y_org, dim=-1)  # (B)
+        if self.reduction == "mean":
+            loss = torch.mean(loss)
+        elif self.reduction == "sum":
+            loss = torch.sum(loss)
+        elif self.reduction == "none":
+            pass
+        else:
+            raise NotImplementedError()
         return loss

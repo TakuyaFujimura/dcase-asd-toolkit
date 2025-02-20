@@ -1,8 +1,6 @@
 # Copyright 2024 Takuya Fujimura
 
 import logging
-from decimal import ROUND_HALF_UP, Decimal
-from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -10,13 +8,9 @@ import pandas as pd
 from scipy.stats import hmean
 from sklearn.metrics import roc_auc_score
 
-from ..utils.config_class.main_test_config import EvaluateConfig, MainTestConfig
+from ...utils.config_class.main_test_config import EvaluateConfig
 
 logger = logging.getLogger(__name__)
-
-
-def myround(x):
-    return Decimal(str(x)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def get_score_name(score_df: pd.DataFrame):
@@ -134,19 +128,3 @@ def evaluate(evaluate_cfg: EvaluateConfig, score_df: pd.DataFrame) -> pd.DataFra
         result_df = add_hmean(result_df, hmean_type)
 
     return result_df
-
-
-def evaluate_main(cfg: MainTestConfig, infer_dir: Path, machines: List[str]):
-    if cfg.evaluate_cfg is None:
-        raise ValueError("evaluate_cfg is not set")
-
-    split = "test"
-    for m in machines:
-        logger.info(f"Start evaluating {m}")
-        machine_dir = infer_dir / m
-        score_df_path = machine_dir / f"{split}_score.csv"
-        score_df = pd.read_csv(score_df_path)
-        result_df = evaluate(cfg.evaluate_cfg, score_df)
-        result_df_path = machine_dir / f"{split}_result.csv"
-        result_df.to_csv(result_df_path, index=True)
-        logger.info(f"Saved at {result_df_path}")

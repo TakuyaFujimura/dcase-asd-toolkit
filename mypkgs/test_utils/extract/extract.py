@@ -30,13 +30,15 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
     embed_cols = []
     for key, values_list in info__dict_of_list.items():
         values_np = np.concatenate(values_list, axis=0)
-        if key == "embedding":
+        if key == "embed":
             embed_cols = [f"e{i}" for i in range(values_np.shape[-1])]
             df = pd.DataFrame(columns=embed_cols, data=values_np)
         elif values_np.ndim == 2 and values_np.shape[1] == 1:
             df = pd.DataFrame(columns=[key], data=values_np[:, 0])
         elif values_np.ndim == 1:
             df = pd.DataFrame(columns=[key], data=values_np)
+        elif key.startswith("logits_"):
+            raise NotImplementedError("I have not implemented storing logits.")
         else:
             raise NotImplementedError(f"Unexpected shape: {values_np.shape}")
         df_list.append(df)
@@ -52,26 +54,34 @@ def get_info_key_list(plmodel: LightningModule) -> List[str]:
     return list(set(info_key_list))
 
 
+def get_output_key_list(plmodel: LightningModule) -> List[str]:
+    output_key_list: List[str] = ["embed"]
+    # for key in plmodel.num_class_dict:
+    #     output_key_list.append(f"logits_{key}")
+    return output_key_list
+
+
 def extract(dataloader: DataLoader, plmodel: LightningModule, device: str):
     logger.info("Start extract_loader")
     plmodel.eval()
-    info__dict_of_list = defaultdict(list)
+    extract__dict_of_list = defaultdict(list)
     info_key_list = get_info_key_list(plmodel)
+    output_key_list = get_output_key_list(plmodel)
 
     for batch in tqdm.tqdm(dataloader):
         with torch.no_grad():
             wave = batch["wave"].to(device)
             output_dict = plmodel(wave)
-            for key, value in output_dict.items():
-                info__dict_of_list[key].append(value.cpu().numpy())
+            for key in output_key_list:
+                extract__dict_of_list[key].append(output_dict[key].cpu().numpy())
 
-        for key in info_key_list:
-            value = batch[key]
-            if isinstance(value, torch.Tensor):
-                info__dict_of_list[key].append(batch[key].cpu().numpy())
-            elif isinstance(value, list):
-                info__dict_of_list[key].append(value)
-            else:
-                raise NotImplementedError(f"Unexpected type: {type(value)}")
-    df = make_df(info__dict_of_list)
+            for key in info_key_list:
+                value = batch[key]
+                if isinstance(value, torch.Tensor):
+                    extract__dict_of_list[key].append(batch[key].cpu().numpy())
+                elif isinstance(value, list):
+                    extract__dict_of_list[key].append(value)
+                else:
+                    raise NotImplementedError(f"Unexpected type: {type(value)}")
+    df = make_df(extract__dict_of_list)
     return df

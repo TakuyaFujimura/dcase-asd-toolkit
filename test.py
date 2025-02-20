@@ -42,13 +42,29 @@ def make_dir(cfg: MainTestConfig) -> Path:
     return infer_dir
 
 
-def get_all_path_machine(
-    cfg: MainTestConfig, past_cfg: MainConfig
-) -> Tuple[List[str], List[str]]:
+def get_path_selector_list(cfg: MainTestConfig, past_cfg: MainConfig) -> List[str]:
+    if cfg.path_selector_list is None:
+        path_selector_list = [
+            f"{past_cfg.data_dir}/{past_cfg.dcase}/all/raw/*/train/*.wav",
+            f"{past_cfg.data_dir}/{past_cfg.dcase}/all/raw/*/test/*.wav",
+        ]
+        logger.info(f"Use past path_selector_list: {path_selector_list}")
+    else:
+        path_selector_list = cfg.path_selector_list
+    return path_selector_list
+
+
+def get_all_path(path_selector_list: List[str]) -> List[str]:
     all_path: List[str] = []
-    machines: List[str] = []
-    for selector in cfg.path_selector_list:
+
+    for selector in path_selector_list:
         all_path += parse_path_selector(selector)
+    logger.info(f"{len(all_path)} files are found")
+    return all_path
+
+
+def get_machines(all_path: List[str], past_cfg: MainConfig) -> List[str]:
+    machines: List[str] = []
 
     for p in all_path:
         # p is in the format of "<data_dir>/<dcase>/all/raw/<machine>/train-test/hoge.wav
@@ -63,7 +79,7 @@ def get_all_path_machine(
 
     machines = list(set(machines))
     logger.info(f"{len(machines)} machines: {machines}")
-    return all_path, machines
+    return machines
 
 
 @hydra.main(version_base=None, config_path="config/test", config_name="config")
@@ -79,7 +95,9 @@ def main(hydra_cfg: DictConfig) -> None:
 
     infer_dir = make_dir(cfg)
     past_cfg = get_past_cfg(cfg)
-    all_path, machines = get_all_path_machine(cfg=cfg, past_cfg=past_cfg)
+    path_selector_list = get_path_selector_list(cfg=cfg, past_cfg=past_cfg)
+    all_path = get_all_path(path_selector_list=path_selector_list)
+    machines = get_machines(all_path=all_path, past_cfg=past_cfg)
 
     if cfg.extract:
         extract_main(

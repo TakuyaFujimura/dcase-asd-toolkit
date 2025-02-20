@@ -40,7 +40,7 @@ class ArcFace(nn.Module):
         """
 
         Args:
-            x (torch.Tensor): embedding
+            x (torch.Tensor): embed
             y (torch.Tensor): onehot label
 
         Returns:

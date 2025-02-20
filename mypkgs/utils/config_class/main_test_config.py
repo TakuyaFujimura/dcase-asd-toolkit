@@ -32,7 +32,7 @@ class MainTestConfig(BaseModel):
     num_workers: int
     backend: List[Dict[str, Any]]
 
-    path_selector_list: List[str]
+    path_selector_list: Optional[List[str]] = None
     evaluate_cfg: Optional[EvaluateConfig] = None
     umap_cfg: Optional[UmapConfig] = None
 

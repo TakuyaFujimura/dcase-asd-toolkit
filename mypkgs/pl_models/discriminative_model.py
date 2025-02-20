@@ -78,26 +78,26 @@ class BasicDisPLModel(BasePLModel):
             x (Tensor): wave (B, T)
         """
         output_dict: Dict[str, Any] = {}
-        embedding = self.extractor(wave)  # (B, D)
+        embed = self.extractor(wave)  # (B, D)
 
         for label_name in self.loss_label2lam_dict:
-            logits = self.head_dict[label_name].calc_logits(embedding)  # type: ignore
+            logits = self.head_dict[label_name].calc_logits(embed)  # type: ignore
             output_dict[f"logits_{label_name}"] = logits
 
         if self.normalize:
-            output_dict["embedding"] = F.normalize(embedding, p=2, dim=1)
+            output_dict["embed"] = F.normalize(embed, p=2, dim=1)
         else:
-            output_dict["embedding"] = embedding
+            output_dict["embed"] = embed
 
         return output_dict
 
     def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
-        embedding = self.extractor(wave)
+        embed = self.extractor(wave)
         loss_dict = {"main": 0.0}
 
         for label_name, lam in self.loss_label2lam_dict.items():
             loss_dict[label_name] = self.head_dict[label_name](
-                embedding, batch[f"onehot_{label_name}"]
+                embed, batch[f"onehot_{label_name}"]
             )
             loss_dict["main"] += loss_dict[label_name] * lam
         return loss_dict

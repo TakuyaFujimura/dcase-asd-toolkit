@@ -15,7 +15,6 @@ name: null
 version: null
 infer_ver: null
 result_dir: "./results"
-
 tf32: true
 
 batch_size: 64

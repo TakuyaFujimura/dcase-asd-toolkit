@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
+from mypkgs.utils.config_class.nparray_class import Np1DArray
+
 
 class PlotConfig(BaseModel):
     ax_idx: int
-    u_idx: Optional[np.ndarray] = None
+    u_idx: Optional[Np1DArray] = None
     plot_cfg: Dict[str, Any]
 
 
