@@ -12,6 +12,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from mypkgs.datasets.torch_dataset import parse_path_selector
 from mypkgs.test_utils import evaluate_main, extract_main, score_main
+from mypkgs.test_utils.table.main import table_main
 from mypkgs.test_utils.umap.main import umap_main
 from mypkgs.utils.config_class import MainTestConfig
 from mypkgs.utils.config_class.main_config import MainConfig
@@ -111,7 +112,10 @@ def main(hydra_cfg: DictConfig) -> None:
         score_main(cfg=cfg, infer_dir=infer_dir, machines=machines)
     if cfg.evaluate:
         evaluate_main(cfg=cfg, infer_dir=infer_dir, machines=machines)
-
+    if len(cfg.table_metric_list) > 0:
+        table_main(
+            metric_list=cfg.table_metric_list, infer_dir=infer_dir, machines=machines
+        )
     if cfg.umap:
         if cfg.umap_cfg is None:
             raise ValueError("umap_cfg is not set")

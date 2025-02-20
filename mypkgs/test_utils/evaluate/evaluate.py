@@ -127,4 +127,5 @@ def evaluate(evaluate_cfg: EvaluateConfig, score_df: pd.DataFrame) -> pd.DataFra
     for hmean_type in evaluate_cfg.hmean_list:
         result_df = add_hmean(result_df, hmean_type)
 
+    result_df = result_df.reset_index().rename(columns={"index": "backend"})
     return result_df

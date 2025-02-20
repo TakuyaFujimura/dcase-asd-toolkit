@@ -7,6 +7,7 @@ extract: true
 score: true
 evaluate: true
 umap: true
+table_metric_list: ${evaluate_cfg.hmean_list}
 
 
 device: cuda:0 #cpu #
@@ -21,7 +22,7 @@ batch_size: 64
 num_workers: 0
 
 evaluate_cfg:
-  hmean_list: []
+  hmean_list: ["official23"]
 umap_cfg:
   metric: "cosine"
   vis_type: "standard"

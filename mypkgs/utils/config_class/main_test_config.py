@@ -19,6 +19,7 @@ class MainTestConfig(BaseModel):
     score: bool = True
     evaluate: bool = True
     umap: bool = True
+    table_metric_list: List[str] = []
 
     device: str
     seed: int

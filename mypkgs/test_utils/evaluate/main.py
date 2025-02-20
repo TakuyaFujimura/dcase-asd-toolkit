@@ -24,5 +24,5 @@ def evaluate_main(cfg: MainTestConfig, infer_dir: Path, machines: List[str]):
         score_df = pd.read_csv(score_df_path)
         result_df = evaluate(cfg.evaluate_cfg, score_df)
         result_df_path = machine_dir / f"{split}_result.csv"
-        result_df.to_csv(result_df_path, index=True)
+        result_df.to_csv(result_df_path, index=False)
         logger.info(f"Saved at {result_df_path}")
