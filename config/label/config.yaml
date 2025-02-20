@@ -1,0 +1,23 @@
+defaults:
+    - _self_
+    - experiments: null
+
+# -------------------------------------------------------- #
+
+
+
+data_dir: "../data"
+dcase: dcase2023
+
+
+
+# -------------------------------------------------------- #
+
+save_path: "labels/${dcase}/${save_name}.json"
+path_selector_list:
+  - "${data_dir}/${dcase}/all/raw/*/train/*.wav"
+#  - "${data_dir}/${dcase}/all/raw/*/test/*.wav"
+
+hydra:
+  run:
+    dir: "labels/${dcase}/logs/${save_name}"

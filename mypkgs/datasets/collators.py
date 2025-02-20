@@ -24,7 +24,7 @@ def get_dcase_info(path: str, label: str) -> str | int:
         assert split_path[4] in ["normal", "anomaly"]
         return int(split_path[4] == "normal")
     elif label == "attr":
-        return "_".join(split_path[6:])[:-4]
+        return "_".join(split_path[6:]).replace(".wav", "")
     else:
         raise ValueError(f"Unknown label: {label}")
 

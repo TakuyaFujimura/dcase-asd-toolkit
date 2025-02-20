@@ -1,5 +1,6 @@
 # My settings
 results/
+labels/*/logs
 *.ckpt
 *.pt
 

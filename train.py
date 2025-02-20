@@ -79,10 +79,10 @@ def setup_plmodel(cfg: MainConfig) -> pl.LightningModule:
     return plmodel
 
 
-@hydra.main(version_base=None, config_path="config", config_name="config")
+@hydra.main(version_base=None, config_path="config/train", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
-    set_logging(cfg.result_dir)
+    # set_logging(cfg.result_dir)
     if not cfg.trainer.get("deterministic", False):
         raise ValueError("Not deterministic!!!")
     if cfg.tf32:

@@ -66,10 +66,10 @@ def get_all_path_machine(
     return all_path, machines
 
 
-@hydra.main(version_base=None, config_path="config_test", config_name="config")
+@hydra.main(version_base=None, config_path="config/test", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
-    set_logging(cfg.result_dir, __file__)
+    # set_logging(cfg.result_dir, __file__)
     logger.info(f"Start testing: {HydraConfig().get().run.dir}")
     logger.info(f"version: {cfg.version}")
     if cfg.tf32:

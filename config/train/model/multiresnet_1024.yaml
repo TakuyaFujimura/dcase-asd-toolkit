@@ -12,10 +12,10 @@ model_cfg:
   extractor_cfg:
     tgt_class: mypkgs.models.MultiResNet
     sec: ${datamodule.sec}
-    sr: ${sampling_rate}
+    sr: ${datamodule.sr}
     stft_cfg_list:
       -
-        sr: ${sampling_rate}
+        sr: ${datamodule.sr}
         n_fft: 1024
         hop_length: 512
         n_mels: null

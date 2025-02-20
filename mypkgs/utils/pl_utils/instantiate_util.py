@@ -1,5 +1,7 @@
 from hydra.utils import instantiate
 
+import mypkgs
+
 
 def instantiate_tgt(config_org: dict):
     if "_target_" in config_org:

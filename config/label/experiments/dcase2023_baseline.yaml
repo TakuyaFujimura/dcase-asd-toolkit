@@ -1,0 +1,6 @@
+# @package _global_
+save_name: ${labeler.label_name}
+
+labeler:
+  _target_: mypkgs.labelers.BasicInfoLabeler
+  label_name: "machine_attr_domain"
