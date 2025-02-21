@@ -1,7 +1,7 @@
 data_dir=$1
 dcase=$2
 
-
-cd ../../..
+cd ../..
 source venv/bin/activate
-python main/format.py --data_dir=$1 --dcase=$2
+asdlib-format --data_dir=$1 --dcase=$2
+# python main/format.py --data_dir=$1 --dcase=$2

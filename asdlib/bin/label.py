@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, cast
 
-import asdlib
 import hydra
 import lightning.pytorch as pl
 from asdlib.datasets.collators import get_relative_dcase_path
@@ -10,7 +9,6 @@ from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.labelers.base import LabelerBase
 from asdlib.utils.io_utils.json_util import write_json
 from asdlib.utils.pl_utils.idx_util import LabelInfo
-from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseModel, field_validator

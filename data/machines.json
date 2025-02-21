@@ -6,9 +6,6 @@
     "dcase2023-dev": ["bearing", "fan", "gearbox", "slider", "ToyCar", "ToyTrain", "valve"],
     "dcase2023-eval": ["bandsaw", "grinder", "shaker", "ToyDrone", "ToyNscale", "ToyTank", "Vacuum"],
     "dcase2024-dev": ["bearing", "fan", "gearbox", "slider", "ToyCar", "ToyTrain", "valve"],
-    "dcase2024-eval": ["3DPrinter", "AirCompressor", "BrushlessMotor", "HairDryer", "HoveringDrone", "RoboticArm", "Scanner", "ToothBrush", "ToyCircuit"],
-    "dcase2024-dev-noattr": ["gearbox", "slider", "ToyTrain"],
-    "dcase2024-eval-noattr": ["AirCompressor", "BrushlessMotor", "HoveringDrone", "ToothBrush"]
-
+    "dcase2024-eval": ["3DPrinter", "AirCompressor", "BrushlessMotor", "HairDryer", "HoveringDrone", "RoboticArm", "Scanner", "ToothBrush", "ToyCircuit"]
 }
 

@@ -1,0 +1,39 @@
+from setuptools import find_packages, setup
+
+setup(
+    name="asdlib",
+    version="0.0.0",
+    description="Anomalous Sound Detection Library",
+    author="Takuya Fujimura",
+    author_email="fujimura.takuya@g.sp.m.is.nagoya-u.ac.jp",
+    packages=find_packages(),
+    python_requires=">=3.10.0",
+    install_requires=[
+        "librosa==0.10.2.post1",
+        "omegaconf==2.2.3",
+        "scikit_learn==1.6.1",
+        "hydra-core==1.2.0",
+        "tqdm==4.66.5",
+        "lightning==2.4.0",
+        "tensorboardX==2.6.2.2",
+        "matplotlib==3.5.1",
+        "numpy==1.24.3",
+        "pandas==1.4.2",
+        "umap-learn==0.5.6",
+        "h5py==3.12.1",
+        "tensorboard==2.18.0",
+        "pydantic==2.10.4",
+        "torch==2.1.1",
+        "torchvision==0.16.1",
+        "torchaudio==2.1.1",
+        "imbalanced-learn==0.13.0",
+    ],
+    entry_points={
+        "console_scripts": [
+            "asdlib-train = asdlib.bin.train:main",
+            "asdlib-test = asdlib.bin.test:main",
+            "asdlib-label = asdlib.bin.label:main",
+            "asdlib-format = asdlib.bin.format:main",
+        ],
+    },
+)

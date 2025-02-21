@@ -1,3 +1,21 @@
+# DCASE Anomalous Sound Detection Library
+
+This repository provides various recipes for the DCASE Task2 Anomalous Sound Detection (ASD).
+
+
+
+## Instsallation 
+
+### Editable Installation
+
+```bash
+git clone https://github.com/TakuyaFujimura/dcase-asd-library.git
+cd dcase-asd-library
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
+```
+
 ### Preperation
 
 Please refer each README in the corresponding directories for the detailed instructions.
