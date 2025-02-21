@@ -84,7 +84,7 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 **How to**
 
 - This will automatically execute training/testing process
-- An example script is provided but you can create your own configuration file (see [Customization](#customization))
+- An example script is provided but you can also create your own configuration file (see [Customization](docs/customization.md))
 
 ```bash
 [dcase-asd-library]$ cd jobs/asd/example
@@ -99,36 +99,31 @@ dcase-asd-library
 ├── ...
 └── results
     ├── ...
-    └── <name> # example
+    └── <name> # `example`
         ├── ...
-        └── <version> # dcase2023_baseline_0
+        └── <version> # `dcase2023_baseline_0`
             ├── checkpoints
             ├── hparams.yaml
             ├── test.log
             ├── train.log
             └── infer
                 ├── ...
-                └── <infer_ver> # epoch_12
+                └── <infer_ver> # `epoch_12`
                     ├── hparams.yaml
-                    ├── <metric>.csv # official23.csv (summary of test results)
+                    ├── <metric>.csv # `official23.csv` (summary of test results)
                     ├── ...
                     └── <machine>
-                        ├── test_extraction.csv # information of test data including embedding
+                        ├── test_extraction.csv # information of test data including embedding values
                         ├── test_result.csv # ROAUCs
                         ├── test_score.csv # anomaly scores of test data
-                        ├── train_extraction.csv # information of train data including embedding
+                        ├── train_extraction.csv # information of train data including embedding values
                         ├── train_score.csv # anomaly scores of train data
-                        ├── umap.csv # UMAP embedding
+                        ├── umap.csv # UMAP embedding values
                         └── umap_*.png # UMAP visualization
             
 ```
 
 </details>
-
-## Customization
-
-- `dcase-asd-library/jobs/asd/base/base.sh` automatically executes training/testing process and `dcase-asd-library/jobs/asd/example/run.sh` is an wrapper script for it
-- Please refer `run.sh`. It includes an explanation of which configuration file will be used
 
 
 ## Information
