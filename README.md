@@ -8,6 +8,7 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 <details>
 <summary>1. Clone and install this repository</summary>
+<br>
 
 **How to**
 
@@ -23,6 +24,7 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 <details>
 <summary>2. Download DCASETask2 dataset</summary>
+<br>
 
 **How to**
 - Specify `data_dir` and `dcase` in `jobs/download/run.sh`
@@ -46,6 +48,7 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 <details>
 <summary>3. Format the dataset</summary>
+<br>
 
 **How to**
 
@@ -75,6 +78,8 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 <details>
 <summary>4. Execute training/testing</summary>
+
+<br>
 
 **How to**
 
