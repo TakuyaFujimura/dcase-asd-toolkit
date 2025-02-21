@@ -1,4 +1,4 @@
-tgt_class: mypkgs.pl_models.BasicDisPLModel
+tgt_class: asdlib.pl_models.BasicDisPLModel
 
 optim_cfg:
   tgt_class: torch.optim.AdamW
@@ -10,7 +10,7 @@ grad_cfg: {}
 
 model_cfg:
   extractor_cfg:
-    tgt_class: mypkgs.models.MultiResNet
+    tgt_class: asdlib.models.MultiResNet
     sec: ${datamodule.sec}
     sr: ${datamodule.sr}
     stft_cfg_list:
@@ -27,13 +27,13 @@ model_cfg:
     use_bias: false
     emb_base_size: 128
   loss_cfg:
-    tgt_class: mypkgs.losses.SCAdaCos
+    tgt_class: asdlib.losses.SCAdaCos
     n_subclusters: 16
     dynamic: false
     trainable: true
   loss_label2lam_dict:
     main_label: 1
   augmentation_cfg_list:
-    - tgt_class: mypkgs.augmentations.Mixup
+    - tgt_class: asdlib.augmentations.Mixup
       prob: 0.5
   use_compile: false

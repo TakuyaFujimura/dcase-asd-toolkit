@@ -1,7 +1,7 @@
-- _target_: mypkgs.backends.Kmeans
+- _target_: asdlib.backends.Kmeans
   hp_dict:
     n_clusters: 16
-- _target_: mypkgs.backends.Knn
+- _target_: asdlib.backends.Knn
   hp_dict:
     n_neighbors_so: 1
     n_neighbors_ta: 1

@@ -1,6 +1,6 @@
 librosa==0.10.2.post1
 omegaconf==2.2.3
-scikit_learn==1.1.1
+scikit_learn==1.6.1
 hydra-core==1.2.0
 tqdm==4.66.5
 lightning==2.4.0

@@ -1,12 +1,31 @@
-# Preperation
-## Dataset
-1. Download the dataset from the DCASE website and extract the files to the arbitrary `<data_dir>` directory.
-2. Execute `preprocess/dataset/dcase??.sh` to reorganize the dataset. This script will create a new directory in `<data_dir>` but will not modify the original dataset.
+### Preperation
+
+Please refer each README in the corresponding directories for the detailed instructions.
+
+1. Download Dataset (preprocess/download)
+2. Formatting Dataset (preprocess/formatting)
+3. Create Virtual Environment
+    - `[dcase_task2]$ python -m venv venv`
+    - `[dcase_task2]$ source venv/bin/activate`
+    - `(venv) [dcase_task2]$ pip install -r requirements.txt`
+4. Execute Training/Testing (jobs)
+
 
 <details>
 <summary>Dataset structure</summary>
 
 ```bash
+<data_dir>
+├── original
+│   ├── dcase2021
+│   ├── dcase2022
+│   └── ...
+└── formatted
+    ├── dcase2021
+    ├── dcase2022
+    └── ...
+```
+<!-- ```bash
 <data_dir>
 ├── dcase2020 # TODO: check the directory structure
 ├── dcase2021 # TODO: check the directory structure
@@ -23,11 +42,5 @@
 │       
 │
 └── dcase2024 # TODO: check the directory structure
-```
+``` -->
 </details>
-
-
-1. preprocess/download
-2. preprocess/formatting
-3. preprocess/labeling
-4. jobs/example/exec0.sh
