@@ -4,61 +4,133 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 
 
-## Instsallation 
-
-### Editable Installation
-
-```bash
-git clone https://github.com/TakuyaFujimura/dcase-asd-library.git
-cd dcase-asd-library
-python3 -m venv venv
-source venv/bin/activate
-pip install -e .
-```
-
-### Preperation
-
-Please refer each README in the corresponding directories for the detailed instructions.
-
-1. Download Dataset (preprocess/download)
-2. Formatting Dataset (preprocess/formatting)
-3. Create Virtual Environment
-    - `[dcase_task2]$ python -m venv venv`
-    - `[dcase_task2]$ source venv/bin/activate`
-    - `(venv) [dcase_task2]$ pip install -r requirements.txt`
-4. Execute Training/Testing (jobs)
-
+## Easy Start
 
 <details>
-<summary>Dataset structure</summary>
+<summary>1. Clone and install this repository</summary>
+
+**How to**
+
+```bash
+[somewhere]$ git clone https://github.com/TakuyaFujimura/dcase-asd-library.git
+[somewhere]$ cd dcase-asd-library
+[dcase-asd-library]$ python3 -m venv venv # Python 3.10+ required
+[dcase-asd-library]$ source venv/bin/activate
+[dcase-asd-library]$ pip install -e .
+```
+
+</details>
+
+<details>
+<summary>2. Download DCASETask2 dataset</summary>
+
+**How to**
+- Specify `data_dir` and `dcase` in `jobs/download/run.sh`
+- `data_dir`: The directory where the dataset is stored
+- `dcase`: The dataset name (`dcase2021`, `dcase2022`, `dcase2023`, `dcase2024` are available)
+
+```bash
+[dcase-asd-library]$ cd jobs/download
+[dcase-asd-library/jobs/download]$ bash run.sh
+```
+
+**Result**
+
+```bash
+<data_dir>
+└── original
+    ├── <dcase>
+    └── ...
+```
+</details>
+
+<details>
+<summary>3. Format the dataset</summary>
+
+**How to**
+
+- Specify `data_dir` and `dcase` in `jobs/format/run.sh`
+- This will create a formatted dataset by making symbolic links to the original dataset (while keeping the original dataset)
+- The ground truth normal/anomalous labels are added during this process
+
+```bash
+[dcase-asd-library]$ cd jobs/format
+[dcase-asd-library/jobs/format]$ bash run.sh
+```
+
+**Result**
 
 ```bash
 <data_dir>
 ├── original
-│   ├── dcase2021
-│   ├── dcase2022
+│   ├── <dcase>
 │   └── ...
 └── formatted
-    ├── dcase2021
-    ├── dcase2022
+    ├── <dcase>
     └── ...
 ```
-<!-- ```bash
-<data_dir>
-├── dcase2020 # TODO: check the directory structure
-├── dcase2021 # TODO: check the directory structure
-├── dcase2022 # TODO: check the directory structure
-├── dcase2023
-│   ├── all # Created by `preprocess/dataset/dcase2023.sh`
-│   │   └── raw
-│   │       ├── ToyCar
-│   │       │   ├── train
-│   │       │   └── test
-│   │       └── ToyCircuit
-│   ├── dev_data  # Original structure
-│   └── eval_data # Original structure
-│       
-│
-└── dcase2024 # TODO: check the directory structure
-``` -->
+
 </details>
+
+
+<details>
+<summary>4. Execute training/testing</summary>
+
+**How to**
+
+- This will automatically execute training/testing process
+- An example script is provided but you can create your own configuration file (see [Customization](#customization))
+
+```bash
+[dcase-asd-library]$ cd jobs/asd/example
+[dcase-asd-library/jobs/asd/example]$ bash run.sh
+```
+
+
+**Result**
+```bash
+dcase-asd-library
+├── asdlib
+├── ...
+└── results
+    ├── ...
+    └── <name> # example
+        ├── ...
+        └── <version> # dcase2023_baseline_0
+            ├── checkpoints
+            ├── hparams.yaml
+            ├── test.log
+            ├── train.log
+            └── infer
+                ├── ...
+                └── <infer_ver> # epoch_12
+                    ├── hparams.yaml
+                    ├── <metric>.csv # official23.csv (summary of test results)
+                    ├── ...
+                    └── <machine>
+                        ├── test_extraction.csv # information of test data including embedding
+                        ├── test_result.csv # ROAUCs
+                        ├── test_score.csv # anomaly scores of test data
+                        ├── train_extraction.csv # information of train data including embedding
+                        ├── train_score.csv # anomaly scores of train data
+                        ├── umap.csv # UMAP embedding
+                        └── umap_*.png # UMAP visualization
+            
+```
+
+</details>
+
+## Customization
+
+- `dcase-asd-library/jobs/asd/base/base.sh` automatically executes training/testing process and `dcase-asd-library/jobs/asd/example/run.sh` is an wrapper script for it
+- Please refer `run.sh`. It includes an explanation of which configuration file will be used
+
+
+## Information
+
+### References
+
+### Author
+
+Takuya Fujimura, Toda Labotorary, Nagoya University  
+E-mail: fujimura.takuya@g.sp.m.is.nagoya-u.ac.jp

@@ -10,10 +10,6 @@ class UmapConfig(BaseModel):
     overwrite: bool = True
 
 
-class EvaluateConfig(BaseModel):
-    hmean_list: List[str] = []
-
-
 class MainTestConfig(BaseModel):
     extract: bool = True
     score: bool = True
@@ -34,7 +30,7 @@ class MainTestConfig(BaseModel):
     backend: List[Dict[str, Any]]
 
     path_selector_list: Optional[List[str]] = None
-    evaluate_cfg: Optional[EvaluateConfig] = None
+    hmean_list: List[str] = []
     umap_cfg: Optional[UmapConfig] = None
 
     @field_validator("name", mode="before")

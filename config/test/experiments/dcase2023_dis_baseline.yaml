@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+    - override /backend: dis_baseline
+
+hmean_list: ["official23"]
+
+
+umap_cfg:
+  metric: "cosine"
+  vis_type: "standard"
+  overwrite: true

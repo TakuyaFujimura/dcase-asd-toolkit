@@ -8,8 +8,6 @@ import pandas as pd
 from scipy.stats import hmean
 from sklearn.metrics import roc_auc_score
 
-from ...utils.config_class.main_test_config import EvaluateConfig
-
 logger = logging.getLogger(__name__)
 
 
@@ -111,7 +109,7 @@ def add_hmean(result_df: pd.DataFrame, hmean_type: str) -> pd.DataFrame:
     return result_df
 
 
-def evaluate(evaluate_cfg: EvaluateConfig, score_df: pd.DataFrame) -> pd.DataFrame:
+def evaluate(hmean_list: List[str], score_df: pd.DataFrame) -> pd.DataFrame:
     score_name_list = get_score_name(score_df)
     auc_type_list = get_auc_type_list(score_df)
     result_df = pd.DataFrame(index=score_name_list, columns=auc_type_list)
@@ -124,7 +122,7 @@ def evaluate(evaluate_cfg: EvaluateConfig, score_df: pd.DataFrame) -> pd.DataFra
                 is_target=score_df["is_target"].values,  # type: ignore
                 auc_type=auc_type,
             )
-    for hmean_type in evaluate_cfg.hmean_list:
+    for hmean_type in hmean_list:
         result_df = add_hmean(result_df, hmean_type)
 
     result_df = result_df.reset_index().rename(columns={"index": "backend"})
