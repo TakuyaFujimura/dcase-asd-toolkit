@@ -81,7 +81,7 @@ def get_machines(all_path: List[str], past_cfg: MainConfig) -> List[str]:
     return machines
 
 
-@hydra.main(version_base=None, config_path="config/test", config_name="config")
+@hydra.main(version_base=None, config_path="../../config/test", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     # set_logging(cfg.result_dir, __file__)

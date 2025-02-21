@@ -28,12 +28,12 @@ setup(
         "torchaudio==2.1.1",
         "imbalanced-learn==0.13.0",
     ],
-    entry_points={
-        "console_scripts": [
-            "asdlib-train = asdlib.bin.train:main",
-            "asdlib-test = asdlib.bin.test:main",
-            "asdlib-label = asdlib.bin.label:main",
-            "asdlib-format = asdlib.bin.format:main",
-        ],
-    },
+    # entry_points={
+    #     "console_scripts": [
+    #         "asdlib-train = asdlib.bin.train:main",
+    #         "asdlib-test = asdlib.bin.test:main",
+    #         "asdlib-label = asdlib.bin.label:main",
+    #         "asdlib-format = asdlib.bin.format:main",
+    #     ],
+    # },
 )

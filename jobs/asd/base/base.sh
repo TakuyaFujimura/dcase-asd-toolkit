@@ -15,14 +15,14 @@ cd ../../..
 
 source "venv/bin/activate"
 
-asdlib-train experiments="${exp_yaml}" \
+python asdlib/bin/train.py experiments="${exp_yaml}" \
 'name='${name}'' 'version='${version}'' \
 'trainer.devices='"[${gpu}]"'' 'seed='${seed}''
 
 
 for infer_ver in "${infer_ver_list[@]}"
 do
-	asdlib-test experiments="${test_exp_yaml}" \
+	python asdlib/bin/test.py experiments="${test_exp_yaml}" \
 	'name='${name}'' 'version='${version}'' 'infer_ver='${infer_ver}'' \
 	'seed='${seed}'' 'device='"cuda:${gpu}"''
 done

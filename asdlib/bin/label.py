@@ -4,6 +4,7 @@ from typing import Any, Dict, List, cast
 
 import hydra
 import lightning.pytorch as pl
+import tqdm
 from asdlib.datasets.collators import get_relative_dcase_path
 from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.labelers.base import LabelerBase
@@ -55,7 +56,7 @@ def get_path_list(cfg: Config) -> List[str]:
 
 def get_labelinfo_dict(path_list: List[str], labeler) -> dict:
     path2idx_dict = {}
-    for path in path_list:
+    for path in tqdm.tqdm(path_list):
         path = get_relative_dcase_path(path=path)
         path2idx_dict[path] = labeler.trans(path)
     labelinfo_dict = {
@@ -68,13 +69,14 @@ def get_labelinfo_dict(path_list: List[str], labeler) -> dict:
     return labelinfo_dict
 
 
-@hydra.main(version_base=None, config_path="config/label", config_name="config")
+@hydra.main(version_base=None, config_path="../../config/label", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if cfg.save_path.exists() and not cfg.overwrite:
         raise FileExistsError(
             f"{cfg.save_path} already exists. Please set overwrite=True"
         )
+    logger.info(f"{cfg.save_path.parent} is created.")
     cfg.save_path.parent.mkdir(parents=True, exist_ok=True)
     pl.seed_everything(cfg.seed, workers=True)
 
