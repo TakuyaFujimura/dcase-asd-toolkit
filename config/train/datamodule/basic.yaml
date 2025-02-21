@@ -12,7 +12,7 @@ train:
         shuffle: true
     dataset:
         path_selector_list:
-            - "${data_dir}/${dcase}/all/raw/*/train/*.wav" # TODO: check this path
+            - "${data_dir}/formatted/${dcase}/raw/*/train/*.wav"
     batch_sampler: null
     collator:
         sr: ${datamodule.sr}
