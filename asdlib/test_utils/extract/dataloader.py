@@ -36,7 +36,7 @@ def get_machine_split_path_list(
 ) -> List[str]:
     machine_split_path_list = []
     for p in all_path:
-        # p is in the format of "<data_dir>/<dcase>/all/raw/<machine>/train-test/hoge.wav
+        # p is in the format of "<data_dir>/formatted/<dcase>/raw/<machine>/train_or_test/hoge.wav
         split_p = p.split("/")
         if split_p[-3] == machine and split_p[-2] == split:
             machine_split_path_list.append(p)

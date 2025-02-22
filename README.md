@@ -77,7 +77,7 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 
 <details>
-<summary>4. Execute training/testing</summary>
+<summary>4. Execute training/testing recipe</summary>
 
 <br>
 

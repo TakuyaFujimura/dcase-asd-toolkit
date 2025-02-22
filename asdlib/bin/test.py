@@ -7,14 +7,15 @@ from typing import Any, Dict, List, cast
 import hydra
 import lightning.pytorch as pl
 import torch
+from hydra.core.hydra_config import HydraConfig
+from omegaconf import DictConfig, OmegaConf
+
 from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.test_utils import evaluate_main, extract_main, score_main
 from asdlib.test_utils.table.main import table_main
 from asdlib.test_utils.umap.main import umap_main
 from asdlib.utils.config_class import MainTestConfig
 from asdlib.utils.config_class.main_config import MainConfig
-from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig, OmegaConf
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +45,8 @@ def make_dir(cfg: MainTestConfig) -> Path:
 def get_path_selector_list(cfg: MainTestConfig, past_cfg: MainConfig) -> List[str]:
     if cfg.path_selector_list is None:
         path_selector_list = [
-            f"{past_cfg.data_dir}/{past_cfg.dcase}/all/raw/*/train/*.wav",
-            f"{past_cfg.data_dir}/{past_cfg.dcase}/all/raw/*/test/*.wav",
+            f"{past_cfg.data_dir}/formatted/{past_cfg.dcase}/raw/*/train/*.wav",
+            f"{past_cfg.data_dir}/formatted/{past_cfg.dcase}/raw/*/test/*.wav",
         ]
         logger.info(f"Use past path_selector_list: {path_selector_list}")
     else:
@@ -66,15 +67,15 @@ def get_machines(all_path: List[str], past_cfg: MainConfig) -> List[str]:
     machines: List[str] = []
 
     for p in all_path:
-        # p is in the format of "<data_dir>/<dcase>/all/raw/<machine>/train-test/hoge.wav
+        # p is in the format of "<data_dir>/formatted/<dcase>/raw/<machine>/train_or_test/hoge.wav
         split_p = p.split("/")
         machines.append(split_p[-3])
         data_dir = "/".join(split_p[:-6])
-        dcase = split_p[-6]
+        dcase = split_p[-5]
         if data_dir != past_cfg.data_dir:
-            logger.warning(f"Unmatched data_dir: {data_dir} vs {past_cfg.data_dir}")
+            raise ValueError(f"Unmatched data_dir: {data_dir} vs {past_cfg.data_dir}")
         if dcase != past_cfg.dcase:
-            logger.warning(f"Unmatched dcase: {dcase} vs {past_cfg.dcase}")
+            raise ValueError(f"Unmatched dcase: {dcase} vs {past_cfg.dcase}")
 
     machines = list(set(machines))
     logger.info(f"{len(machines)} machines: {machines}")
