@@ -8,8 +8,10 @@ import numpy as np
 import pandas as pd
 import torch
 import tqdm
-from lightning import LightningModule
 from torch.utils.data import DataLoader
+
+from ...pl_models import BasePLModel
+from ...utils.config_class.output_config import PLOutput
 
 INFOLIST = ["path", "section", "is_normal", "is_target"]
 
@@ -30,15 +32,18 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
     embed_cols = []
     for key, values_list in info__dict_of_list.items():
         values_np = np.concatenate(values_list, axis=0)
-        if key == "embed":
-            embed_cols = [f"e{i}" for i in range(values_np.shape[-1])]
+        if key.startswith("embed_"):
+            key_tmp = key.replace("embed_", "")
+            embed_cols = [f"e_{key_tmp}_{i}" for i in range(values_np.shape[-1])]
             df = pd.DataFrame(columns=embed_cols, data=values_np)
+        elif key.startswith("logits_"):
+            key_tmp = key.replace("logits_", "")
+            logits_cols = [f"l_{key_tmp}_{i}" for i in range(values_np.shape[-1])]
+            df = pd.DataFrame(columns=logits_cols, data=values_np)
         elif values_np.ndim == 2 and values_np.shape[1] == 1:
             df = pd.DataFrame(columns=[key], data=values_np[:, 0])
         elif values_np.ndim == 1:
             df = pd.DataFrame(columns=[key], data=values_np)
-        elif key.startswith("logits_"):
-            raise NotImplementedError("I have not implemented storing logits.")
         else:
             raise NotImplementedError(f"Unexpected shape: {values_np.shape}")
         df_list.append(df)
@@ -47,33 +52,32 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
     return df
 
 
-def get_info_key_list(plmodel: LightningModule) -> List[str]:
+def get_info_key_list(plmodel: BasePLModel) -> List[str]:
     info_key_list: List[str] = INFOLIST
     # for key in plmodel.num_class_dict:
     #     info_key_list.append(key)
     return list(set(info_key_list))
 
 
-def get_output_key_list(plmodel: LightningModule) -> List[str]:
-    output_key_list: List[str] = ["embed"]
-    # for key in plmodel.num_class_dict:
-    #     output_key_list.append(f"logits_{key}")
-    return output_key_list
-
-
-def extract(dataloader: DataLoader, plmodel: LightningModule, device: str):
+def extract(dataloader: DataLoader, plmodel: BasePLModel, device: str):
     logger.info("Start extract_loader")
     plmodel.eval()
     extract__dict_of_list = defaultdict(list)
     info_key_list = get_info_key_list(plmodel)
-    output_key_list = get_output_key_list(plmodel)
+    output_key_list = ["embed", "AS"]  # Currently, I exclude "logits" from output
 
     for batch in tqdm.tqdm(dataloader):
+
+        batch = {
+            k: v.to(device) if isinstance(v, torch.Tensor) else v
+            for k, v in batch.items()
+        }
+
         with torch.no_grad():
-            wave = batch["wave"].to(device)
-            output_dict = plmodel(wave)
-            for key in output_key_list:
-                extract__dict_of_list[key].append(output_dict[key].cpu().numpy())
+            pl_output: PLOutput = plmodel(batch)
+            for key1 in output_key_list:
+                for key2, value in getattr(pl_output, key1).items():
+                    extract__dict_of_list[f"{key1}_{key2}"].append(value.cpu().numpy())
 
             for key in info_key_list:
                 value = batch[key]

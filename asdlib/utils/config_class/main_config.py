@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class GradConfig(BaseModel):
@@ -57,7 +57,7 @@ class MainConfig(BaseModel):
     model: ModelConfig
     trainer: Dict[str, Any]
     datamodule_type: Literal["basic"]
-    label_dict_path: Dict[str, Path] = {}
+    label_dict_path: Dict[str, Path] = Field(default_factory=dict)
     datamodule: dict
 
     data_dir: str

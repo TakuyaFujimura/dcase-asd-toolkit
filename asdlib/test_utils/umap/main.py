@@ -34,6 +34,7 @@ def umap_main(
             machine_dir=machine_dir,
             metric=umap_cfg.metric,
             overwrite=umap_cfg.overwrite,
+            embed_key=umap_cfg.embed_key,
         )
         visualize(
             umap_df=umap_df,

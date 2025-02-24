@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from ..utils.config_class import GradConfig
+from ..utils.config_class.output_config import PLOutput
 from ..utils.pl_utils import instantiate_tgt
 from .base_model import BasePLModel
 
@@ -72,24 +73,20 @@ class BasicDisPLModel(BasePLModel):
         self.set_head_dict(self.loss_label2lam_dict)
         self.set_augmentations(augmentation_cfg_list)
 
-    def forward(self, wave: Tensor) -> Dict[str, Any]:
-        """
-        Args:
-            x (Tensor): wave (B, T)
-        """
-        output_dict: Dict[str, Any] = {}
-        embed = self.extractor(wave)  # (B, D)
+    def forward(self, batch: dict) -> PLOutput:
+        logit_dict: Dict[str, Tensor] = {}
+        embed = self.extractor(batch["wave"])  # (B, D)
 
         for label_name in self.loss_label2lam_dict:
             logits = self.head_dict[label_name].calc_logits(embed)  # type: ignore
-            output_dict[f"logits_{label_name}"] = logits
+            logit_dict[label_name] = logits
 
         if self.normalize:
-            output_dict["embed"] = F.normalize(embed, p=2, dim=1)
+            embed_dict = {"main": F.normalize(embed, p=2, dim=1)}
         else:
-            output_dict["embed"] = embed
+            embed_dict = {"main": embed}
 
-        return output_dict
+        return PLOutput(embed=embed_dict, logits=logit_dict)
 
     def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
         embed = self.extractor(wave)

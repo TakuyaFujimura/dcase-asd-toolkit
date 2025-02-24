@@ -14,13 +14,15 @@ def get_df(machine_dir: Path) -> pd.DataFrame:
     return df
 
 
-def get_umap_df(machine_dir: Path, metric: str, overwrite: bool) -> pd.DataFrame:
+def get_umap_df(
+    machine_dir: Path, metric: str, overwrite: bool, embed_key: str
+) -> pd.DataFrame:
     umap_path = machine_dir / "umap.csv"
     if umap_path.exists() and not overwrite:
         return pd.read_csv(umap_path)
 
     df = get_df(machine_dir=machine_dir)
-    embed = get_embed_from_df(df)
+    embed = get_embed_from_df(df=df, embed_key=embed_key)
     umap_model = umap.UMAP(random_state=0, metric=metric)
     umap_embed = umap_model.fit_transform(embed)  # (N, 2)
     umap_df = pd.DataFrame(

@@ -2,12 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
-from asdlib.datasets.torch_dataset import parse_path_selector
-from lightning import LightningModule
-
-from ...pl_models import BasicDisPLModel
+from ...pl_models import BasePLModel, BasicDisPLModel
 from ...utils.config_class import MainConfig, MainTestConfig
 from ...utils.io_utils import get_best_path, get_path_glob
 from .dataloader import get_loader
@@ -29,7 +26,7 @@ def get_ckpt_path(cfg: MainTestConfig) -> Path:
     return ckpt_path
 
 
-def load_plmodel(cfg: MainTestConfig, past_cfg: MainConfig) -> LightningModule:
+def load_plmodel(cfg: MainTestConfig, past_cfg: MainConfig) -> BasePLModel:
     ckpt_path = get_ckpt_path(cfg)
     if past_cfg.model.tgt_class == "asdlib.pl_models.BasicDisPLModel":
         plmodel = BasicDisPLModel.load_from_checkpoint(ckpt_path)

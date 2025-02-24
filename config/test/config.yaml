@@ -6,7 +6,7 @@ defaults:
 extract: true
 score: true
 evaluate: true
-umap: false
+umap: true
 table_metric_list: ${hmean_list}
 
 

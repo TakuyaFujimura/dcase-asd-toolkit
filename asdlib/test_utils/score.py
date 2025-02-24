@@ -21,7 +21,12 @@ def get_name(backend_cfg: Dict[str, Any]) -> str:
 
 def rm_unnecesary_col(df: pd.DataFrame) -> pd.DataFrame:
     rm_cols = []
-    rm_cols += [col for col in df.keys() if col[0] == "e" and int(col[1:]) >= 0]
+    for col in df.keys():
+        if col.startswith("e_") and int(col.split("_")[-1]) >= 0:
+            rm_cols.append(col)
+        elif col.startswith("l_") and int(col.split("_")[-1]) >= 0:
+            rm_cols.append(col)
+
     return df.drop(rm_cols, axis=1)
 
 

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -5,6 +6,7 @@ import lightning.pytorch as pl
 import torch
 
 from ..utils.config_class import GradConfig
+from ..utils.config_class.output_config import PLOutput
 from ..utils.pl_utils import get_label_dict, instantiate_tgt
 
 
@@ -18,7 +20,7 @@ def grad_norm(module: torch.nn.Module) -> float:
     return total_norm
 
 
-class BasePLModel(pl.LightningModule):
+class BasePLModel(pl.LightningModule, ABC):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
@@ -46,6 +48,10 @@ class BasePLModel(pl.LightningModule):
     def _constructor(self):
         pass
 
+    @abstractmethod
+    def forward(self, batch: dict) -> PLOutput:
+        pass
+
     def log_loss(self, loss: Any, log_name: str, batch_size: int):
         if isinstance(loss, torch.Tensor) and loss.numel() == 1:
             self.log(
@@ -58,7 +64,7 @@ class BasePLModel(pl.LightningModule):
                 on_epoch=False,
             )
         else:
-            raise ValueError(f"Loss is not a scalar tensor")
+            raise ValueError("Loss is not a scalar tensor")
 
     def on_after_backward(self):
         if self.grad_clipper is not None:

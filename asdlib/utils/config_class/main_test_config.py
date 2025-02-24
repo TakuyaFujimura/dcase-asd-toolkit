@@ -1,13 +1,14 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class UmapConfig(BaseModel):
     metric: str
     vis_type: str = "standard"
     overwrite: bool = True
+    embed_key: str = "e_main"
 
 
 class MainTestConfig(BaseModel):
@@ -15,7 +16,7 @@ class MainTestConfig(BaseModel):
     score: bool = True
     evaluate: bool = True
     umap: bool = True
-    table_metric_list: List[str] = []
+    table_metric_list: List[str] = Field(default_factory=list)
 
     device: str
     seed: int
@@ -30,7 +31,7 @@ class MainTestConfig(BaseModel):
     backend: List[Dict[str, Any]]
 
     path_selector_list: Optional[List[str]] = None
-    hmean_list: List[str] = []
+    hmean_list: List[str] = Field(default_factory=list)
     umap_cfg: Optional[UmapConfig] = None
 
     @field_validator("name", mode="before")

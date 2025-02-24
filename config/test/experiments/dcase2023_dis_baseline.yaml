@@ -9,3 +9,4 @@ umap_cfg:
   metric: "cosine"
   vis_type: "standard"
   overwrite: true
+  embed_key: "e_main"
