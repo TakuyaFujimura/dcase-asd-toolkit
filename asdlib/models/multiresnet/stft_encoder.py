@@ -4,8 +4,8 @@ import logging
 import torch
 from torch import nn
 
+from ..audio_feature.stft import STFT
 from ..modules import SEBlock, calc_filtered_size_3d
-from ..stft import STFT
 
 logger = logging.getLogger(__name__)
 

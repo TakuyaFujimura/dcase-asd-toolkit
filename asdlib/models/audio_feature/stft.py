@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 
 import torch
 import torchaudio.transforms as T
@@ -12,7 +13,7 @@ class STFT(nn.Module):
         sr: int,
         n_fft: int,
         hop_length: int,
-        n_mels: int,
+        n_mels: Optional[int],
         power: float,
         f_min: float,
         f_max: float,
@@ -22,6 +23,7 @@ class STFT(nn.Module):
         super().__init__()
         self.use_mel = use_mel
         self.n_fft = n_fft
+        self.n_mels = n_mels
         self.sr = sr
         self.f_min = f_min
         self.f_max = f_max
@@ -29,6 +31,8 @@ class STFT(nn.Module):
         self.use_log = use_log
         self.temporal_norm = temporal_norm
         if use_mel:
+            self.output_freq_size = n_mels
+            assert n_mels is not None
             self.stft = T.MelSpectrogram(
                 sample_rate=sr,
                 n_fft=n_fft,
@@ -44,6 +48,7 @@ class STFT(nn.Module):
                 onesided=True,
             )
         else:
+            self.output_freq_size = n_fft // 2 + 1
             self.stft = T.Spectrogram(
                 n_fft=n_fft,
                 hop_length=hop_length,

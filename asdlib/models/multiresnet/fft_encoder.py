@@ -3,8 +3,8 @@ from typing import List
 
 from torch import nn
 
+from ..audio_feature.stft import FFT
 from ..modules import SEBlock, calc_filtered_size_1d
-from ..stft import FFT
 
 logger = logging.getLogger(__name__)
 
