@@ -13,6 +13,7 @@ model_cfg:
     tgt_class: asdlib.models.MultiResNet
     sec: ${datamodule.sec}
     sr: ${datamodule.sr}
+    use_fft: true
     stft_cfg_list:
       -
         sr: ${datamodule.sr}

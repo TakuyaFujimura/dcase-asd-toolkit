@@ -12,15 +12,20 @@ class MultiResNet(nn.Module):
         self,
         sec: int,
         sr: int,
+        use_fft: bool,
         stft_cfg_list: List[dict],
         use_bias: bool = False,
         emb_base_size: int = 128,
         resnet_additional_layer: str = "SEBlock",
     ):
         super().__init__()
-        self.fft_layer = FFTEncoderLayer(
-            sec=sec, sr=sr, use_bias=use_bias, emb_base_size=emb_base_size
-        )
+        if use_fft:
+            self.fft_layer = FFTEncoderLayer(
+                sec=sec, sr=sr, use_bias=use_bias, emb_base_size=emb_base_size
+            )
+        else:
+            self.fft_layer = None
+
         self.stft_layer_list = nn.ModuleList([])
         for stft_cfg in stft_cfg_list:
             stft_encoder = STFTEncoderLayer(
@@ -42,7 +47,9 @@ class MultiResNet(nn.Module):
         Returns
             z: (B, emb_base_size * (1 + len(stft_cfg_list)))
         """
-        z_list: List[torch.Tensor] = [self.fft_layer(x_time)]
+        z_list: List[torch.Tensor] = []
+        if self.fft_layer is not None:
+            z_list += [self.fft_layer(x_time)]
         for stft_layer in self.stft_layer_list:
             z_list += [stft_layer(x_time)]
         return torch.cat(z_list, dim=-1)
