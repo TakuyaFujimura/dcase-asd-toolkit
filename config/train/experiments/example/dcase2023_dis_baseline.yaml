@@ -8,4 +8,4 @@ dcase: "dcase2023"
 
 
 label_dict_path:
-  main_label: "labels/${dcase}/machine_attr_domain.json"
+  main_label: "labels/${dcase}/machine_section_attr_domain.json"
