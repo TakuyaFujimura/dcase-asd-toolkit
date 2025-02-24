@@ -37,7 +37,7 @@ label_dict_path: {}
 datamodule_type: "basic"
 
 dcase: null
-data_dir: "../data" # TODO: change this
+data_dir: "../data"
 
 hydra:
     run:

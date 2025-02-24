@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+    - override /datamodule: basic
+    - override /model: multiresnet_1024
+    - override /trainer: default
+
+dcase: "dcase2024"
+
+
+label_dict_path:
+  main_label: "labels/${dcase}/machine_section_attr_domain.json"

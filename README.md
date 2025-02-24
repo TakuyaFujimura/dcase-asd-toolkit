@@ -82,7 +82,8 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 <br>
 
 **How to**
-
+- Specify `data_dir` in `dcase-asd-library/config/config.yaml`
+- Specify `dcase` in `jobs/asd/example/run.sh`
 - This will automatically execute training/testing process
 - An example script is provided but you can also create your own configuration file (see [Customization](docs/customization.md))
 
