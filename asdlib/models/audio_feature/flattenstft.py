@@ -2,23 +2,25 @@ from typing import Any, Dict
 
 import torch
 
+from .base import BaseAudioFeature
 from .stft import STFT
 
 
-class ConsecutiveSpec:
+class FlattenSTFT(BaseAudioFeature):
     def __init__(self, stft_cfg: Dict[str, Any], n_frames: int):
         self.stft = STFT(**stft_cfg)
         self.n_frames = n_frames
         self.output_freq_size = self.stft.output_freq_size
+        self.feat_dim = self.output_freq_size * self.n_frames
 
     def __call__(self, wave: torch.Tensor) -> torch.Tensor:
         """Make consecutive input feature
         Args:
             wave: [Batch, Time]
         Returns:
-            x: [B*n_vectors, dim]
+            x: [B*n_vectors, self.feat_dim]
             where n_vectors is number of features obtained from a spectrogram,
-            dim =  n_frames * n_fft , i.e., n_frames-consecutive spectrogram.
+            self.feat_dim =  n_frames * n_fft , i.e., n_frames-consecutive spectrogram.
             content of x is like below,
             ---------------------------------
                     |n_fft |

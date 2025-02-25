@@ -1,0 +1,34 @@
+tgt_class: asdlib.pl_models.AEPLModel
+
+optim_cfg:
+  tgt_class: torch.optim.AdamW
+  lr: 1.0e-3
+
+scheduler_cfg: null
+grad_cfg: {}
+
+
+
+model_cfg:
+  network_cfg:
+    tgt_class: asdlib.models.autoencoder.AE_MLP
+    z_dim: 8
+    h_dim: 128
+    audio_feat_cfg:
+      tgt_class: asdlib.audio_feature.FlattenSTFT
+      stft_cfg:
+        use_mel: true
+        sr: ${datamodule.sr}
+        n_fft: 1024
+        hop_length: 512
+        n_mels: 128
+        power: 1.0
+        f_min: 0.0
+        f_max: 8000.0
+        use_log: true
+        temporal_norm: false
+      n_frames: 5
+  loss_cfg:
+    tgt_class: torch.nn.MSELoss
+  use_compile: true
+

@@ -31,8 +31,8 @@ class STFT(nn.Module):
         self.use_log = use_log
         self.temporal_norm = temporal_norm
         if use_mel:
-            self.output_freq_size = n_mels
             assert n_mels is not None
+            self.output_freq_size = n_mels
             self.stft = T.MelSpectrogram(
                 sample_rate=sr,
                 n_fft=n_fft,
