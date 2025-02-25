@@ -79,7 +79,7 @@ def get_loader(
     )
     loader = PLDataModule.get_loader(
         datamoduleconfig=datamoduleconfig,
-        label_dict_path=past_cfg.label_dict_path,  # TODO: make label using test
+        label_dict_path=past_cfg.label_dict_path,
     )
     assert loader is not None
 

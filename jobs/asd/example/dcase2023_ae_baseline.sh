@@ -23,7 +23,7 @@ gpu=0
 # ID of GPU to use
 
 # ----------------------------------------------- #
-infer_ver_list="epoch_12"
+infer_ver_list="last"
 # comma separated list of versions to inference. 
 # Available versions: epoch_??, best, last
 # epoch_??: Use model at the epoch (there must be a checkpoint file at the epoch)

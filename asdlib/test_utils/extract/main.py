@@ -1,5 +1,6 @@
 # Copyright 2024 Takuya Fujimura
 
+import importlib
 import logging
 from pathlib import Path
 from typing import List
@@ -28,10 +29,11 @@ def get_ckpt_path(cfg: MainTestConfig) -> Path:
 
 def load_plmodel(cfg: MainTestConfig, past_cfg: MainConfig) -> BasePLModel:
     ckpt_path = get_ckpt_path(cfg)
-    if past_cfg.model.tgt_class == "asdlib.pl_models.BasicDisPLModel":
-        plmodel = BasicDisPLModel.load_from_checkpoint(ckpt_path)
-    else:
-        raise NotImplementedError("Unexpected model class")
+    module_name = ".".join(past_cfg.model.tgt_class.split(".")[:-1])
+    class_name = past_cfg.model.tgt_class.split(".")[-1]
+    module = importlib.import_module(module_name)
+    plmodel_cls = getattr(module, class_name)
+    plmodel = plmodel_cls.load_from_checkpoint(ckpt_path)
     plmodel.to(cfg.device)
     plmodel.eval()
     logger.info("Model was successfully loaded from ckpt_path")
