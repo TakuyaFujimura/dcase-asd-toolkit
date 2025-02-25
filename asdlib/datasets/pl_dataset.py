@@ -1,19 +1,17 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from ..utils.config_class import BasicDMConfig, BasicDMSplitConfig
+from ..utils.config_class import DMConfig, DMSplitConfig
 from ..utils.pl_utils import instantiate_tgt
-from .collators import BasicCollator
-from .torch_dataset import BasicDataset
 
 
-class BasicDataModule(pl.LightningDataModule):
+class PLDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        dm_cfg: BasicDMSplitConfig,
+        dm_cfg: DMSplitConfig,
         label_dict_path: Dict[str, Path],
     ):
         super().__init__()
@@ -21,36 +19,55 @@ class BasicDataModule(pl.LightningDataModule):
         self.label_dict_path = label_dict_path
 
     @staticmethod
-    def get_loader(datasetconfig: BasicDMConfig, label_dict_path: Dict[str, Path]):
-        dataset = BasicDataset(
-            path_selector_list=datasetconfig.dataset.path_selector_list,
-            use_cache=datasetconfig.dataset.use_cache,
-        )
-        if datasetconfig.batch_sampler is None:
+    def get_loader(
+        datamoduleconfig: Optional[DMConfig], label_dict_path: Dict[str, Path]
+    ) -> DataLoader | None:
+
+        if datamoduleconfig is None:
+            return None
+
+        dataset = instantiate_tgt(datamoduleconfig.dataset.model_dump())
+
+        if datamoduleconfig.batch_sampler is None:
             batch_sampler = None
         else:
             batch_sampler = instantiate_tgt(
-                {"dataset": dataset, **datasetconfig.batch_sampler}
+                {"dataset": dataset, **datamoduleconfig.batch_sampler}
             )
-        collator = BasicCollator(
-            label_dict_path=label_dict_path,
-            **datasetconfig.collator.model_dump(),
+
+        collator = instantiate_tgt(
+            {
+                "label_dict_path": label_dict_path,
+                **datamoduleconfig.collator.model_dump(),
+            }
         )
         return DataLoader(
             dataset=dataset,
             batch_sampler=batch_sampler,
             collate_fn=collator,
-            **datasetconfig.dataloader,
+            **datamoduleconfig.dataloader,
         )
 
     def train_dataloader(self):
         return self.get_loader(
-            datasetconfig=self.dm_cfg.train,
+            datamoduleconfig=self.dm_cfg.train,
             label_dict_path=self.label_dict_path,
         )
 
     def val_dataloader(self):
-        return None
+        if self.dm_cfg.valid is not None:
+            # check validation configuration
+            if self.dm_cfg.valid.dataloader.get("shuffle", True):
+                raise ValueError("Validation dataloader should not shuffle")
+            if self.dm_cfg.valid.batch_sampler is not None:
+                raise ValueError("Validation dataloader should not use batch_sampler")
+            if getattr(self.dm_cfg.valid.collator, "shuffle", True):
+                raise ValueError("Validation collator should not shuffle")
+
+        return self.get_loader(
+            datamoduleconfig=self.dm_cfg.valid,
+            label_dict_path=self.label_dict_path,
+        )
 
     def test_dataloader(self):
         return None

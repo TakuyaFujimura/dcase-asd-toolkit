@@ -52,8 +52,7 @@ class AEPLModel(BasePLModel):
         anomaly_score_dict = {"plain": self.loss(x_est, x_ref)}
         return PLOutput(embed=embed_dict, AS=anomaly_score_dict)
 
-    def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
-        x_ref = self.audio_feat(wave)
+    def wave2loss(self, x_ref: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
         if self.condition_label is None:
             condition = None
         else:
@@ -63,16 +62,16 @@ class AEPLModel(BasePLModel):
         return loss_dict
 
     def training_step(self, batch, batch_idx):
-        wave = batch.pop("wave")
-        loss_dict = self.wave2loss(wave, batch)
-        self.log_loss(torch.tensor(len(wave)).float(), "train/batch_size", 1)
+        audio_feature = batch.pop("feat")
+        loss_dict = self.wave2loss(x_ref=audio_feature, batch=batch)
+        self.log_loss(torch.tensor(len(audio_feature)).float(), "train/batch_size", 1)
         for key_, val_ in loss_dict.items():
-            self.log_loss(val_, f"train/{key_}", len(wave))
+            self.log_loss(val_, f"train/{key_}", len(audio_feature))
         return loss_dict["main"]
 
     def validation_step(self, batch, batch_idx):
-        wave = batch.pop("wave")
-        loss_dict = self.wave2loss(wave, batch)
-        self.log_loss(torch.tensor(len(wave)).float(), "valid/batch_size", 1)
+        audio_feature = batch.pop("feat")
+        loss_dict = self.wave2loss(x_ref=audio_feature, batch=batch)
+        self.log_loss(torch.tensor(len(audio_feature)).float(), "valid/batch_size", 1)
         for key_, val_ in loss_dict.items():
-            self.log_loss(val_, f"valid/{key_}", len(wave))
+            self.log_loss(val_, f"valid/{key_}", len(audio_feature))

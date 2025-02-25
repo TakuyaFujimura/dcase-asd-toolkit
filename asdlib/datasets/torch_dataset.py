@@ -107,7 +107,7 @@ class AudioFeatDataset(Dataset):
 
     def get_item(self, idx) -> dict:
         items = {
-            "audio_feat": self.audio_feat_tensor[idx],
+            "feat": self.audio_feat_tensor[idx],
             "path": self.path_list[self.path_idx_list[idx]],
         }
         return items

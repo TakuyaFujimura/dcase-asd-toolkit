@@ -34,7 +34,6 @@ every_n_epochs_valid: 1
 result_dir: "./results"
 
 label_dict_path: {}
-datamodule_type: "basic"
 
 dcase: null
 data_dir: "../data"

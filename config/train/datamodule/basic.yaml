@@ -11,11 +11,14 @@ train:
         pin_memory: true
         shuffle: true
     dataset:
+        tgt_class: asdlib.datasets.BasicDataset
         path_selector_list:
             - "${data_dir}/formatted/${dcase}/raw/*/train/*.wav"
     batch_sampler: null
     collator:
+        tgt_class: asdlib.datasets.BasicCollator
         sr: ${datamodule.sr}
         sec: ${datamodule.sec}
+        need_feat: false
         shuffle: true
 

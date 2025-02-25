@@ -5,14 +5,14 @@ from typing import Any, Dict, List, cast
 import hydra
 import lightning.pytorch as pl
 import torch
-from asdlib.datasets import BasicDataModule
-from asdlib.utils.config_class import MainConfig
-from asdlib.utils.config_class.main_config import BasicDMSplitConfig
-from asdlib.utils.pl_utils import NaNCheckCallback, instantiate_tgt
 from hydra.core.hydra_config import HydraConfig
 from lightning.pytorch.callbacks import ModelCheckpoint, TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
+
+from asdlib.datasets import PLDataModule
+from asdlib.utils.config_class import MainConfig
+from asdlib.utils.pl_utils import NaNCheckCallback, instantiate_tgt
 
 logger = logging.getLogger(__name__)
 
@@ -56,14 +56,11 @@ def set_logging(dst_dir: Path):
 
 
 def setup_datamodule(cfg: MainConfig) -> pl.LightningDataModule:
-    if cfg.datamodule_type == "basic":
-        logger.info("Create datamodule")
-        dm = BasicDataModule(
-            dm_cfg=BasicDMSplitConfig(**cfg.datamodule),
-            label_dict_path=cfg.label_dict_path,
-        )
-    else:
-        raise NotImplementedError("I have not checked this")
+    logger.info("Create datamodule")
+    dm = PLDataModule(
+        dm_cfg=cfg.datamodule,
+        label_dict_path=cfg.label_dict_path,
+    )
     return dm
 
 

@@ -1,7 +1,9 @@
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field, field_validator
+
+from .datamodule import AudioFeatDSConfig, BasicCollatorConfig, BasicDSConfig
 
 
 class GradConfig(BaseModel):
@@ -17,31 +19,16 @@ class ModelConfig(BaseModel):
     grad_cfg: GradConfig
 
 
-class BasicDMConfig(BaseModel):
-
-    class DSConfig(BaseModel):
-        path_selector_list: List[str]
-        use_cache: bool = False
-
-    class CollatorConfig(BaseModel):
-        sec: float
-        sr: int
-        shuffle: bool
-
-        @field_validator("sr")
-        def check_sr(cls, v):
-            if v not in [16000]:
-                raise ValueError("Unexpected sampling rate")
-            return v
-
+class DMConfig(BaseModel):
     dataloader: Dict[str, Any]
-    dataset: DSConfig
+    dataset: BasicDSConfig | AudioFeatDSConfig
     batch_sampler: Optional[Dict[str, Any]] = None
-    collator: CollatorConfig
+    collator: BasicCollatorConfig
 
 
-class BasicDMSplitConfig(BaseModel):
-    train: BasicDMConfig
+class DMSplitConfig(BaseModel):
+    train: DMConfig
+    valid: Optional[DMConfig] = None
 
 
 class MainConfig(BaseModel):
@@ -56,9 +43,8 @@ class MainConfig(BaseModel):
     result_dir: Path
     model: ModelConfig
     trainer: Dict[str, Any]
-    datamodule_type: Literal["basic"]
     label_dict_path: Dict[str, Path] = Field(default_factory=dict)
-    datamodule: dict
+    datamodule: DMSplitConfig
 
     data_dir: str
     dcase: str

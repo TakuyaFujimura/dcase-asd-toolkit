@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 import numpy as np
 import torch
@@ -60,25 +60,51 @@ class BasicCollator(object):
     def __init__(
         self,
         label_dict_path: Dict[str, Path],
-        sec: float,
+        sec: float | Literal["all", "none"],
         sr: int,
+        need_feat: bool = False,
         shuffle: bool = True,
     ):
         self.label_dict: Dict[str, LabelInfo] = get_label_dict(label_dict_path)
-        self.crop_len = int(sr * sec)
         self.shuffle = shuffle
+        self.crop_len: int | Literal["all", "none"]
 
         if sr != 16000:
-            raise ValueError("Only 16kHz is supported.")
+            raise ValueError("Unexpected sampling rate")
+
+        if sec == "all":
+            self.crop_len = "all"
+        elif sec == "none":
+            self.crop_len = "none"
+            logging.info(
+                "`wave` in batch will be ignored. If you need it, set `sec` parameter."
+            )
+        else:
+            self.crop_len = int(sr * sec)
+
+        self.need_wave: bool = self.crop_len != "none"
+        self.need_feat = need_feat
+        if self.need_feat and self.need_wave:
+            raise ValueError("Cannot use both wave and feat at the same time.")
+        # If we use only `feat`, `sec` will not be used and
+        # meaningless `sec` parameters will appear in hparams.yaml.
+        # This is a source of confusion and the ValuerError is to prevent it.
+        # Using `feat` and `wave` at the same time itself can be easily realized
+        # but I didn't do that to simply avoid confusion.
+        # (I think there is another better way...)
 
     def crop_wave(self, wave: torch.Tensor) -> torch.Tensor:
         assert len(wave.shape) == 1
-        wave = wave_pad(wave, self.crop_len, "tile")
-        if self.shuffle:
-            wave = wave_rand_crop(wave, self.crop_len)
+        assert self.crop_len != "none"
+        if self.crop_len == "all":
+            return wave
         else:
-            wave = wave[: self.crop_len]
-        return wave
+            wave = wave_pad(wave, self.crop_len, "tile")
+            if self.shuffle:
+                wave = wave_rand_crop(wave, self.crop_len)
+            else:
+                wave = wave[: self.crop_len]
+            return wave
 
     def format_batch(self, batch: List[Dict[str, Any]]) -> Dict[str, list]:
         list_items: Dict[str, list] = {
@@ -88,16 +114,26 @@ class BasicCollator(object):
             "attr": [],
             "is_normal": [],
             "is_target": [],
-            "wave": [],
         }
+        if self.need_wave:
+            list_items["wave"] = []
+        if self.need_feat:
+            list_items["feat"] = []
 
         for b in batch:
             list_items["path"].append(b["path"])
             for l in ["machine", "section", "attr", "is_normal", "is_target"]:
                 list_items[l].append(get_dcase_info(b["path"], l))
-            list_items["wave"].append(self.crop_wave(b["wave"]))
+            if self.need_wave:
+                list_items["wave"].append(self.crop_wave(b["wave"]))
+            if self.need_feat:
+                list_items["feat"].append(b["feat"])
 
-        list_items["wave"] = torch.stack(list_items["wave"])  # type: ignore
+        if self.need_wave:
+            list_items["wave"] = torch.stack(list_items["wave"])  # type: ignore
+        if self.need_feat:
+            list_items["feat"] = torch.stack(list_items["feat"])  # type: ignore
+
         # list_items["path"] = np.array(list_items["path"])
         return list_items
 
