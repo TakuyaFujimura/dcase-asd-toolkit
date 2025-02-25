@@ -5,14 +5,15 @@ from typing import Any, Dict, List, cast
 import hydra
 import lightning.pytorch as pl
 import tqdm
-from asdlib.datasets.collators import get_relative_dcase_path
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
+from pydantic import BaseModel, field_validator
+
+from asdlib.datasets.collators import get_dcase_info, get_relative_dcase_path
 from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.labelers.base import LabelerBase
 from asdlib.utils.io_utils.json_util import write_json
 from asdlib.utils.pl_utils.idx_util import LabelInfo
-from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf
-from pydantic import BaseModel, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -56,14 +57,17 @@ def get_path_list(cfg: Config) -> List[str]:
 
 def get_labelinfo_dict(path_list: List[str], labeler) -> dict:
     path2idx_dict = {}
+    split_idx_dict = {"train": [], "test": []}
     for path in tqdm.tqdm(path_list):
         path = get_relative_dcase_path(path=path)
-        path2idx_dict[path] = labeler.trans(path)
+        idx = labeler.trans(path)
+        path2idx_dict[path] = idx
+        split_idx_dict[get_dcase_info(path=path, label="split")] += [idx]  # type: ignore
+
     labelinfo_dict = {
         "num_class": len(set(path2idx_dict.values())),
-        # I don't use labeler.num_class because it won't be correct
-        # when there is train/test mismatch in labeler.
-        # i.e., labeler.fit(path_list_1).num_class != len(set([labeler.trans(p) for p in path_list_2]))
+        "num_class_train": len(set(split_idx_dict["train"])),
+        "num_class_test": len(set(split_idx_dict["test"])),
         "path2idx_dict": path2idx_dict,
     }
     return labelinfo_dict

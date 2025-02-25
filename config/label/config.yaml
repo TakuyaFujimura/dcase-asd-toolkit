@@ -14,7 +14,7 @@ dcase: null
 save_path: "labels/${dcase}/${labeler.label_name}.json"
 path_selector_list:
   - "${data_dir}/formatted/${dcase}/raw/*/train/*.wav"
-#  - "${data_dir}/formatted/${dcase}/raw/*/test/*.wav"
+  - "${data_dir}/formatted/${dcase}/raw/*/test/*.wav"
 
 hydra:
   run:

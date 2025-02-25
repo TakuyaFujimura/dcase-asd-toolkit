@@ -23,7 +23,9 @@ def get_relative_dcase_path(path: str) -> str:
 def get_dcase_info(path: str, label: str) -> str | int:
     # section_00_target_train_normal_0009_<attribute>.wav
     split_path = path.split("/")[-1].split("_")
-    if label == "machine":
+    if label == "split":
+        return path.split("/")[-2]
+    elif label == "machine":
         return path.split("/")[-3]
     elif label == "section":
         return int(split_path[1])
