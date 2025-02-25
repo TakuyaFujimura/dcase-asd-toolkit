@@ -12,8 +12,8 @@ class AUROC:
         self.y_target.append(target)
 
     def compute(self) -> float:
-        y_score = torch.cat(self.y_score).cpu().numpy()
-        y_target = torch.cat(self.y_target).cpu().numpy()
+        y_score = torch.cat(self.y_score).detach().cpu().numpy()
+        y_target = torch.cat(self.y_target).detach().cpu().numpy()
         return roc_auc_score(y_true=y_target, y_score=y_score)  # type: ignore
 
     def reset(self) -> None:
