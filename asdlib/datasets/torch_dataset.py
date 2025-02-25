@@ -98,7 +98,7 @@ class AudioFeatDataset(Dataset):
         audio_feat_list = []
         path_idx_list = []
         for i, path in enumerate(tqdm.tqdm(self.path_list)):
-            wave = torch_mono_wav_load(path=path)
+            wave = torch_mono_wav_load(path=path)[None]  # 1, T
             x = self.audio_feat_extractor(wave)  # N x D
             audio_feat_list += [x]
             path_idx_list += [i] * len(x)

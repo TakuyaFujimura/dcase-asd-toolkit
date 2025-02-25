@@ -10,7 +10,7 @@ grad_cfg: {}
 
 model_cfg:
   extractor_cfg:
-    tgt_class: asdlib.models.MultiResNet
+    tgt_class: asdlib.models.multiresnet.MultiResNet
     sec: ${datamodule.sec}
     sr: ${datamodule.sr}
     use_fft: true

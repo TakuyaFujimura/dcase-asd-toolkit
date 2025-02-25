@@ -2,8 +2,9 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
-from asdlib.utils.config_class.nparray_class import Np1DArray
 from pydantic import BaseModel
+
+from ...utils.config_class.nparray_class import Np1DArray
 
 
 class PlotConfig(BaseModel):

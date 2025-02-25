@@ -1,9 +1,12 @@
+import logging
 import sys
 from typing import Optional
 
 import torch
 import torchaudio.transforms as T
 from torch import nn
+
+logger = logging.getLogger(__name__)
 
 
 class STFT(nn.Module):
@@ -45,8 +48,9 @@ class STFT(nn.Module):
                 normalized=True,
                 center=True,
                 pad_mode="reflect",
-                onesided=True,
+                # onesided=True, # onesided has been deprecated
             )
+            self.device = self.stft.spectrogram.window.device
         else:
             self.output_freq_size = n_fft // 2 + 1
             self.stft = T.Spectrogram(
@@ -59,10 +63,15 @@ class STFT(nn.Module):
                 pad_mode="reflect",
                 onesided=True,
             )
+            self.device = self.stft.window.device
 
     def forward(self, x):
-        # B, F, T
-        spectrogram = self.stft(x)
+        if self.device != x.device:
+            logger.info("Move STFT to the same device")
+            self.device = x.device
+            self.stft = self.stft.to(self.device)
+
+        spectrogram = self.stft(x)  # B, F, T
         if not self.use_mel:
             frequencies = torch.linspace(0, self.sr // 2, self.n_fft // 2 + 1)
             if self.f_min is not None:

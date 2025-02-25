@@ -5,12 +5,12 @@ dcase="dcase2023" # Referred by $version and $test_exp_yaml
 
 # ----------------------------------------------- #
 name="example"
-version="${dcase}_dis_baseline"
+version="${dcase}_ae_baseline"
 # Name of configuration file to use
 # dcase-asd-library/config/train/experiments/${name}/${version}.yaml will be used
 
 # ----------------------------------------------- #
-test_exp_yaml="${dcase}_dis_baseline"
+test_exp_yaml="ae_baseline"
 # Name of configuration file to use for testing
 # dcase-asd-library/config/test/experiments/${test_exp_yaml}.yaml will be used
 
@@ -23,7 +23,7 @@ gpu=0
 # ID of GPU to use
 
 # ----------------------------------------------- #
-infer_ver_list="epoch_12,epoch_16"
+infer_ver_list="epoch_12"
 # comma separated list of versions to inference. 
 # Available versions: epoch_??, best, last
 # epoch_??: Use model at the epoch (there must be a checkpoint file at the epoch)

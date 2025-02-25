@@ -1,10 +1,12 @@
 # @package _global_
 defaults:
-    - override /datamodule: basic
+    - override /datamodule: ae_flattenstft
     - override /model: ae_mlp
     - override /trainer: default
 
 dcase: "dcase2023"
 
-
 label_dict_path: {}
+
+
+machine: "fan"

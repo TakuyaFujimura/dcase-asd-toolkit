@@ -8,33 +8,14 @@ import pandas as pd
 from scipy.stats import hmean
 from sklearn.metrics import roc_auc_score
 
+from ...utils.dcase_utils import get_dcase_idx
+
 logger = logging.getLogger(__name__)
 
 
 def get_score_name(score_df: pd.DataFrame):
     score_name_list = [col for col in score_df.columns if col.split("-")[0] == "AS"]
     return score_name_list
-
-
-def get_idx(
-    auc_type: str, section: np.ndarray, is_target: np.ndarray, is_normal: np.ndarray
-) -> np.ndarray:
-    domain = auc_type.split("_")[1]
-    if domain == "s":
-        domain_idx = is_target == 0
-    elif domain == "t":
-        domain_idx = is_target == 1
-    elif domain == "smix":
-        domain_idx = (is_target == 0) | (is_normal == 0)
-    elif domain == "tmix":
-        domain_idx = (is_target == 1) | (is_normal == 0)
-    elif domain == "mix":
-        domain_idx = np.ones_like(is_normal).astype(bool)
-    else:
-        raise NotImplementedError()
-
-    section_idx = section == int(auc_type.split("_")[0])
-    return domain_idx & section_idx
 
 
 def dcase_auc(
@@ -48,7 +29,7 @@ def dcase_auc(
 
     auc_pauc = auc_type.split("_")[2]
 
-    idx = get_idx(
+    idx = get_dcase_idx(
         auc_type=auc_type, section=section, is_target=is_target, is_normal=is_normal
     )
 

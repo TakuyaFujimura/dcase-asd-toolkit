@@ -9,7 +9,7 @@ grad_cfg: {}
 
 
 audio_feat_cfg:
-  tgt_class: asdlib.audio_feature.FlattenSTFT
+  tgt_class: asdlib.models.audio_feature.FlattenSTFT
   stft_cfg:
     use_mel: true
     sr: ${datamodule.sr}
@@ -28,7 +28,7 @@ model_cfg:
     tgt_class: asdlib.models.autoencoder.AE_MLP
     z_dim: 8
     h_dim: 128
-    audio_feat_cfg: ${model.audio_feat_cfg}
+  audio_feat_cfg: ${model.audio_feat_cfg}
   loss_cfg:
     tgt_class: torch.nn.MSELoss
   use_compile: true
