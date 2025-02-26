@@ -32,6 +32,3 @@ model_cfg:
   loss_cfg:
     tgt_class: torch.nn.MSELoss
   use_compile: true
-
-trainer:
-  max_epochs: 100

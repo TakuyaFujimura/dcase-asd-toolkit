@@ -14,7 +14,6 @@ from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.test_utils import score_main
 from asdlib.test_utils.evaluate import evaluate_main
 from asdlib.test_utils.extract import extract_main
-from asdlib.test_utils.table.main import table_main
 from asdlib.test_utils.umap.main import umap_main
 from asdlib.utils.config_class import MainTestConfig
 from asdlib.utils.config_class.main_config import MainConfig

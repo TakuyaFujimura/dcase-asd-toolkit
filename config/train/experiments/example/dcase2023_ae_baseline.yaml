@@ -11,3 +11,6 @@ label_dict_path: {}
 callback_opts:
   interval:
     every_n_epochs: 10
+
+trainer:
+  max_epochs: 100
