@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import torch
-from sklearn.metrics import roc_auc_score
 from torch import Tensor
 
 from ..models.audio_feature.base import BaseAudioFeature
@@ -84,6 +83,10 @@ class AEPLModel(BasePLModel):
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
         x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+
+        z = z.view(len(wave), -1, z.shape[-1]).mean(dim=1)
+        # (B, n_frames, z_dim) -> (B, z_dim), time average
+
         embed_dict = {"main": z}
         anomaly_score_dict = self.net2as(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)

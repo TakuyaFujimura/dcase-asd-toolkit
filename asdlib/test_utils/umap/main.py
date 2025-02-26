@@ -3,9 +3,8 @@
 import logging
 import warnings
 from pathlib import Path
-from typing import List
 
-from ...utils.config_class.main_test_config import UmapConfig
+from ...utils.config_class.main_test_config import MainTestConfig
 from .trans import get_umap_df
 from .vis_main import visualize
 
@@ -22,22 +21,21 @@ warnings.filterwarnings(
 
 
 def umap_main(
-    umap_cfg: UmapConfig,
-    infer_dir: Path,
-    machines: List[str],
+    cfg: MainTestConfig,
+    machine_dir: Path,
 ) -> None:
+    if cfg.umap_cfg is None:
+        raise ValueError("`umap_cfg` is not set although `umap` is True")
 
-    for m in machines:
-        logger.info(f"Start umapping {m}")
-        machine_dir = infer_dir / m
-        umap_df = get_umap_df(
-            machine_dir=machine_dir,
-            metric=umap_cfg.metric,
-            overwrite=umap_cfg.overwrite,
-            embed_key=umap_cfg.embed_key,
-        )
-        visualize(
-            umap_df=umap_df,
-            machine_dir=machine_dir,
-            vis_type=umap_cfg.vis_type,
-        )
+    logger.info(f"Start umapping {machine_dir}")
+    umap_df = get_umap_df(
+        machine_dir=machine_dir,
+        metric=cfg.umap_cfg.metric,
+        overwrite=cfg.umap_cfg.overwrite,
+        embed_key=cfg.umap_cfg.embed_key,
+    )
+    visualize(
+        umap_df=umap_df,
+        machine_dir=machine_dir,
+        vis_type=cfg.umap_cfg.vis_type,
+    )

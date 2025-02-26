@@ -22,6 +22,7 @@ class MainTestConfig(BaseModel):
     seed: int
     name: str
     version: str
+    machine: str
     infer_ver: str
     result_dir: Path
     tf32: bool = False

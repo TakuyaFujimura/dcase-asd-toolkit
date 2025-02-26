@@ -103,17 +103,21 @@ dcase-asd-library
     └── <name> # `example`
         ├── ...
         └── <version> # `dcase2023_baseline_0`
-            ├── checkpoints
-            ├── hparams.yaml
-            ├── test.log
-            ├── train.log
-            └── infer
-                ├── ...
-                └── <infer_ver> # `epoch_12`
-                    ├── hparams.yaml
-                    ├── <metric>.csv # `official23.csv` (summary of test results)
-                    ├── ...
-                    └── <machine>
+            ├── _all_
+            │   ├── .hydra
+            │   ├── .hydra_test
+            │   ├── checkpoints
+            │   ├── events.out.tfevents.*
+            │   ├── hparams.yaml
+            │   ├── test.log
+            │   └── train.log
+            ├── bandsaw
+            ├── bearing
+            ├── ...
+            └─── valve
+                └── infrer
+                    └── <infer_ver> # `epoch_12`
+                        ├── hparams.yaml
                         ├── test_extraction.csv # information of test data including embedding values
                         ├── test_result.csv # ROAUCs
                         ├── test_score.csv # anomaly scores of test data

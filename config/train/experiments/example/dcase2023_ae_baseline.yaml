@@ -8,9 +8,6 @@ dcase: "dcase2023"
 
 label_dict_path: {}
 
-
-machine: "fan"
-
 callback_opts:
   interval:
     every_n_epochs: 10

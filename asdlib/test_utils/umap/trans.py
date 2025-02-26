@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -36,4 +37,10 @@ def get_umap_df(
         }
     )
     umap_df.to_csv(umap_path, index=False)
+
+    with open(machine_dir / "umap_info.txt", "a") as f:
+        f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+        f.write(f"metric: {metric}\n")
+        f.write(f"embed_key: {embed_key}\n")
+
     return umap_df

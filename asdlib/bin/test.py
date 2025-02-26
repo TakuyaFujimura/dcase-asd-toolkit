@@ -29,30 +29,42 @@ def hydra_to_pydantic(config: DictConfig) -> MainTestConfig:
 
 
 def get_past_cfg(cfg: MainTestConfig) -> MainConfig:
-    config_path = cfg.result_dir / cfg.name / cfg.version / ".hydra/config.yaml"
+    config_path = (
+        cfg.result_dir / cfg.name / cfg.version / cfg.machine / ".hydra/config.yaml"
+    )
     past_cfg = MainConfig(**cast(Dict[str, Any], OmegaConf.load(config_path)))
     assert cfg.result_dir == past_cfg.result_dir
     assert cfg.name == past_cfg.name
     assert cfg.version == past_cfg.version
+    assert cfg.machine == past_cfg.machine
     return past_cfg
 
 
-def make_dir(cfg: MainTestConfig) -> Path:
-    infer_dir = cfg.result_dir / cfg.name / cfg.version / "infer" / cfg.infer_ver
-    infer_dir.mkdir(exist_ok=True, parents=True)
-    OmegaConf.save(cfg.model_dump(), infer_dir / "hparams.yaml")
-    return infer_dir
+def make_dir(cfg: MainTestConfig, machine: str) -> Path:
+    machine_dir = (
+        cfg.result_dir / cfg.name / cfg.version / machine / "infer" / cfg.infer_ver
+    )
+    machine_dir.mkdir(exist_ok=True, parents=True)
+    OmegaConf.save(cfg.model_dump(), machine_dir / "hparams.yaml")
+    return machine_dir
 
 
 def get_path_selector_list(cfg: MainTestConfig, past_cfg: MainConfig) -> List[str]:
-    if cfg.path_selector_list is None:
+    if cfg.path_selector_list is not None:
+        return cfg.path_selector_list
+
+    if past_cfg.machine == "_all_":
         path_selector_list = [
             f"{past_cfg.data_dir}/formatted/{past_cfg.dcase}/raw/*/train/*.wav",
             f"{past_cfg.data_dir}/formatted/{past_cfg.dcase}/raw/*/test/*.wav",
         ]
-        logger.info(f"Use past path_selector_list: {path_selector_list}")
     else:
-        path_selector_list = cfg.path_selector_list
+        path_selector_list = [
+            f"{past_cfg.data_dir}/formatted/{past_cfg.dcase}/raw/{past_cfg.machine}/train/*.wav",  # noqa
+            f"{past_cfg.data_dir}/formatted/{past_cfg.dcase}/raw/{past_cfg.machine}/test/*.wav",  # noqa
+        ]
+
+    logger.info(f"Use past path_selector_list: {path_selector_list}")
     return path_selector_list
 
 
@@ -61,6 +73,10 @@ def get_all_path(path_selector_list: List[str]) -> List[str]:
 
     for selector in path_selector_list:
         all_path += parse_path_selector(selector)
+
+    if len(all_path) == 0:
+        raise ValueError("No files are found")
+
     logger.info(f"{len(all_path)} files are found")
     return all_path
 
@@ -95,32 +111,28 @@ def main(hydra_cfg: DictConfig) -> None:
         logger.info("Set float32_matmul_precision to high")
     pl.seed_everything(cfg.seed, workers=True)
 
-    infer_dir = make_dir(cfg)
     past_cfg = get_past_cfg(cfg)
+
     path_selector_list = get_path_selector_list(cfg=cfg, past_cfg=past_cfg)
     all_path = get_all_path(path_selector_list=path_selector_list)
     machines = get_machines(all_path=all_path, past_cfg=past_cfg)
 
-    if cfg.extract:
-        extract_main(
-            cfg=cfg,
-            past_cfg=past_cfg,
-            infer_dir=infer_dir,
-            all_path=all_path,
-            machines=machines,
-        )
-    if cfg.score:
-        score_main(cfg=cfg, infer_dir=infer_dir, machines=machines)
-    if cfg.evaluate:
-        evaluate_main(cfg=cfg, infer_dir=infer_dir, machines=machines)
-    if len(cfg.table_metric_list) > 0:
-        table_main(
-            metric_list=cfg.table_metric_list, infer_dir=infer_dir, machines=machines
-        )
-    if cfg.umap:
-        if cfg.umap_cfg is None:
-            raise ValueError("umap_cfg is not set")
-        umap_main(umap_cfg=cfg.umap_cfg, infer_dir=infer_dir, machines=machines)
+    for m in machines:
+        machine_dir = make_dir(cfg=cfg, machine=m)
+
+        if cfg.extract:
+            extract_main(
+                cfg=cfg,
+                past_cfg=past_cfg,
+                machine_dir=machine_dir,
+                all_path=all_path,
+            )
+        if cfg.score:
+            score_main(cfg=cfg, machine_dir=machine_dir)
+        if cfg.evaluate:
+            evaluate_main(cfg=cfg, machine_dir=machine_dir)
+        if cfg.umap:
+            umap_main(cfg=cfg, machine_dir=machine_dir)
 
 
 if __name__ == "__main__":

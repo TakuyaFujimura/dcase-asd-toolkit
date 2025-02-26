@@ -35,9 +35,11 @@ result_dir: "./results"
 
 label_dict_path: {}
 
+machine: null
+
 dcase: null
 data_dir: "../data"
 
 hydra:
     run:
-        dir: ${result_dir}/${name}/${version}
+        dir: ${result_dir}/${name}/${version}/${machine}

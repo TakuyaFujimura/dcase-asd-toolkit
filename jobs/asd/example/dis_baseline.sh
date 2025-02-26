@@ -19,7 +19,7 @@ seed=0
 # Seed for random number generator
 
 # ----------------------------------------------- #
-gpu=0
+gpu=1
 # ID of GPU to use
 
 # ----------------------------------------------- #
@@ -31,5 +31,8 @@ infer_ver_list="epoch_12,epoch_16"
 # last: Use the model with the last epoch
 
 # ----------------------------------------------- #
-bash ../base/base.sh ${name} ${version} ${test_exp_yaml} ${seed} ${gpu} ${infer_ver_list}
+machine="_all_"
+bash ../base/base.sh ${name} ${version} ${machine} ${test_exp_yaml} ${seed} ${gpu} ${infer_ver_list}
 
+
+# TODO: Add evaluation of all machines

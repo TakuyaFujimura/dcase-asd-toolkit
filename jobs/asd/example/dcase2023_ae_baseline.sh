@@ -31,5 +31,11 @@ infer_ver_list="last"
 # last: Use the model with the last epoch
 
 # ----------------------------------------------- #
-bash ../base/base.sh ${name} ${version} ${test_exp_yaml} ${seed} ${gpu} ${infer_ver_list}
+for machine in "fan"
+do
+    bash ../base/base.sh ${name} ${version} ${machine} ${test_exp_yaml} ${seed} ${gpu} ${infer_ver_list}
+done
+
+# TODO: Add more machines
+# TODO: Add evaluation of all machines
 

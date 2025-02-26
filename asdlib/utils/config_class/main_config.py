@@ -48,6 +48,7 @@ class MainConfig(BaseModel):
 
     data_dir: str
     dcase: str
+    machine: str
 
     @field_validator("name", mode="before")
     def cast_name(cls, v):

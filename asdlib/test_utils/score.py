@@ -2,7 +2,7 @@
 import copy
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Tuple
 
 import pandas as pd
 from hydra.utils import instantiate
@@ -57,23 +57,22 @@ def add_score(
     return output_df_dict
 
 
-def score_main(cfg: MainTestConfig, infer_dir: Path, machines: List[str]) -> None:
-    for m in machines:
-        logger.info(f"Start scoring {m}")
-        machine_dir = infer_dir / m
+def score_main(cfg: MainTestConfig, machine_dir: Path) -> None:
 
-        org_df_dict, output_df_dict = get_dicts(machine_dir=machine_dir)
+    logger.info(f"Start scoring {machine_dir}")
 
-        # Loop for backend
-        for backend_cfg in cfg.backend:
-            output_df_dict = add_score(
-                backend_cfg=backend_cfg,
-                org_df_dict=org_df_dict,
-                output_df_dict=output_df_dict,
-            )
+    org_df_dict, output_df_dict = get_dicts(machine_dir=machine_dir)
 
-        # Save
-        for split, output_df in output_df_dict.items():
-            output_path = machine_dir / f"{split}_score.csv"
-            output_df.to_csv(output_path, index=False)
-            logging.info(f"Saved at {str(output_path)}")
+    # Loop for backend
+    for backend_cfg in cfg.backend:
+        output_df_dict = add_score(
+            backend_cfg=backend_cfg,
+            org_df_dict=org_df_dict,
+            output_df_dict=output_df_dict,
+        )
+
+    # Save
+    for split, output_df in output_df_dict.items():
+        output_path = machine_dir / f"{split}_score.csv"
+        output_df.to_csv(output_path, index=False)
+        logging.info(f"Saved at {str(output_path)}")

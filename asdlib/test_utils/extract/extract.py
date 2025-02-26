@@ -32,12 +32,12 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
     embed_cols = []
     for key, values_list in info__dict_of_list.items():
         values_np = np.concatenate(values_list, axis=0)
-        if key.startswith("embed_"):
-            key_tmp = key.replace("embed_", "")
+        if key.startswith("embed-"):
+            key_tmp = key.replace("embed-", "")
             embed_cols = [f"e_{key_tmp}_{i}" for i in range(values_np.shape[-1])]
             df = pd.DataFrame(columns=embed_cols, data=values_np)
-        elif key.startswith("logits_"):
-            key_tmp = key.replace("logits_", "")
+        elif key.startswith("logits-"):
+            key_tmp = key.replace("logits-", "")
             logits_cols = [f"l_{key_tmp}_{i}" for i in range(values_np.shape[-1])]
             df = pd.DataFrame(columns=logits_cols, data=values_np)
         elif values_np.ndim == 2 and values_np.shape[1] == 1:
@@ -77,8 +77,7 @@ def extract(dataloader: DataLoader, plmodel: BasePLModel, device: str):
             pl_output: PLOutput = plmodel(batch)
             for key1 in output_key_list:
                 for key2, value in getattr(pl_output, key1).items():
-                    extract__dict_of_list[f"{key1}_{key2}"].append(value.cpu().numpy())
-
+                    extract__dict_of_list[f"{key1}-{key2}"].append(value.cpu().numpy())
             for key in info_key_list:
                 value = batch[key]
                 if isinstance(value, torch.Tensor):

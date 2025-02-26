@@ -25,9 +25,7 @@ def make_trainer(cfg: MainConfig, ckpt_dir: Path) -> pl.Trainer:
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
-        save_dir=cfg.result_dir,
-        name=cfg.name,
-        version=cfg.version,
+        save_dir=cfg.result_dir, name=cfg.name, version=cfg.version, sub_dir=cfg.machine
     )
     # Trainer
     trainer = instantiate_tgt(
@@ -89,7 +87,7 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(cfg.seed, workers=True)
     # torch.autograd.set_detect_anomaly(False)
 
-    ckpt_dir = cfg.result_dir / cfg.name / cfg.version / "checkpoints"
+    ckpt_dir = cfg.result_dir / cfg.name / cfg.version / cfg.machine / "checkpoints"
     if ckpt_dir.exists():
         logger.warning("already done")
         return

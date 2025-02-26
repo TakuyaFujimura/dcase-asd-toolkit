@@ -21,17 +21,24 @@ class FlattenSTFT(BaseAudioFeature):
             x: [B*n_vectors, self.feat_dim]
             where n_vectors is number of features obtained from a spectrogram,
             self.feat_dim =  n_frames * n_fft , i.e., n_frames-consecutive spectrogram.
-            content of x is like below,
-            ---------------------------------
-                    |n_fft |
-                    -------------------------
-            batch_0 |oooooo|oooooo|oooooo|
-                    |...                 | n_vectors
-                    |oooooo|oooooo|oooooo|
-                    -------------------------
-            batch_1 |oooooo|oooooo|oooooo|
-                    |...                 |
-                    |oooooo|oooooo|oooooo|
+
+            x is like below (self.n_frames = 3):
+            ----------------------------------------------------------------------------
+                    |n_fft     |
+                    ----------------------------------
+            batch_0 |frame[0]  |frame[1]  |frame[2]  |
+                    |frame[1]  |frame[2]  |frame[3]  |
+                    |...                             | n_vectors = T - self.n_frames + 1
+                    |frame[T-4]|frame[T-3]|frame[T-2]|
+                    |frame[T-3]|frame[T-2]|frame[T-1]| (len(frame) = T, frame[T-1] is the last frame)
+                    ----------------------------------
+            batch_1 |frame[0]  |frame[1]  |frame[2]  |
+                    |frame[1]  |frame[2]  |frame[3]  |
+                    |...                             |
+                    |frame[T-4]|frame[T-3]|frame[T-2]|
+                    |frame[T-3]|frame[T-2]|frame[T-1]|
+                    ----------------------------------
+                    ...
         """
         if len(wave.shape) != 2:
             raise ValueError("Input shape must be [Batch, Time]")
