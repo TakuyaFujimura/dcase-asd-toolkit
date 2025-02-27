@@ -35,7 +35,7 @@ def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
         save_dir=cfg.result_dir,
         name=cfg.name,
         version=cfg.version,
-        sub_dir=f"model/{cfg.machine}",
+        sub_dir=f"model/{cfg.model_ver}",
     )
     # Trainer
     trainer = instantiate_tgt(
@@ -83,7 +83,12 @@ def main(hydra_cfg: DictConfig) -> None:
     # torch.autograd.set_detect_anomaly(False)
 
     ckpt_dir = (
-        cfg.result_dir / cfg.name / cfg.version / "model" / cfg.machine / "checkpoints"
+        cfg.result_dir
+        / cfg.name
+        / cfg.version
+        / "model"
+        / cfg.model_ver
+        / "checkpoints"
     )
     if ckpt_dir.exists():
         logger.warning("already done")

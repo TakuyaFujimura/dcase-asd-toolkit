@@ -1,38 +1,25 @@
 #!/bin/bash
-# ----------------------------------------------- #
-dcase="dcase2023" # Referred by $version and $test_exp_yaml
-
-
-# ----------------------------------------------- #
+########################
 name="example"
-version="${dcase}_dis_baseline"
-# Name of configuration file to use
-# dcase-asd-library/config/train/experiments/${name}/${version}.yaml will be used
-
-# ----------------------------------------------- #
-test_exp_yaml="dis_baseline"
-# Name of configuration file to use for testing
-# dcase-asd-library/config/test/experiments/${test_exp_yaml}.yaml will be used
-
-# ----------------------------------------------- #
+version="dcase2023_dis_baseline"
 seed=0
-# Seed for random number generator
-
-# ----------------------------------------------- #
-gpu=1
-# ID of GPU to use
-
-# ----------------------------------------------- #
-infer_ver_list="epoch_12,epoch_16"
-# comma separated list of versions to inference. 
-# Available versions: epoch_??, best, last
-# epoch_??: Use model at the epoch (there must be a checkpoint file at the epoch)
-# best: Use the model with the best loss (automatically selected)
-# last: Use the model with the last epoch
-
-# ----------------------------------------------- #
-machine="_all_"
-bash ../base/base.sh ${name} ${version} ${machine} ${test_exp_yaml} ${seed} ${gpu} ${infer_ver_list}
+gpu=0
+########################
 
 
-# TODO: Add evaluation of all machines
+
+cd ../../..
+
+source "venv/bin/activate"
+
+python -m asdlib.bin.train experiments="${name}/${version}" \
+'name='${name}'' 'version='${version}_${seed}'' \
+'trainer.devices='"[${gpu}]"'' 'seed='${seed}''
+
+
+# for infer_ver in "${infer_ver_list[@]}"
+# do
+# 	python asdlib/bin/test.py experiments="${test_exp_yaml}" \
+# 	'name='${name}'' 'version='${version}'' 'machine='${machine}'' \
+# 	'infer_ver='${infer_ver}'' 'seed='${seed}'' 'device='"cuda:${gpu}"''
+# done

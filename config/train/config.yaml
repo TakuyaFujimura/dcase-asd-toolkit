@@ -8,7 +8,7 @@ defaults:
 seed: 0
 name: null
 version: null
-tf32: true
+tf32: false
 
 refresh_rate: 1
 num_workers: 4
@@ -36,10 +36,11 @@ result_dir: "./results"
 label_dict_path: {}
 
 machine: null
+model_ver: null
 
 dcase: null
 data_dir: "../data"
 
 hydra:
     run:
-        dir: ${result_dir}/${name}/${version}/model/${machine}
+        dir: ${result_dir}/${name}/${version}/model/${model_ver}
