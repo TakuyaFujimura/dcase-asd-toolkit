@@ -6,7 +6,8 @@ from imblearn.over_sampling import SMOTE
 from pydantic import BaseModel
 from sklearn.neighbors import NearestNeighbors
 
-from ..utils.io_utils import get_embed_from_df
+from asdlib.utils.common import get_embed_from_df
+
 from .base import BaseBackend
 
 

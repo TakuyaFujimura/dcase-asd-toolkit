@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import List
 
 from ...pl_models import BasePLModel
+from ...utils.common import get_best_path, get_path_glob
 from ...utils.config_class import MainConfig, MainTestConfig
-from ...utils.io_utils import get_best_path, get_path_glob
 from .dataloader import get_loader
 from .extract import extract
 

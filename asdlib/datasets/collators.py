@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Literal
 import numpy as np
 import torch
 
-from ..utils.dcase_utils import get_dcase_info
-from ..utils.pl_utils import LabelInfo, get_label_dict
+from asdlib.utils.config_class import LabelInfo
+from asdlib.utils.dcase_utils import get_dcase_info, get_label_dict
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,8 @@ from typing import List
 
 from sklearn.preprocessing import LabelEncoder
 
-from ..datasets.collators import get_dcase_info
+from asdlib.utils.dcase_utils import get_dcase_info
+
 from .base import LabelerBase
 
 

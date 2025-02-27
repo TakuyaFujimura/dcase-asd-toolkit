@@ -5,9 +5,9 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 
-from ..utils.config_class import GradConfig
-from ..utils.config_class.output_config import PLOutput
-from ..utils.pl_utils import instantiate_tgt
+from asdlib.utils.common import instantiate_tgt
+from asdlib.utils.config_class import GradConfig, PLOutput
+
 from .base_model import BasePLModel
 
 

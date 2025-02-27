@@ -7,9 +7,8 @@ import torchaudio
 import tqdm
 from torch.utils.data import Dataset
 
-from ..models.audio_feature.base import BaseAudioFeature
-from ..utils.io_utils import read_json
-from ..utils.pl_utils import instantiate_tgt
+from asdlib.models.audio_feature.base import BaseAudioFeature
+from asdlib.utils.common import instantiate_tgt, read_json
 
 logger = logging.getLogger(__name__)
 

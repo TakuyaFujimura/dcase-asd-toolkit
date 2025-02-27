@@ -6,15 +6,32 @@ import hydra
 import lightning.pytorch as pl
 import torch
 from hydra.core.hydra_config import HydraConfig
-from lightning.pytorch.callbacks import ModelCheckpoint, TQDMProgressBar
+from lightning.pytorch.callbacks import Callback, ModelCheckpoint, TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 
 from asdlib.datasets import PLDataModule
+from asdlib.utils.common import instantiate_tgt
 from asdlib.utils.config_class import MainConfig
-from asdlib.utils.pl_utils import NaNCheckCallback, instantiate_tgt
 
 logger = logging.getLogger(__name__)
+
+
+class NaNCheckCallback(Callback):
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        if self._check_for_nan(outputs):
+            logging.warning("NaN detected in training batch, stopping training.")
+            trainer.should_stop = True
+
+    @staticmethod
+    def _check_for_nan(outputs):
+        if isinstance(outputs, torch.Tensor):
+            return torch.isnan(outputs).any().item()
+        elif isinstance(outputs, dict):
+            for key, value in outputs.items():
+                if isinstance(value, torch.Tensor) and torch.isnan(value).any().item():
+                    return True
+        return False
 
 
 def make_trainer(cfg: MainConfig, ckpt_dir: Path) -> pl.Trainer:
@@ -87,7 +104,9 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(cfg.seed, workers=True)
     # torch.autograd.set_detect_anomaly(False)
 
-    ckpt_dir = cfg.result_dir / cfg.name / cfg.version / cfg.machine / "checkpoints"
+    ckpt_dir = (
+        cfg.result_dir / cfg.name / cfg.version / "model" / cfg.machine / "checkpoints"
+    )
     if ckpt_dir.exists():
         logger.warning("already done")
         return

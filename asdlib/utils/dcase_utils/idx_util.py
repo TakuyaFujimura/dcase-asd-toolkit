@@ -1,14 +1,8 @@
 from pathlib import Path
 from typing import Dict, cast
 
-from pydantic import BaseModel
-
-from ..io_utils import read_json
-
-
-class LabelInfo(BaseModel):
-    path2idx_dict: Dict[str, int]
-    num_class: int
+from asdlib.utils.common import read_json
+from asdlib.utils.config_class import LabelInfo
 
 
 def check_label_dict(label_dict: LabelInfo):

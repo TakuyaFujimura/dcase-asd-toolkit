@@ -5,7 +5,8 @@ import pandas as pd
 from pydantic import BaseModel
 from sklearn.cluster import KMeans
 
-from ..utils.io_utils import get_embed_from_df
+from asdlib.utils.common import get_embed_from_df
+
 from .base import BaseBackend
 
 

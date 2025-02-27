@@ -5,9 +5,9 @@ from typing import Any, Dict, Optional
 import lightning.pytorch as pl
 import torch
 
-from ..utils.config_class import GradConfig
-from ..utils.config_class.output_config import PLOutput
-from ..utils.pl_utils import get_label_dict, instantiate_tgt
+from asdlib.utils.common import instantiate_tgt
+from asdlib.utils.config_class import GradConfig, PLOutput
+from asdlib.utils.dcase_utils import get_label_dict
 
 
 def grad_norm(module: torch.nn.Module) -> float:

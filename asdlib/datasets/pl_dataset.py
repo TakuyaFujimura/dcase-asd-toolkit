@@ -4,8 +4,8 @@ from typing import Dict, Optional
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from ..utils.config_class import DMConfig, DMSplitConfig
-from ..utils.pl_utils import instantiate_tgt
+from asdlib.utils.common import instantiate_tgt
+from asdlib.utils.config_class import DMConfig, DMSplitConfig
 
 
 class PLDataModule(pl.LightningDataModule):

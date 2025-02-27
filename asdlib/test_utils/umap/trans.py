@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import umap
 
-from ...utils.io_utils import get_embed_from_df
+from ...utils.common import get_embed_from_df
 
 
 def get_df(machine_dir: Path) -> pd.DataFrame:

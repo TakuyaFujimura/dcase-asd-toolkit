@@ -5,11 +5,11 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from ..models.audio_feature.base import BaseAudioFeature
-from ..utils.config_class import GradConfig
-from ..utils.config_class.output_config import PLOutput
-from ..utils.dcase_utils import get_domain_idx
-from ..utils.pl_utils import instantiate_tgt
+from asdlib.models.audio_feature.base import BaseAudioFeature
+from asdlib.utils.common import instantiate_tgt
+from asdlib.utils.config_class import GradConfig, PLOutput
+from asdlib.utils.dcase_utils import get_domain_idx
+
 from .auroc import AUROC
 from .base_model import BasePLModel
 

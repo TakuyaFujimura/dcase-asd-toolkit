@@ -12,9 +12,9 @@ from pydantic import BaseModel, field_validator
 from asdlib.datasets.collators import get_relative_dcase_path
 from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.labelers.base import LabelerBase
+from asdlib.utils.common.json_util import write_json
+from asdlib.utils.config_class import LabelInfo
 from asdlib.utils.dcase_utils import get_dcase_info
-from asdlib.utils.io_utils.json_util import write_json
-from asdlib.utils.pl_utils.idx_util import LabelInfo
 
 logger = logging.getLogger(__name__)
 

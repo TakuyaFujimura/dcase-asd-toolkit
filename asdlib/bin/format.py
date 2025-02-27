@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Dict
 
 import tqdm
-from asdlib.utils.io_utils.json_util import read_json
+
+from asdlib.utils.common.json_util import read_json
 
 MACHINE_DICT = read_json("data/machines.json")
 
