@@ -31,7 +31,7 @@ class DMSplitConfig(BaseModel):
     valid: Optional[DMConfig] = None
 
 
-class MainConfig(BaseModel):
+class MainTrainConfig(BaseModel):
     seed: int
     name: str
     version: str

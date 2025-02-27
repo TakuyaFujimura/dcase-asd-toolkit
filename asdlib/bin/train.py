@@ -6,35 +6,25 @@ import hydra
 import lightning.pytorch as pl
 import torch
 from hydra.core.hydra_config import HydraConfig
-from lightning.pytorch.callbacks import Callback, ModelCheckpoint, TQDMProgressBar
+from lightning.pytorch.callbacks import ModelCheckpoint, TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 
+from asdlib.bin.utils import NaNCheckCallback
 from asdlib.datasets import PLDataModule
 from asdlib.utils.common import instantiate_tgt
-from asdlib.utils.config_class import MainConfig
+from asdlib.utils.config_class import MainTrainConfig
 
 logger = logging.getLogger(__name__)
 
 
-class NaNCheckCallback(Callback):
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        if self._check_for_nan(outputs):
-            logging.warning("NaN detected in training batch, stopping training.")
-            trainer.should_stop = True
-
-    @staticmethod
-    def _check_for_nan(outputs):
-        if isinstance(outputs, torch.Tensor):
-            return torch.isnan(outputs).any().item()
-        elif isinstance(outputs, dict):
-            for key, value in outputs.items():
-                if isinstance(value, torch.Tensor) and torch.isnan(value).any().item():
-                    return True
-        return False
+def hydra_to_pydantic(config: DictConfig) -> MainTrainConfig:
+    """Converts Hydra config to Pydantic config."""
+    config_dict = cast(Dict[str, Any], OmegaConf.to_object(config))
+    return MainTrainConfig(**config_dict)
 
 
-def make_trainer(cfg: MainConfig, ckpt_dir: Path) -> pl.Trainer:
+def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
     # Callbacks
     callback_list: List[Any] = [NaNCheckCallback()]
     for key_, cfg_ in cfg.callback_opts.items():
@@ -42,7 +32,10 @@ def make_trainer(cfg: MainConfig, ckpt_dir: Path) -> pl.Trainer:
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
-        save_dir=cfg.result_dir, name=cfg.name, version=cfg.version, sub_dir=cfg.machine
+        save_dir=cfg.result_dir,
+        name=cfg.name,
+        version=cfg.version,
+        sub_dir=f"model/{cfg.machine}",
     )
     # Trainer
     trainer = instantiate_tgt(
@@ -56,21 +49,7 @@ def make_trainer(cfg: MainConfig, ckpt_dir: Path) -> pl.Trainer:
     return trainer
 
 
-def hydra_to_pydantic(config: DictConfig) -> MainConfig:
-    """Converts Hydra config to Pydantic config."""
-    config_dict = cast(Dict[str, Any], OmegaConf.to_object(config))
-    return MainConfig(**config_dict)
-
-
-def set_logging(dst_dir: Path):
-    logging.basicConfig(
-        filename=dst_dir / f"{Path(__file__).stem}.log",
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-
-
-def setup_datamodule(cfg: MainConfig) -> pl.LightningDataModule:
+def setup_datamodule(cfg: MainTrainConfig) -> pl.LightningDataModule:
     logger.info("Create datamodule")
     dm = PLDataModule(
         dm_cfg=cfg.datamodule,
@@ -79,7 +58,7 @@ def setup_datamodule(cfg: MainConfig) -> pl.LightningDataModule:
     return dm
 
 
-def setup_plmodel(cfg: MainConfig) -> pl.LightningModule:
+def setup_plmodel(cfg: MainTrainConfig) -> pl.LightningModule:
     logger.info("Create plmodel")
     plmodel = instantiate_tgt(
         {
@@ -93,7 +72,6 @@ def setup_plmodel(cfg: MainConfig) -> pl.LightningModule:
 @hydra.main(version_base=None, config_path="../../config/train", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
-    # set_logging(cfg.result_dir)
     if not cfg.trainer.get("deterministic", False):
         raise ValueError("Not deterministic!!!")
     if cfg.tf32:
