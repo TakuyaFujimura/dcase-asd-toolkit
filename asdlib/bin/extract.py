@@ -42,7 +42,6 @@ def make_dir(cfg: MainExtractConfig) -> Path:
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start extraction: {HydraConfig().get().run.dir}")
-    logger.info(f"version: {cfg.version}_{cfg.seed}")
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = make_dir(cfg=cfg)
@@ -53,6 +52,7 @@ def main(hydra_cfg: DictConfig) -> None:
     plmodel = load_plmodel(cfg=cfg, past_cfg=past_cfg)
 
     for split in ["train", "test"]:
+        logger.info(f"Extracting {split} data now...")
         datamoduleconfig = DMConfigMaker.get_config(split=split)
         dataloader = PLDataModule.get_loader(
             datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
