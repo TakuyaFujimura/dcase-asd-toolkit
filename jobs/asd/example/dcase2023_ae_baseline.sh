@@ -3,6 +3,7 @@
 name="example"
 version="dcase2023_ae_baseline"
 extract_exp_yaml="ae_baseline"
+score_exp_yaml="ae_baseline"
 seed=0
 ########################
 
@@ -20,6 +21,10 @@ for machine in "fan" "valve"; do
 	python -m asdlib.bin.extract experiments="${extract_exp_yaml}" \
 	'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
     'machine='${machine}''
+
+    python -m asdlib.bin.score experiments="${score_exp_yaml}" \
+	'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+	'machine='${machine}''
 done
 
 # TODO: Add more machines
