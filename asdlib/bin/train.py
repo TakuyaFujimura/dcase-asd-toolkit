@@ -34,7 +34,7 @@ def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
     pl_logger = TensorBoardLogger(
         save_dir=cfg.result_dir,
         name=cfg.name,
-        version=cfg.version,
+        version=f"{cfg.version}_{cfg.seed}",
         sub_dir=f"model/{cfg.model_ver}",
     )
     # Trainer
@@ -78,14 +78,14 @@ def main(hydra_cfg: DictConfig) -> None:
         torch.set_float32_matmul_precision("high")
         logger.info("Set float32_matmul_precision to high")
     logger.info(f"Start experiment: {HydraConfig().get().run.dir}")
-    logger.info(f"version: {cfg.version}")
+    logger.info(f"version: {cfg.version}_{cfg.seed}")
     pl.seed_everything(cfg.seed, workers=True)
     # torch.autograd.set_detect_anomaly(False)
 
     ckpt_dir = (
         cfg.result_dir
         / cfg.name
-        / cfg.version
+        / f"{cfg.version}_{cfg.seed}"
         / "model"
         / cfg.model_ver
         / "checkpoints"

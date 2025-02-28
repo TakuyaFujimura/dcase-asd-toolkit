@@ -2,6 +2,6 @@ tgt_class: lightning.pytorch.Trainer
 max_epochs: 16
 min_epochs: null
 accelerator: "gpu"
-devices: 1
+devices: [0]
 deterministic: true
 log_every_n_steps: 1
