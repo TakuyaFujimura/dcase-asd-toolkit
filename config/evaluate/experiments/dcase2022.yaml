@@ -1,0 +1,5 @@
+# @package _global_
+hmean_cfg_list:
+  - "official22-dev"
+  - "official22-eval"
+

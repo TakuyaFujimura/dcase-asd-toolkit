@@ -2,28 +2,67 @@
 ########################
 name=$1
 version=$2
-machine=$3
-test_exp_yaml=$4
-seed=$5
-gpu=$6
+dcase=$3
+seed=$4
+extract_exp=$5
+score_exp=$6
+evaluate_exp=$7
+umap_exp=$8
+IFS=',' read -r -a ckpt_ver_list <<< "$9"
+########################
 
-IFS=',' read -r -a infer_ver_list <<< "$7"
-exp_yaml="${name}/${version}"
-version="${version}_${seed}"
-################################
+# get machines
+if [ "$dcase" = "dcase2021" ]; then
+    machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
+elif [ "$dcase" = "dcase2022" ]; then
+    machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")
+elif [ "$dcase" = "dcase2023" ]; then
+    machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
+elif [ "$dcase" = "dcase2024" ]; then
+    machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
+else
+    echo "Invalid dcase"
+    exit 1
+fi
 
+
+# activate virtual environment
 cd ../../..
-
 source "venv/bin/activate"
 
-python asdlib/bin/train.py experiments="${exp_yaml}" \
-'name='${name}'' 'version='${version}'' 'machine='${machine}'' \
-'trainer.devices='"[${gpu}]"'' 'seed='${seed}''
 
 
-for infer_ver in "${infer_ver_list[@]}"
-do
-	python asdlib/bin/test.py experiments="${test_exp_yaml}" \
-	'name='${name}'' 'version='${version}'' 'machine='${machine}'' \
-	'infer_ver='${infer_ver}'' 'seed='${seed}'' 'device='"cuda:${gpu}"''
+# train and test process
+
+if [ "${extract_exp}" = "shared" ]; then
+    python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+    'name='${name}'' 'version='${version}''
+fi
+
+for ckpt_ver in "${ckpt_ver_list[@]}"; do
+
+    for machine in "${machines[@]}"; do
+
+        if [ "${extract_exp}" = "machinewise" ]; then
+            python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+            'name='${name}'' 'version='${version}'' 'machine='${machine}''
+        fi
+
+        python -m asdlib.bin.extract experiments="${extract_exp}" \
+        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+
+        python -m asdlib.bin.score experiments="${score_exp}" \
+        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+
+        python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
+        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+
+        python -m asdlib.bin.umap experiments="${umap_exp}" \
+        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+    done
+
 done
