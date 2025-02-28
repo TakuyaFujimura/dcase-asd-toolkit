@@ -5,13 +5,13 @@ from typing import Any, Dict, List, cast
 import hydra
 import lightning.pytorch as pl
 import tqdm
-from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseModel, field_validator
 
 from asdlib.datasets.collators import get_relative_dcase_path
 from asdlib.datasets.torch_dataset import parse_path_selector
 from asdlib.labelers.base import LabelerBase
+from asdlib.utils.common import instantiate_tgt
 from asdlib.utils.common.json_util import write_json
 from asdlib.utils.config_class import LabelInfo
 from asdlib.utils.dcase_utils import get_dcase_info
@@ -86,7 +86,7 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(cfg.seed, workers=True)
 
     path_list = get_path_list(cfg=cfg)
-    labeler: LabelerBase = instantiate(cfg.labeler)
+    labeler: LabelerBase = instantiate_tgt(cfg.labeler)
     labeler.fit(all_path_list=path_list)
     labelinfo_dict = get_labelinfo_dict(path_list=path_list, labeler=labeler)
     write_json(json_path=cfg.save_path, data=labelinfo_dict)
