@@ -10,7 +10,7 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from asdlib.bin.utils.extract import loader2df
-from asdlib.bin.utils.path import get_output_dir
+from asdlib.bin.utils.path import check_file_exists, get_output_dir
 from asdlib.bin.utils.resume import get_past_cfg, load_plmodel
 from asdlib.configmaker.extractdm import BaseExtractDMConfigMaker
 from asdlib.datasets.pl_datamodule import PLDataModule
@@ -29,10 +29,9 @@ def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
 def make_dir(cfg: MainExtractConfig) -> Path:
     output_dir = get_output_dir(cfg)
 
-    if output_dir.exists() and not cfg.overwrite:
-        raise FileExistsError(
-            f"{output_dir} already exists. Set config.overwrite=True to overwrite."
-        )
+    check_file_exists(
+        dir_path=output_dir, file_name="*_extraction.csv", overwrite=cfg.overwrite
+    )
     output_dir.mkdir(exist_ok=True, parents=True)
     OmegaConf.save(cfg.model_dump(), output_dir / "hparams.yaml")
     return output_dir

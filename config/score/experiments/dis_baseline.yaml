@@ -1,0 +1,13 @@
+# @package _global_
+backend:
+  - tgt_class: asdlib.backends.Kmeans
+    hp_dict:
+      n_clusters: 16
+  - tgt_class: asdlib.backends.Knn
+    hp_dict:
+      n_neighbors_so: 1
+      n_neighbors_ta: 1
+      smote_ratio: 0.05
+      smote_neighbors: 5
+
+ckpt_ver: "last"

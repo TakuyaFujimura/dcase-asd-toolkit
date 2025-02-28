@@ -1,7 +1,7 @@
-- _target_: asdlib.backends.Kmeans
+- tgt_class: asdlib.backends.Kmeans
   hp_dict:
     n_clusters: 16
-- _target_: asdlib.backends.Knn
+- tgt_class: asdlib.backends.Knn
   hp_dict:
     n_neighbors_so: 1
     n_neighbors_ta: 1

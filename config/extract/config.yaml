@@ -5,7 +5,7 @@ defaults:
 
 
 device: cuda:0 #cpu #
-seed: 0
+seed: null
 name: null
 version: null
 model_ver: null
@@ -29,9 +29,9 @@ extract_items:
   - "AS-*"
 
 
-overwrite: true #false
+overwrite: false
 
 hydra:
-  output_subdir: .hydra_test
+  output_subdir: .hydra_extract
   run:
     dir: ${result_dir}/${name}/${version}_${seed}/output/${ckpt_ver}/${machine}
