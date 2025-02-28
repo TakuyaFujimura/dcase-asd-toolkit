@@ -15,7 +15,7 @@ seed: 0
 name: null
 version: null
 machine: null
-infer_ver: null
+ckpt_ver: null
 result_dir: "./results"
 tf32: true
 

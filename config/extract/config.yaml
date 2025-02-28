@@ -1,0 +1,37 @@
+defaults:
+  - _self_
+  - experiments: null
+
+
+
+device: cuda:0 #cpu #
+seed: 0
+name: null
+version: null
+model_ver: null
+
+ckpt_ver: null
+result_dir: "./results"
+
+datamodule:
+  tgt_class: asdlib.configmaker.extractdm.BasicExtractDMConfigMaker
+  dataloader_cfg:
+    batch_size: 64
+    num_workers: 0
+  collator_cfg: {}
+  dataset_cfg: {}
+label_dict_path: {}
+
+machine: null
+
+extract_items:
+  - "embed-*"
+  - "AS-*"
+
+
+overwrite: true #false
+
+hydra:
+  output_subdir: .hydra_test
+  run:
+    dir: ${result_dir}/${name}/${version}_${seed}/output/${ckpt_ver}/${machine}
