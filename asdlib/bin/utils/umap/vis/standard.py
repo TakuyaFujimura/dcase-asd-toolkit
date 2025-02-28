@@ -82,7 +82,9 @@ def get_cfg_list_of_dict(umap_df: pd.DataFrame) -> List[Dict[str, dict]]:
     return cfg_list_of_dict
 
 
-def vis_standard(umap_df: pd.DataFrame) -> None:
+def plot_and_save(
+    umap_df: pd.DataFrame, save_path: Path, u0min, u0max, u1min, u1max
+) -> None:
     cfg_list_of_dict = get_cfg_list_of_dict(umap_df=umap_df)
     fig, axes = plt.subplots(1, 2, figsize=(20, 10))
     for i in range(len(cfg_list_of_dict)):
@@ -90,5 +92,27 @@ def vis_standard(umap_df: pd.DataFrame) -> None:
             plot_ax_cfg(ax=axes[i], umap_df=umap_df, cfg=cfg)
     for i in range(2):
         axes[i].legend(bbox_to_anchor=(1, 1.1), ncol=2, loc="upper right", fontsize=15)
-        axes[i].set_xlim(umap_df["u0"].min() - 0.5, umap_df["u0"].max() + 0.5)
-        axes[i].set_ylim(umap_df["u1"].min() - 0.5, umap_df["u1"].max() + 0.5)
+        axes[i].set_xlim(u0min - 0.5, u0max + 0.5)
+        axes[i].set_ylim(u1min - 0.5, u1max + 0.5)
+    plt.savefig(save_path, bbox_inches="tight")
+
+
+def vis_standard(umap_df: pd.DataFrame, output_dir: Path, png_stem: str) -> None:
+    ulim_dict = {
+        "u0min": umap_df["u0"].min(),
+        "u0max": umap_df["u0"].max(),
+        "u1min": umap_df["u1"].min(),
+        "u1max": umap_df["u1"].max(),
+    }
+    plot_and_save(
+        umap_df=umap_df,
+        save_path=output_dir / f"{png_stem}_all.png",
+        **ulim_dict,
+    )
+    for section in umap_df["section"].unique():
+        umap_df_selected = umap_df[umap_df["section"] == section]
+        plot_and_save(
+            umap_df=umap_df_selected,
+            save_path=output_dir / f"{png_stem}_{section}.png",
+            **ulim_dict,
+        )

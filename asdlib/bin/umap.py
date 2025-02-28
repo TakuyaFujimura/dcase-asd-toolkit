@@ -40,33 +40,36 @@ def main(hydra_cfg: DictConfig) -> None:
 
     output_dir = get_output_dir(cfg=cfg)
 
-    csv_name = f"umap_{cfg.metric}_{cfg.embed_key}.csv"
-    png_name = f"umap_{cfg.metric}_{cfg.embed_key}_{cfg.vis_type}.png"
+    csv_stem = f"umap_{cfg.metric}_{cfg.embed_key}"
+    png_stem = f"umap_{cfg.metric}_{cfg.embed_key}_{cfg.vis_type}"
 
     if cfg.trans_exec:
         check_file_exists(
             dir_path=output_dir,
-            file_name=csv_name,
+            file_name=f"{csv_stem}.csv",
             overwrite=cfg.trans_overwrite,
         )
         trans_umap(
             output_dir=output_dir,
             metric=cfg.metric,
             embed_key=cfg.embed_key,
-            save_path=output_dir / csv_name,
+            save_path=output_dir / f"{csv_stem}.csv",
         )
 
     if cfg.vis_exec:
 
         check_file_exists(
-            dir_path=output_dir, file_name=png_name, overwrite=cfg.vis_overwrite
+            dir_path=output_dir,
+            file_name=f"{png_stem}.png",
+            overwrite=cfg.vis_overwrite,
         )
-        umap_df = pd.read_csv(output_dir / csv_name)
+        umap_df = pd.read_csv(output_dir / f"{csv_stem}.csv")
 
         visualize_umap(
             umap_df=umap_df,
             vis_type=cfg.vis_type,
-            save_path=output_dir / png_name,
+            output_dir=output_dir,
+            png_stem=png_stem,
         )
 
 

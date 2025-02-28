@@ -27,6 +27,7 @@ def trans_umap(output_dir: Path, metric: str, embed_key: str, save_path: Path) -
     umap_df = pd.DataFrame(
         {
             "path": df.path.values,
+            "section": df.section.values,
             "is_normal": df.is_normal.values,
             "is_target": df.is_target.values,
             "is_test": df.is_test.values,
