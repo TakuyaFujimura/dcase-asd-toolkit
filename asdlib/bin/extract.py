@@ -10,6 +10,7 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from asdlib.bin.utils.extract import loader2df
+from asdlib.bin.utils.path import get_output_dir
 from asdlib.bin.utils.resume import get_past_cfg, load_plmodel
 from asdlib.configmaker.extractdm import BaseExtractDMConfigMaker
 from asdlib.datasets.pl_datamodule import PLDataModule
@@ -25,15 +26,9 @@ def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
     return MainExtractConfig(**config_dict)
 
 
-def make_dir(cfg: MainExtractConfig, machine: str) -> Path:
-    output_dir = (
-        cfg.result_dir
-        / cfg.name
-        / f"{cfg.version}_{cfg.seed}"
-        / "output"
-        / cfg.ckpt_ver
-        / machine
-    )
+def make_dir(cfg: MainExtractConfig) -> Path:
+    output_dir = get_output_dir(cfg)
+
     if output_dir.exists() and not cfg.overwrite:
         raise FileExistsError(
             f"{output_dir} already exists. Set config.overwrite=True to overwrite."
@@ -46,11 +41,11 @@ def make_dir(cfg: MainExtractConfig, machine: str) -> Path:
 @hydra.main(version_base=None, config_path="../../config/extract", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
-    logger.info(f"Start testing: {HydraConfig().get().run.dir}")
-    logger.info(f"version: {cfg.version}")
+    logger.info(f"Start extraction: {HydraConfig().get().run.dir}")
+    logger.info(f"version: {cfg.version}_{cfg.seed}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = make_dir(cfg=cfg, machine=cfg.machine)
+    output_dir = make_dir(cfg=cfg)
     past_cfg = get_past_cfg(cfg=cfg)
     DMConfigMaker: BaseExtractDMConfigMaker = instantiate_tgt(
         {**cfg.datamodule, "past_cfg": past_cfg, "machine": cfg.machine}
