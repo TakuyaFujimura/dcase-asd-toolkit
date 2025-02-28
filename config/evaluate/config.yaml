@@ -1,0 +1,23 @@
+defaults:
+  - _self_
+  - experiments: null
+
+
+
+seed: null
+name: null
+version: null
+
+ckpt_ver: null
+result_dir: "./results"
+
+hmean_cfg_list: []
+
+machine: null
+
+overwrite: true #false
+
+hydra:
+  output_subdir: .hydra_evaluate
+  run:
+    dir: ${result_dir}/${name}/${version}_${seed}/output/${ckpt_ver}/${machine}

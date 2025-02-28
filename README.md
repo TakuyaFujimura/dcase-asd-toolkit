@@ -103,29 +103,28 @@ dcase-asd-library
     └── <name> # `example`
         ├── ...
         └── <version> # `dcase2023_baseline_0`
-            ├── _all_
-            │   ├── .hydra
-            │   ├── .hydra_test
-            │   ├── checkpoints
-            │   ├── events.out.tfevents.*
-            │   ├── hparams.yaml
-            │   ├── test.log
-            │   └── train.log
-            ├── bandsaw
-            ├── bearing
-            ├── ...
-            └─── valve
-                └── infrer
-                    └── <infer_ver> # `epoch_12`
+            ├── model
+            │   └── <model_ver> # all
+            │       ├── .hydra
+            │       ├── checkpoints
+            │       ├── events.out.tfevents.*
+            │       ├── hparams.yaml
+            │       └── train.log
+            └── output
+                └── <ckpt_ver> # `epoch_12`
+                    ├── bandsaw
+                    ├── bearing
+                    ├── ...
+                    └─── valve
                         ├── hparams.yaml
+                        ├── test_evaluate.csv # AUCs on test data
                         ├── test_extraction.csv # information of test data including embedding values
-                        ├── test_result.csv # ROAUCs
                         ├── test_score.csv # anomaly scores of test data
                         ├── train_extraction.csv # information of train data including embedding values
                         ├── train_score.csv # anomaly scores of train data
                         ├── umap.csv # UMAP embedding values
                         └── umap_*.png # UMAP visualization
-            
+                
 ```
 
 </details>

@@ -1,9 +1,15 @@
 from pathlib import Path
 
-from asdlib.utils.config_class import MainExtractConfig, MainScoreConfig
+from asdlib.utils.config_class import (
+    MainEvaluateConfig,
+    MainExtractConfig,
+    MainScoreConfig,
+)
 
 
-def get_output_dir(cfg: MainExtractConfig | MainScoreConfig) -> Path:
+def get_output_dir(
+    cfg: MainExtractConfig | MainScoreConfig | MainEvaluateConfig,
+) -> Path:
     output_dir = (
         cfg.result_dir
         / cfg.name

@@ -4,6 +4,8 @@ name="example"
 version="dcase2023_dis_baseline"
 extract_exp_yaml="dis_baseline"
 score_exp_yaml="dis_baseline"
+evaluate_exp_yaml="dcase2023"
+ckpt_ver="last"
 seed=0
 ########################
 
@@ -18,9 +20,13 @@ python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
 for machine in "fan" "valve"; do
 	python -m asdlib.bin.extract experiments="${extract_exp_yaml}" \
 	'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-	'machine='${machine}''
+	'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
 
 	python -m asdlib.bin.score experiments="${score_exp_yaml}" \
 	'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-	'machine='${machine}''
+	'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+
+	python -m asdlib.bin.evaluate experiments="${evaluate_exp_yaml}" \
+	'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+	'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
 done

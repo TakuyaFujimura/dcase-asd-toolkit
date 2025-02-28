@@ -1,4 +1,2 @@
 # @package _global_
-
 model_ver: "all"
-ckpt_ver: "last" #"epoch_16"

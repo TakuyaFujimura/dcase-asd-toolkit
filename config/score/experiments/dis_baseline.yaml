@@ -10,4 +10,3 @@ backend:
       smote_ratio: 0.05
       smote_neighbors: 5
 
-ckpt_ver: "last"
