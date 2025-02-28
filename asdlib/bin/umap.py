@@ -39,13 +39,15 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = get_output_dir(cfg=cfg)
+    umap_dir = output_dir / "umap"
+    umap_dir.mkdir(parents=True, exist_ok=True)
 
     csv_stem = f"umap_{cfg.metric}_{cfg.embed_key}"
     png_stem = f"umap_{cfg.metric}_{cfg.embed_key}_{cfg.vis_type}"
 
     if cfg.trans_exec:
         check_file_exists(
-            dir_path=output_dir,
+            dir_path=umap_dir,
             file_name=f"{csv_stem}.csv",
             overwrite=cfg.trans_overwrite,
         )
@@ -53,14 +55,13 @@ def main(hydra_cfg: DictConfig) -> None:
             output_dir=output_dir,
             metric=cfg.metric,
             embed_key=cfg.embed_key,
-            save_path=output_dir / f"{csv_stem}.csv",
+            save_path=umap_dir / f"{csv_stem}.csv",
         )
 
     if cfg.vis_exec:
-
         check_file_exists(
-            dir_path=output_dir,
-            file_name=f"{png_stem}.png",
+            dir_path=umap_dir,
+            file_name=f"{png_stem}_*.png",
             overwrite=cfg.vis_overwrite,
         )
         umap_df = pd.read_csv(output_dir / f"{csv_stem}.csv")
@@ -68,8 +69,7 @@ def main(hydra_cfg: DictConfig) -> None:
         visualize_umap(
             umap_df=umap_df,
             vis_type=cfg.vis_type,
-            output_dir=output_dir,
-            png_stem=png_stem,
+            path_stem=umap_dir / png_stem,
         )
 
 
