@@ -1,0 +1,6 @@
+# @package _global_
+
+metric: "euclidean"
+vis_type: "standard"
+embed_key: "e_main"
+

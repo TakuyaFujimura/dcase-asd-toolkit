@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
-from ...utils.config_class.nparray_class import Np1DArray
+from asdlib.utils.config_class.nparray_class import Np1DArray
 
 
 class PlotConfig(BaseModel):
