@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Literal
 
 import numpy as np
 import pandas as pd
@@ -9,9 +9,11 @@ from sklearn.neighbors import NearestNeighbors
 from asdlib.utils.common import get_embed_from_df
 
 from .base import BaseBackend
+from .utils import normalize_vector
 
 
 class KnnConfig(BaseModel):
+    metric: Literal["euclid", "cosine"]
     n_neighbors_so: int
     n_neighbors_ta: int
     smote_ratio: float = 0
@@ -40,13 +42,28 @@ class Knn(BaseBackend):
         is_target = np.asarray(train_df["is_target"].values)
         self.check_target(is_target)
         embed = get_embed_from_df(train_df)
+
+        if self.hp_dict.metric == "cosine":
+            embed = normalize_vector(embed)
+
         if self.smote is not None:
             embed, is_target = self.smote.fit_resample(embed, is_target)  # type: ignore
+            if self.hp_dict.metric == "cosine":
+                embed = normalize_vector(embed)  # type: ignore
+
         self.knn_so.fit(embed[is_target == 0])  # type: ignore
         self.knn_ta.fit(embed[is_target == 1])  # type: ignore
 
     def anomaly_score(self, test_df: pd.DataFrame) -> Dict[str, np.ndarray]:
         embed = get_embed_from_df(test_df)
+        if self.hp_dict.metric == "cosine":
+            embed = normalize_vector(embed)
+
         scores_so: np.ndarray = self.knn_so.kneighbors(embed)[0].mean(1)
         scores_ta: np.ndarray = self.knn_ta.kneighbors(embed)[0].mean(1)
+
+        if self.hp_dict.metric == "cosine":
+            scores_so /= 2
+            scores_ta /= 2
+
         return {"plain": np.minimum(scores_so, scores_ta)}
