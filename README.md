@@ -112,18 +112,145 @@ dcase-asd-library
                     ├── bandsaw
                     ├── bearing
                     ├── ...
-                    └── valve
-                        ├── hparams.yaml
-                        ├── test_evaluate.csv # AUC scores on test data
-                        ├── test_extraction.csv # Extracted test data information, including embedding values
-                        ├── test_score.csv # Anomaly scores for test data
-                        ├── train_extraction.csv # Extracted training data information, including embedding values
-                        ├── train_score.csv # Anomaly scores for training data
-                        ├── umap.csv # UMAP embedding values
-                        └── umap_*.png # UMAP visualization
+                    ├── valve
+                    │   ├── hparams.yaml
+                    │   ├── test_evaluate.csv # AUC scores on test data
+                    │   ├── test_extract.csv # Extracted test data information, including embedding values
+                    │   ├── test_score.csv # Anomaly scores for test data
+                    │   ├── train_extract.csv # Extracted training data information, including embedding values
+                    │   ├── train_score.csv # Anomaly scores for training data
+                    │   └── umap # UMAP visualization
+                    │── official23-dev.csv # Summarized evaluation results
+                    └── official23-eval.csv
 ```
 
 </details>
+
+
+
+## Main Tools
+
+
+<!-- <img src="docs/tools.drawio.png" alt="asdlib tools" width="500"> -->
+<div style="display: flex; justify-content: center;">
+    <img src="docs/tools.drawio.png" alt="Tools" width="500">
+    <img src="docs/examples.drawio.png" alt="Example" width="500">
+</div>
+
+The example scripts are based on these tools.
+These tools load and merge configurations from `config/<tool>/config.yaml`, `config/<tool>/experiments/<experiments>.yaml`, and command-line arguments.
+
+
+<details>
+<summary>asdlib.bin.train</summary>
+<br>
+
+```bash
+# jobs/asd/base/base.sh
+python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+'name='${name}'' 'version='${version}''
+```
+
+- **Role**: Training the frontend model
+- **Result**: `results/<name>/<version>/model/<model_ver>` including checkpoints.
+
+</details>
+
+<details>
+<summary>asdlib.bin.extract</summary>
+<br>
+
+```bash
+# jobs/asd/base/base.sh
+python -m asdlib.bin.extract experiments="${extract_exp}" \
+'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+```
+
+- **Role**: Extracting test/training data information with the trained frontend model
+- **Arguments**:
+    - `ckpt_ver`: The checkpoint version of the trained frontend model
+    - `machine`: The machine type (e.g., `fan`, `slider`, etc.)
+- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_extract.csv`.
+
+</details>
+
+<details>
+<summary>asdlib.bin.score</summary>
+<br>
+
+```bash
+# jobs/asd/base/base.sh
+python -m asdlib.bin.score experiments="${score_exp}" \
+'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+```
+
+- **Role**: Calculating anomaly scores for test/training data with the extracted information
+- **Arguments**: Arguments are used to specify the extracted information file path `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`. The backend model is specified in `config/score/experiments/<experiments>.yaml`.
+- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_score.csv`.
+
+</details>
+
+
+<details>
+<summary>asdlib.bin.evaluate</summary>
+<br>
+
+```bash
+# jobs/asd/base/base.sh
+python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
+'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+```
+
+- **Role**: Evaluating the anomaly detection performance
+- **Arguments**: Arguments are used to specify the score file path `results/<name>/<version>/output/<ckpt_ver>/*_score.csv`.
+- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_evaluate.csv`.
+
+</details>
+
+<details>
+<summary>asdlib.bin.umap</summary>
+<br>
+
+```bash
+# jobs/asd/base/base.sh
+python -m asdlib.bin.umap experiments="${umap_exp}" \
+'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+```
+
+- **Role**: Extracting and visualizing UMAP embeddings
+- **Arguments**: Arguments are used to specify the extracted information file path `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`.
+- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>/umap`.
+
+</details>
+
+
+<details>
+<summary>asdlib.bin.table</summary>
+<br>
+
+```bash
+# jobs/asd/base/base.sh
+python -m asdlib.bin.table dcase="${dcase}" \
+'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+'ckpt_ver='${ckpt_ver}''
+```
+
+- **Role**: Summarizing the evaluation results
+- **Arguments**: Arguments are used to specify the evaluation file path `results/<name>/<version>/output/<ckpt_ver>/*_evaluate.csv`.
+- **Result**: `results/<name>/<version>/output/<ckpt_ver>/*.csv`.
+
+</details>
+
+## Other Information
+- `jobs/asd/base/base.sh` is a useful wrapper script.
+- off cource, You can create your own scripts with the above tools and the customized configuration files.
+- `dis_baseline.sh` uses shared frontend models for all machines, while `ae_baseline.sh` uses individual frontend models for each machine.
+- `config/*/config.yaml` includes `overwrite` parameters which is a flag to overwrite the existing files in each process. The default is set to `False` in `config.yaml`
+
 
 ## Information
 

@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_df(output_dir: Path) -> pd.DataFrame:
-    train_df = pd.read_csv(output_dir / "train_extraction.csv")
-    test_df = pd.read_csv(output_dir / "test_extraction.csv")
+    train_df = pd.read_csv(output_dir / "train_extract.csv")
+    test_df = pd.read_csv(output_dir / "test_extract.csv")
     df = pd.concat([train_df, test_df], axis=0)
     df["is_test"] = [0] * len(train_df) + [1] * len(test_df)
     return df

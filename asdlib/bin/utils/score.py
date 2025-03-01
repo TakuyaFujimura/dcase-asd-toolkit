@@ -23,7 +23,7 @@ def get_dicts(
     extract_df_dict: Dict[str, pd.DataFrame] = {}
     score_df_dict: Dict[str, pd.DataFrame] = {}
     for split in ["train", "test"]:
-        extract_df_dict[split] = pd.read_csv(output_dir / f"{split}_extraction.csv")
+        extract_df_dict[split] = pd.read_csv(output_dir / f"{split}_extract.csv")
         score_df_dict[split] = copy.deepcopy(extract_df_dict[split])
         score_df_dict[split] = rm_unnecesary_col(score_df_dict[split])
     return extract_df_dict, score_df_dict

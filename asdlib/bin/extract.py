@@ -30,7 +30,7 @@ def make_dir(cfg: MainExtractConfig) -> Path:
     output_dir = get_output_dir(cfg)
 
     check_file_exists(
-        dir_path=output_dir, file_name="*_extraction.csv", overwrite=cfg.overwrite
+        dir_path=output_dir, file_name="*_extract.csv", overwrite=cfg.overwrite
     )
     output_dir.mkdir(exist_ok=True, parents=True)
     OmegaConf.save(cfg.model_dump(), output_dir / "hparams.yaml")
@@ -62,7 +62,7 @@ def main(hydra_cfg: DictConfig) -> None:
             device=cfg.device,
             extract_items=cfg.extract_items,
         )
-        df_path = output_dir / f"{split}_extraction.csv"
+        df_path = output_dir / f"{split}_extract.csv"
         df.to_csv(df_path, index=False)
         logger.info(f"Saved extraction result to {df_path}")
 
