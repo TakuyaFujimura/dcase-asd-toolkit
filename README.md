@@ -80,8 +80,9 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 **How to**
 - Specify `data_dir` in `config/train/config.yaml`
 - Specify `dcase` in `jobs/asd/example/?.sh`
+    - Two example scripts are provided: `dis_baseline.sh` and `ae_baseline.sh`
 - This process will automatically execute the training and testing pipeline.
-- Two example scripts are provided: `dis_baseline.sh` and `ae_baseline.sh`
+
 
 
 ```bash
