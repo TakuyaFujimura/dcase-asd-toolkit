@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 
 class MainTableConfig(BaseModel):
@@ -12,7 +11,6 @@ class MainTableConfig(BaseModel):
     ckpt_ver: str
     result_dir: Path
 
-    additional_metric_list: List[str] = Field(default_factory=list)
     dcase: str
     overwrite: bool = False
 

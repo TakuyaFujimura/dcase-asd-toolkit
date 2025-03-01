@@ -32,37 +32,40 @@ source "venv/bin/activate"
 
 
 
-# train and test process
-
+# training
 if [ "${extract_exp}" = "shared" ]; then
     python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
     'name='${name}'' 'version='${version}''
+elif [ "${extract_exp}" = "machinewise" ]; then
+    for machine in "${machines[@]}"; do
+        python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+        'name='${name}'' 'version='${version}'' 'machine='${machine}''
+    done
 fi
 
+# testing
 for ckpt_ver in "${ckpt_ver_list[@]}"; do
-
     for machine in "${machines[@]}"; do
-
-        if [ "${extract_exp}" = "machinewise" ]; then
-            python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
-            'name='${name}'' 'version='${version}'' 'machine='${machine}''
-        fi
-
         python -m asdlib.bin.extract experiments="${extract_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 
         python -m asdlib.bin.score experiments="${score_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 
         python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 
         python -m asdlib.bin.umap experiments="${umap_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'machine='${machine}'' 'ckpt_ver='${ckpt_ver}''
+        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
     done
 
+    python -m asdlib.bin.table dcase="${dcase}" \
+    'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+    'ckpt_ver='${ckpt_ver}''
 done
+
+

@@ -106,13 +106,13 @@ def vis_standard(umap_df: pd.DataFrame, path_stem: Path) -> None:
     }
     plot_and_save(
         umap_df=umap_df,
-        save_path=f"{path_stem}_all.png",
+        save_path=f"{path_stem}_sectionall.png",
         **ulim_dict,
     )
     for section in umap_df["section"].unique():
         umap_df_selected = umap_df[umap_df["section"] == section]
         plot_and_save(
             umap_df=umap_df_selected,
-            save_path=f"{path_stem}_{section}.png",
+            save_path=f"{path_stem}_section{section}.png",
             **ulim_dict,
         )

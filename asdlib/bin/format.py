@@ -6,9 +6,7 @@ from typing import Dict
 
 import tqdm
 
-from asdlib.utils.common.json_util import read_json
-
-MACHINE_DICT = read_json("data/machines.json")
+from asdlib.utils.dcase_utils import MACHINE_DICT
 
 
 def mk_symlink(link_path: Path, target_path: Path) -> None:

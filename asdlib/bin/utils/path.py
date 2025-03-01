@@ -29,5 +29,6 @@ def dir_has_file(dir_path: Path, file_name: str) -> bool:
 def check_file_exists(dir_path: Path, file_name: str, overwrite: bool) -> None:
     if dir_has_file(dir_path, file_name) and not overwrite:
         raise FileExistsError(
-            f"{dir_path}/{file_name} already exists. Set config.overwrite=True to overwrite."
+            f"{dir_path}/{file_name} already exists. "
+            + "Set config.overwrite=True to overwrite."
         )

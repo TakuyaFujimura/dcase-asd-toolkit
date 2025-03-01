@@ -1,3 +1,3 @@
 cd ../..
 source venv/bin/activate
-python asdlib/bin/label.py experiments=$1
+python -m asdlib.bin.label experiments=$1

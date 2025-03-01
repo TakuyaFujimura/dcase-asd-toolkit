@@ -64,7 +64,7 @@ def main(hydra_cfg: DictConfig) -> None:
             file_name=f"{png_stem}_*.png",
             overwrite=cfg.vis_overwrite,
         )
-        umap_df = pd.read_csv(output_dir / f"{csv_stem}.csv")
+        umap_df = pd.read_csv(umap_dir / f"{csv_stem}.csv")
 
         visualize_umap(
             umap_df=umap_df,

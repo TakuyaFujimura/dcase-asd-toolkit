@@ -1,0 +1,18 @@
+
+
+seed: null
+name: null
+version: null
+
+ckpt_ver: null
+result_dir: "./results"
+
+dcase: null
+overwrite: false
+
+
+
+hydra:
+  output_subdir: .hydra_table
+  run:
+    dir: ${result_dir}/${name}/${version}_${seed}/output/${ckpt_ver}
