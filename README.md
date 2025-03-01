@@ -13,7 +13,7 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 ```bash
 [somewhere]$ git clone https://github.com/TakuyaFujimura/dcase-asd-library.git
 [somewhere]$ cd dcase-asd-library
-[dcase-asd-library]$ python3 -m venv venv # Python 3.10+ required
+[dcase-asd-library]$ python3 -m venv venv # Requires Python 3.10+
 [dcase-asd-library]$ source venv/bin/activate
 [dcase-asd-library]$ pip install -e .
 ```
@@ -26,7 +26,7 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 
 **How to**
 - Specify `data_dir` and `dcase` in `jobs/download/run.sh`
-- `data_dir`: The directory where the dataset is stored. The default is set to the parent directory of this repository. If you don't change this, you don't need to change the `data_dir` in other scripts as well.
+- `data_dir`: The directory where the dataset will be stored. The default is set to the parent directory of this repository. If unchanged, you do not need to modify `data_dir` in other scripts.
 - `dcase`: The dataset name (`dcase2021`, `dcase2022`, `dcase2023`, `dcase2024` are available)
 
 ```bash
@@ -51,8 +51,8 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 **How to**
 
 - Specify `data_dir` and `dcase` in `jobs/format/run.sh`
-- This will create a formatted dataset by making symbolic links to the original dataset (while keeping the original dataset)
-- The ground truth normal/anomalous labels are added during this process
+- This process creates a formatted dataset by generating symbolic links to the original dataset (without modifying the original files).
+- Normal/anomalous ground truth labels for test data are added during this process.
 
 ```bash
 [dcase-asd-library]$ cd jobs/format
@@ -79,9 +79,10 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 
 **How to**
 - Specify `data_dir` in `config/train/config.yaml`
-- Specify `dcase` in `jobs/asd/example/dis_baseline.sh`
-- This will automatically execute the training/testing process
-- An example script is provided, but you can also create your own configuration file (see [Customization](docs/customization.md))
+- Specify `dcase` in `jobs/asd/example/?.sh`
+- This process will automatically execute the training and testing pipeline.
+- Two example scripts are provided: `dis_baseline.sh` and `ae_baseline.sh`
+
 
 ```bash
 [dcase-asd-library]$ cd jobs/asd/example
@@ -112,11 +113,11 @@ dcase-asd-library
                     ├── ...
                     └── valve
                         ├── hparams.yaml
-                        ├── test_evaluate.csv # AUCs on test data
-                        ├── test_extraction.csv # information of test data including embedding values
-                        ├── test_score.csv # anomaly scores of test data
-                        ├── train_extraction.csv # information of train data including embedding values
-                        ├── train_score.csv # anomaly scores of train data
+                        ├── test_evaluate.csv # AUC scores on test data
+                        ├── test_extraction.csv # Extracted test data information, including embedding values
+                        ├── test_score.csv # Anomaly scores for test data
+                        ├── train_extraction.csv # Extracted training data information, including embedding values
+                        ├── train_score.csv # Anomaly scores for training data
                         ├── umap.csv # UMAP embedding values
                         └── umap_*.png # UMAP visualization
 ```
