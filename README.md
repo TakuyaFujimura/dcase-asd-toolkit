@@ -127,11 +127,8 @@ dcase-asd-library
 </details>
 
 
-
 ## Main Tools
 
-
-<!-- <img src="docs/tools.drawio.png" alt="asdlib tools" width="500"> -->
 <div style="display: flex; justify-content: center;">
     <img src="docs/tools.drawio.png" alt="Tools" width="500">
     <img src="docs/examples.drawio.png" alt="Example" width="500">
@@ -151,8 +148,8 @@ python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
 'name='${name}'' 'version='${version}''
 ```
 
-- **Role**: Training the frontend model
-- **Result**: `results/<name>/<version>/model/<model_ver>` including checkpoints.
+- **Role**: Trains the frontend model
+- **Result**: Saves the model to `results/<name>/<version>/model/<model_ver>`
 
 </details>
 
@@ -167,11 +164,11 @@ python -m asdlib.bin.extract experiments="${extract_exp}" \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
 
-- **Role**: Extracting test/training data information with the trained frontend model
+- **Role**: Extracts test/training data information with the trained frontend model
 - **Arguments**:
-    - `ckpt_ver`: The checkpoint version of the trained frontend model
-    - `machine`: The machine type (e.g., `fan`, `slider`, etc.)
-- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_extract.csv`.
+    - `ckpt_ver`: Checkpoint version of the trained frontend model
+    - `machine`: Machine type (e.g., `fan`, `slider`, etc.)
+- **Result**: Saves the extracted data to `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_extract.csv`
 
 </details>
 
@@ -186,9 +183,11 @@ python -m asdlib.bin.score experiments="${score_exp}" \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
 
-- **Role**: Calculating anomaly scores for test/training data with the extracted information
-- **Arguments**: Arguments are used to specify the extracted information file path `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`. The backend model is specified in `config/score/experiments/<experiments>.yaml`.
-- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_score.csv`.
+- **Role**: Calculates anomaly scores for test/training data with the extracted information
+- **Arguments**: 
+    - Specifies the file path for extracted information: `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`
+    - The backend model is specified in `config/score/experiments/<experiments>.yaml`
+- **Result**: Saves the anomaly scores to `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_score.csv`
 
 </details>
 
@@ -204,9 +203,9 @@ python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
 
-- **Role**: Evaluating the anomaly detection performance
-- **Arguments**: Arguments are used to specify the score file path `results/<name>/<version>/output/<ckpt_ver>/*_score.csv`.
-- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>//*_evaluate.csv`.
+- **Role**: Evaluates the anomaly detection performance
+- **Arguments**: Specifies the file path for estimated anomaly scores: `results/<name>/<version>/output/<ckpt_ver>/*_score.csv`
+- **Result**: Saves the evaluation results to `results/<name>/<version>/output/<ckpt_ver>/<machine>/*_evaluate.csv`
 
 </details>
 
@@ -221,9 +220,9 @@ python -m asdlib.bin.umap experiments="${umap_exp}" \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
 
-- **Role**: Extracting and visualizing UMAP embeddings
-- **Arguments**: Arguments are used to specify the extracted information file path `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`.
-- **Result**: `results/<name>/<version>/output/<ckpt_ver>/<machine>/umap`.
+- **Role**: Extracts and visualizes UMAP embeddings
+- **Arguments**: Specifies the file path for extracted information: `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`
+- **Result**: Saves results to `results/<name>/<version>/output/<ckpt_ver>/<machine>/umap`
 
 </details>
 
@@ -239,18 +238,17 @@ python -m asdlib.bin.table dcase="${dcase}" \
 'ckpt_ver='${ckpt_ver}''
 ```
 
-- **Role**: Summarizing the evaluation results
-- **Arguments**: Arguments are used to specify the evaluation file path `results/<name>/<version>/output/<ckpt_ver>/*_evaluate.csv`.
-- **Result**: `results/<name>/<version>/output/<ckpt_ver>/*.csv`.
+- **Role**: Summarizes the evaluation results
+- **Arguments**: Specifies the evaluation file path `results/<name>/<version>/output/<ckpt_ver>/*_evaluate.csv`
+- **Result**: Saves results to `results/<name>/<version>/output/<ckpt_ver>/*.csv`
 
 </details>
 
 ## Other Information
 - `jobs/asd/base/base.sh` is a useful wrapper script.
-- off cource, You can create your own scripts with the above tools and the customized configuration files.
-- `dis_baseline.sh` uses shared frontend models for all machines, while `ae_baseline.sh` uses individual frontend models for each machine.
-- `config/*/config.yaml` includes `overwrite` parameters which is a flag to overwrite the existing files in each process. The default is set to `False` in `config.yaml`
-
+- Of course, you can create your own scripts using the above tools and customized configuration files.
+- `dis_baseline.sh` uses a shared frontend model for all machines, while `ae_baseline.sh` uses individual frontend models for each machine.
+- `config/*/config.yaml` includes the `overwrite` parameter, which is a flag to overwrite existing files in each process. The default is set to `False` in `config.yaml`.
 
 ## Information
 
