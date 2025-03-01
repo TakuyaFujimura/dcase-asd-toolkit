@@ -1,8 +1,6 @@
 # DCASE Anomalous Sound Detection Library
 
-This repository provides various recipes for the DCASE Task2 Anomalous Sound Detection (ASD).
-
-
+This repository provides various recipes for the DCASE Task 2 Anomalous Sound Detection (ASD).
 
 ## Easy Start
 
@@ -23,12 +21,12 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 </details>
 
 <details>
-<summary>2. Download DCASETask2 dataset</summary>
+<summary>2. Download the DCASE Task 2 dataset</summary>
 <br>
 
 **How to**
 - Specify `data_dir` and `dcase` in `jobs/download/run.sh`
-- `data_dir`: The directory where the dataset is stored
+- `data_dir`: The directory where the dataset is stored. The default is set to the parent directory of this repository. If you don't change this, you don't need to change the `data_dir` in other scripts as well.
 - `dcase`: The dataset name (`dcase2021`, `dcase2022`, `dcase2023`, `dcase2024` are available)
 
 ```bash
@@ -75,23 +73,20 @@ This repository provides various recipes for the DCASE Task2 Anomalous Sound Det
 
 </details>
 
-
 <details>
-<summary>4. Execute training/testing recipe</summary>
-
+<summary>4. Execute the training/testing recipe</summary>
 <br>
 
 **How to**
-- Specify `data_dir` in `dcase-asd-library/config/config.yaml`
+- Specify `data_dir` in `config/train/config.yaml`
 - Specify `dcase` in `jobs/asd/example/dis_baseline.sh`
-- This will automatically execute training/testing process
-- An example script is provided but you can also create your own configuration file (see [Customization](docs/customization.md))
+- This will automatically execute the training/testing process
+- An example script is provided, but you can also create your own configuration file (see [Customization](docs/customization.md))
 
 ```bash
 [dcase-asd-library]$ cd jobs/asd/example
 [dcase-asd-library/jobs/asd/example]$ bash dis_baseline.sh
 ```
-
 
 **Result**
 ```bash
@@ -115,7 +110,7 @@ dcase-asd-library
                     ├── bandsaw
                     ├── bearing
                     ├── ...
-                    └─── valve
+                    └── valve
                         ├── hparams.yaml
                         ├── test_evaluate.csv # AUCs on test data
                         ├── test_extraction.csv # information of test data including embedding values
@@ -124,11 +119,9 @@ dcase-asd-library
                         ├── train_score.csv # anomaly scores of train data
                         ├── umap.csv # UMAP embedding values
                         └── umap_*.png # UMAP visualization
-                
 ```
 
 </details>
-
 
 ## Information
 
@@ -136,5 +129,5 @@ dcase-asd-library
 
 ### Author
 
-Takuya Fujimura, Toda Labotorary, Nagoya University  
+Takuya Fujimura, Toda Laboratory, Nagoya University  
 E-mail: fujimura.takuya@g.sp.m.is.nagoya-u.ac.jp
