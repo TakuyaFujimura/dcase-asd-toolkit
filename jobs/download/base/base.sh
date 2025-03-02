@@ -1,8 +1,6 @@
 data_dir=$1
 dcase=$2
 
-cd jobs
-
 if [ -d "${data_dir}/original/${dcase}" ]; then
   echo "Data already exists. Exiting..."
   exit 1

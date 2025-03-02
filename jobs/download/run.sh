@@ -4,4 +4,5 @@ dcase="dcase2023"
 
 absolute_data_dir=$(cd "$(dirname ${data_dir})" && pwd)/$(basename ${data_dir})
 echo "absolute data_dir: ${absolute_data_dir}"
-base/base.sh "${absolute_data_dir}" "${dcase}"
+cd base
+bash base.sh "${absolute_data_dir}" "${dcase}"
