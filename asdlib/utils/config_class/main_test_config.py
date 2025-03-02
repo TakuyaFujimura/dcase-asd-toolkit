@@ -25,7 +25,6 @@ class MainTestConfig(BaseModel):
     machine: str
     infer_ver: str
     result_dir: Path
-    tf32: bool = False
 
     batch_size: int
     num_workers: int

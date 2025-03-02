@@ -37,7 +37,6 @@ class MainTrainConfig(BaseModel):
     version: str
     refresh_rate: int
     num_workers: int
-    tf32: bool = False
     callback_opts: Dict[str, Dict[str, Any]]
     every_n_epochs_valid: int
     result_dir: Path

@@ -74,9 +74,6 @@ def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if not cfg.trainer.get("deterministic", False):
         raise ValueError("Not deterministic!!!")
-    if cfg.tf32:
-        torch.set_float32_matmul_precision("high")
-        logger.info("Set float32_matmul_precision to high")
     logger.info(f"Start experiment: {HydraConfig().get().run.dir}")
     logger.info(f"version: {cfg.version}_{cfg.seed}")
     pl.seed_everything(cfg.seed, workers=True)
