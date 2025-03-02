@@ -46,10 +46,12 @@ class BasicCollator(object):
         sr: int,
         need_feat: bool = False,
         shuffle: bool = True,
+        double_precision: bool = False,
     ):
         self.label_dict: Dict[str, LabelInfo] = get_label_dict(label_dict_path)
         self.shuffle = shuffle
         self.crop_len: int | Literal["all", "none"]
+        self.double_precision = double_precision
 
         if sr != 16000:
             raise ValueError("Unexpected sampling rate")
@@ -134,8 +136,18 @@ class BasicCollator(object):
             items[f"onehot_{key}"] = onehot_tensor
         return items
 
+    @staticmethod
+    def to_double(batch: Dict[str, Any]) -> Dict[str, Any]:
+        for key, val in batch.items():
+            if isinstance(val, torch.Tensor):
+                batch[key] = val.double()
+        return batch
+
     def __call__(self, unformatted_batch: List[Dict[str, Any]]):
         """Convert into batch tensors."""
         batch = self.format_batch(unformatted_batch)
         batch = self.add_labels(batch)
+
+        if self.double_precision:
+            batch = self.to_double(batch)
         return batch
