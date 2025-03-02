@@ -54,9 +54,7 @@ def main(hydra_cfg: DictConfig) -> None:
         logger.info(f"Extracting {split} data now...")
         datamoduleconfig = DMConfigMaker.get_config(split=split)
         dataloader = PLDataModule.get_loader(
-            datamoduleconfig=datamoduleconfig,
-            label_dict_path=cfg.label_dict_path,
-            double_precision=past_cfg.double_precision,
+            datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
         )
         df = loader2df(
             dataloader=dataloader,

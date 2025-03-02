@@ -13,18 +13,14 @@ class PLDataModule(pl.LightningDataModule):
         self,
         dm_cfg: DMSplitConfig,
         label_dict_path: Dict[str, Path],
-        double_precision: bool = False,
     ):
         super().__init__()
         self.dm_cfg = dm_cfg
         self.label_dict_path = label_dict_path
-        self.double_precision = double_precision
 
     @staticmethod
     def get_loader(
-        datamoduleconfig: Optional[DMConfig],
-        label_dict_path: Dict[str, Path],
-        double_precision: bool = False,
+        datamoduleconfig: Optional[DMConfig], label_dict_path: Dict[str, Path]
     ) -> DataLoader | None:
 
         if datamoduleconfig is None:
@@ -42,7 +38,6 @@ class PLDataModule(pl.LightningDataModule):
         collator = instantiate_tgt(
             {
                 "label_dict_path": label_dict_path,
-                "double_precision": double_precision,
                 **datamoduleconfig.collator.model_dump(),
             }
         )
@@ -57,7 +52,6 @@ class PLDataModule(pl.LightningDataModule):
         return self.get_loader(
             datamoduleconfig=self.dm_cfg.train,
             label_dict_path=self.label_dict_path,
-            double_precision=self.double_precision,
         )
 
     def val_dataloader(self):
@@ -73,7 +67,6 @@ class PLDataModule(pl.LightningDataModule):
         return self.get_loader(
             datamoduleconfig=self.dm_cfg.valid,
             label_dict_path=self.label_dict_path,
-            double_precision=self.double_precision,
         )
 
     def test_dataloader(self):
