@@ -244,7 +244,7 @@ python -m asdlib.bin.table dcase="${dcase}" \
 
 </details>
 
-## Other Detailed Information
+## Other Details
 - `jobs/asd/base/base.sh` is a helpful wrapper script; however, you can, of course, create your own scripts using the tools above and customized configuration files.
 - `dis_baseline.sh` uses a shared frontend model for all machines, while `ae_baseline.sh` uses individual frontend models for each machine.
 - `config/*/config.yaml` includes the `overwrite` parameter, which is a flag to overwrite existing files in each process. The default is set to `False` in `config.yaml`.
