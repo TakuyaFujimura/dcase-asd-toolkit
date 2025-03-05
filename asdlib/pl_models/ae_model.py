@@ -33,7 +33,7 @@ class AEPLModel(BasePLModel):
 
     def setup_auc(self):
         self.auc_type_list = [
-            "all_s_auc",
+            "all_s_auc",  # AUC with all sections in source domain
             "all_t_auc",
             "all_smix_auc",
             "all_tmix_auc",
