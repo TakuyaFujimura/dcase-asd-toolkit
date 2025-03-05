@@ -61,7 +61,7 @@ class PLDataModule(pl.LightningDataModule):
                 raise ValueError("Validation dataloader should not shuffle")
             if self.dm_cfg.valid.batch_sampler is not None:
                 raise ValueError("Validation dataloader should not use batch_sampler")
-            if getattr(self.dm_cfg.valid.collator, "shuffle", True):
+            if self.dm_cfg.valid.collator.get("shuffle", True):
                 raise ValueError("Validation collator should not shuffle")
 
         return self.get_loader(
