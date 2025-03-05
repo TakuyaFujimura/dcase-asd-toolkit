@@ -20,6 +20,8 @@ metric: null
 vis_type: null
 embed_key: null
 
+extract_items: ["agg_idx"]
+
 trans_exec: true
 trans_overwrite: false
 vis_exec: true
