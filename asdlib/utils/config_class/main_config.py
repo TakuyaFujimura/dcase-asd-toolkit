@@ -3,8 +3,6 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from .datamodule import AudioFeatDSConfig, BasicCollatorConfig, BasicDSConfig
-
 
 class GradConfig(BaseModel):
     log_every_n_steps: int = 25
@@ -21,9 +19,9 @@ class ModelConfig(BaseModel):
 
 class DMConfig(BaseModel):
     dataloader: Dict[str, Any]
-    dataset: BasicDSConfig | AudioFeatDSConfig
+    dataset: Dict[str, Any]
     batch_sampler: Optional[Dict[str, Any]] = None
-    collator: BasicCollatorConfig
+    collator: Dict[str, Any]
 
 
 class DMSplitConfig(BaseModel):

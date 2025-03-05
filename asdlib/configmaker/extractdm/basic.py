@@ -36,8 +36,8 @@ class BasicExtractDMConfigMaker(BaseExtractDMConfigMaker):
         }
         self.collator_cfg = {
             "tgt_class": "asdlib.datasets.BasicCollator",
-            "sec": past_dmcfg.collator.sec,
-            "sr": past_dmcfg.collator.sr,
+            "sec": past_dmcfg.collator["sec"],
+            "sr": past_dmcfg.collator["sr"],
             **collator_cfg,
             "need_feat": False,
             "shuffle": False,
