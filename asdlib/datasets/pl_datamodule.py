@@ -26,7 +26,7 @@ class PLDataModule(pl.LightningDataModule):
         if datamoduleconfig is None:
             return None
 
-        dataset = instantiate_tgt(datamoduleconfig.dataset.model_dump())
+        dataset = instantiate_tgt(datamoduleconfig.dataset)
 
         if datamoduleconfig.batch_sampler is None:
             batch_sampler = None
@@ -38,7 +38,7 @@ class PLDataModule(pl.LightningDataModule):
         collator = instantiate_tgt(
             {
                 "label_dict_path": label_dict_path,
-                **datamoduleconfig.collator.model_dump(),
+                **datamoduleconfig.collator,
             }
         )
         return DataLoader(

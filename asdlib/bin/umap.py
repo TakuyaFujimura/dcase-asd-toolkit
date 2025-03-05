@@ -56,6 +56,7 @@ def main(hydra_cfg: DictConfig) -> None:
             metric=cfg.metric,
             embed_key=cfg.embed_key,
             save_path=umap_dir / f"{csv_stem}.csv",
+            extract_items=cfg.extract_items,
         )
 
     if cfg.vis_exec:

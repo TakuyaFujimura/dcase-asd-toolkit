@@ -13,16 +13,17 @@ class MainUmapConfig(BaseModel):
     result_dir: Path
 
     machine: str
-    
+
     metric: str
     vis_type: str
     embed_key: str
+
+    extract_items: List[str] = Field(default_factory=list)
 
     trans_exec: bool
     trans_overwrite: bool
     vis_exec: bool
     vis_overwrite: bool
-    
 
     @field_validator("name", mode="before")
     def cast_name(cls, v):
