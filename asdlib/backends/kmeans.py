@@ -40,14 +40,15 @@ def min_cosine(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 class KmeansConfig(BaseModel):
     n_clusters: int
     metric: Literal["euclid", "cosine"]
+    sep_section: bool = True
 
 
 class Kmeans(BaseBackend):
     def __init__(self, hp_dict: Dict[str, Any]):
         self.hp_dict = KmeansConfig(**hp_dict)
-        self.kmeans_so = KMeans(n_clusters=self.hp_dict.n_clusters, random_state=0)
+        self.centers_dict: Dict[int, np.ndarray] = {}
 
-    def fit(self, train_df: pd.DataFrame):
+    def get_centers(self, train_df: pd.DataFrame) -> np.ndarray:
         is_target = np.asarray(train_df["is_target"].values)
         self.check_target(is_target)
         embed = get_embed_from_df(train_df)
@@ -56,19 +57,41 @@ class Kmeans(BaseBackend):
             embed = normalize_vector(embed)
 
         centers_ta: np.ndarray = embed[is_target == 1]  # (M, D)
-        self.kmeans_so.fit(embed[is_target == 0])
-        centers_so: np.ndarray = self.kmeans_so.cluster_centers_
+        kmeans_so = KMeans(n_clusters=self.hp_dict.n_clusters, random_state=0)
+        kmeans_so.fit(embed[is_target == 0])
+        centers_so: np.ndarray = kmeans_so.cluster_centers_
 
         if self.hp_dict.metric == "cosine":
             centers_so = normalize_vector(centers_so)
 
-        self.centers = np.vstack([centers_so, centers_ta])  # (M, D)
+        centers = np.vstack([centers_so, centers_ta])  # (M, D)
+        return centers
+
+    def fit(self, train_df: pd.DataFrame):
+        section = train_df["section"].values
+        if self.hp_dict.sep_section:
+            for sec in np.unique(section):  # type: ignore
+                self.centers_dict[sec] = self.get_centers(train_df[section == sec])
+        else:
+            self.centers_dict[0] = self.get_centers(train_df)
+
+    def calc_score(self, test_df: pd.DataFrame, centers: np.ndarray) -> np.ndarray:
+        embed = get_embed_from_df(test_df)  # (N, D)
+        if self.hp_dict.metric == "cosine":
+            scores = min_cosine(embed, centers)  # (N,)
+        else:
+            scores = min_euclid(embed, centers)  # (N,)
+        return scores
 
     def anomaly_score(self, test_df: pd.DataFrame) -> Dict[str, np.ndarray]:
-        embed = get_embed_from_df(test_df)  # (N, D)
-
-        if self.hp_dict.metric == "cosine":
-            scores = min_cosine(embed, self.centers)  # (N,)
+        section = test_df["section"].values
+        scores = np.zeros(len(test_df))
+        if self.hp_dict.sep_section:
+            for sec in np.unique(section):  # type: ignore
+                scores[section == sec] = self.calc_score(
+                    test_df[section == sec], self.centers_dict[sec]
+                )
         else:
-            scores = min_euclid(embed, self.centers)  # (N,)
+            scores = self.calc_score(test_df, self.centers_dict[0])
+
         return {"plain": scores}

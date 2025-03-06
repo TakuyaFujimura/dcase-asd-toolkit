@@ -1,8 +1,11 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Dict
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class BaseBackend(ABC):
@@ -17,4 +20,4 @@ class BaseBackend(ABC):
 
     def check_target(self, is_target: np.ndarray) -> None:
         if np.sum(is_target) == 0:
-            raise ValueError("number of target data is 0.")
+            logger.warning("number of target data is 0.")
