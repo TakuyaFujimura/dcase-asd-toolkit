@@ -18,7 +18,7 @@ class KnnConfig(BaseModel):
     n_neighbors_ta: int
     smote_ratio: float = 0
     smote_neighbors: int = 5
-    sep_section: bool = True
+    sep_section: bool = False
 
 
 class Knn(BaseBackend):

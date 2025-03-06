@@ -40,7 +40,7 @@ def min_cosine(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 class KmeansConfig(BaseModel):
     n_clusters: int
     metric: Literal["euclid", "cosine"]
-    sep_section: bool = True
+    sep_section: bool = False
 
 
 class Kmeans(BaseBackend):

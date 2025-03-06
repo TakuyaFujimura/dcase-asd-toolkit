@@ -4,6 +4,7 @@ backend:
     hp_dict:
       n_clusters: 16
       metric: cosine
+      sep_section: False
   - tgt_class: asdlib.backends.Knn
     hp_dict:
       n_neighbors_so: 1
@@ -11,4 +12,5 @@ backend:
       smote_ratio: 0.05
       smote_neighbors: 5
       metric: cosine
+      sep_section: False
 
