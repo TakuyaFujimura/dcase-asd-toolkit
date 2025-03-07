@@ -89,22 +89,23 @@ def get_official_sectionlist(dcase: str, split: str = "") -> List[int]:
         raise NotImplementedError()
 
 
+def combine_section_metric(sectionlist: List[int], metriclist: List[str]) -> List[str]:
+    return [f"{section}_{metric}" for section in sectionlist for metric in metriclist]
+
+
 def add_section_to_metric(hmean_cfg_dict: HmeanCfgDict, dcase: str) -> HmeanCfgDict:
     hmean_cfg_dict_new = {}
     for hmean_name, metriclist in hmean_cfg_dict.items():
         if dcase in ["dcase2021", "dcase2022"]:
             for split in ["dev", "eval"]:
-                hmean_cfg_dict_new[f"{hmean_name}-{split}"] = [
-                    f"{section}_{metric}"
-                    for section in get_official_sectionlist(dcase=dcase, split=split)
-                    for metric in metriclist
-                ]
+                hmean_cfg_dict_new[f"{hmean_name}-{split}"] = combine_section_metric(
+                    sectionlist=get_official_sectionlist(dcase=dcase, split=split),
+                    metriclist=metriclist,
+                )
         elif dcase in ["dcase2023", "dcase2024"]:
-            hmean_cfg_dict_new[hmean_name] = [
-                f"{section}_{metric}"
-                for section in get_official_sectionlist(dcase=dcase)
-                for metric in metriclist
-            ]
+            hmean_cfg_dict_new[hmean_name] = combine_section_metric(
+                sectionlist=get_official_sectionlist(dcase=dcase), metriclist=metriclist
+            )
         else:
             raise NotImplementedError()
 
