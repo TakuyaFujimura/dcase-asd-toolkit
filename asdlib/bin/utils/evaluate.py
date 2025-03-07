@@ -8,7 +8,7 @@ import pandas as pd
 from scipy.stats import hmean
 from sklearn.metrics import roc_auc_score
 
-from asdlib.utils.config_class import CustomHmeanConfig
+from asdlib.utils.config_class import HmeanCfgDict
 from asdlib.utils.dcase_utils import get_dcase_idx
 
 logger = logging.getLogger(__name__)
@@ -66,69 +66,89 @@ def get_auc_type_list(score_df: pd.DataFrame) -> List[str]:
     return auc_type_list
 
 
-def get_official_hmean_cols(hmean_name: str, auc_type_list: List[str]) -> List[str]:
-    section = sorted(list({int(auc_type.split("_")[0]) for auc_type in auc_type_list}))
-    if hmean_name in ["official23", "official24"]:
-        if section == [0]:
-            return ["0_smix_auc", "0_tmix_auc", "0_mix_pauc"]
-        else:
-            logger.warning(f"{hmean_name}: section {section} is provided.")
-            return []
-
-    elif hmean_name.split("-")[0] in ["official22", "official21"]:
-        if section != list(range(6)):
-            logger.warning(f"{hmean_name}: section {section} is provided.")
-            return []
-        if hmean_name == "official22-dev":
-            return [
-                f"{i}_{a}"
-                for i in range(3)
-                for a in ["smix_auc", "tmix_auc", "mix_pauc"]
-            ]
-        elif hmean_name == "official22-eval":
-            return [
-                f"{i}_{a}"
-                for i in range(3, 6)
-                for a in ["smix_auc", "tmix_auc", "mix_pauc"]
-            ]
-        elif hmean_name == "official21-dev":
-            return [
-                f"{i}_{a}"
-                for i in range(3)
-                for a in ["s_auc", "t_auc", "s_pauc", "t_pauc"]
-            ]
-        elif hmean_name == "official21-eval":
-            return [
-                f"{i}_{a}"
-                for i in range(3, 6)
-                for a in ["s_auc", "t_auc", "s_pauc", "t_pauc"]
-            ]
-        else:
-            raise NotImplementedError()
-
+def get_official_metriclist(dcase: str) -> List[str]:
+    if dcase == "dcase2021":
+        return ["s_auc", "t_auc", "s_pauc", "t_pauc"]
+    elif dcase in ["dcase2022", "dcase2023", "dcase2024"]:
+        return ["smix_auc", "tmix_auc", "mix_pauc"]
     else:
         raise NotImplementedError()
 
 
+def get_official_sectionlist(dcase: str, split: str = "") -> List[int]:
+    if dcase in ["dcase2021", "dcase2022"]:
+        if split == "dev":
+            return [0, 1, 2]
+        elif split == "eval":
+            return [3, 4, 5]
+        else:
+            raise NotImplementedError()
+    elif dcase in ["dcase2023", "dcase2024"]:
+        return [0]
+    else:
+        raise NotImplementedError()
+
+
+def combine_section_metric(sectionlist: List[int], metriclist: List[str]) -> List[str]:
+    return [f"{section}_{metric}" for section in sectionlist for metric in metriclist]
+
+
+def add_section_to_metric(hmean_cfg_dict: HmeanCfgDict, dcase: str) -> HmeanCfgDict:
+    hmean_cfg_dict_new = {}
+    for hmean_name, metriclist in hmean_cfg_dict.items():
+        if dcase in ["dcase2021", "dcase2022"]:
+            for split in ["dev", "eval"]:
+                hmean_cfg_dict_new[f"{hmean_name}-{split}"] = combine_section_metric(
+                    sectionlist=get_official_sectionlist(dcase=dcase, split=split),
+                    metriclist=metriclist,
+                )
+        elif dcase in ["dcase2023", "dcase2024"]:
+            hmean_cfg_dict_new[hmean_name] = combine_section_metric(
+                sectionlist=get_official_sectionlist(dcase=dcase), metriclist=metriclist
+            )
+        else:
+            raise NotImplementedError()
+
+    return hmean_cfg_dict_new
+
+
+def complete_hmean_cfg_dict(hmean_cfg_dict: HmeanCfgDict, dcase: str) -> HmeanCfgDict:
+    if any([key.startswith("official") for key in hmean_cfg_dict]):
+        raise ValueError("name starting with 'official' is reserved. Please rename.")
+    hmean_cfg_dict[f"official{dcase[-2:]}"] = get_official_metriclist(dcase=dcase)
+    # Dict of metriclist: {hmean_name: [smix_auc, tmix_auc, mix_pauc]}
+    hmean_cfg_dict = add_section_to_metric(hmean_cfg_dict=hmean_cfg_dict, dcase=dcase)
+    # Dict of metriclist w/ section: {hmean_name: [0_smix_auc, 1_smix_auc, ..., 2_mix_pauc]}
+    return hmean_cfg_dict
+
+
+def hmean_is_available(
+    evaluate_df: pd.DataFrame, hmean_name: str, hmean_cols: List[str]
+) -> bool:
+    if len(hmean_cols) == 0:
+        logger.warning(f"{hmean_name}: hmean_cols is empty.")
+        return False
+    if not set(hmean_cols).issubset(evaluate_df.columns):
+        logger.warning(f"{hmean_name}: {hmean_cols} is not provided in evaluate_df.")
+        return False
+    return True
+
+
 def add_hmean(
     evaluate_df: pd.DataFrame,
-    hmean_cfg_list: List[str | CustomHmeanConfig],
-    auc_type_list: List[str],
+    dcase: str,
+    hmean_cfg_dict: HmeanCfgDict,
 ) -> pd.DataFrame:
-    for hmean_cfg in hmean_cfg_list:
-        if isinstance(hmean_cfg, str):
-            hmean_name = hmean_cfg
-            hmean_cols = get_official_hmean_cols(
-                hmean_name=hmean_cfg, auc_type_list=auc_type_list
-            )
-        elif isinstance(hmean_cfg, CustomHmeanConfig):
-            hmean_name = hmean_cfg.name
-            hmean_cols = hmean_cfg.cols
-        else:
-            raise ValueError(f"Unexpected hmean_cfg type: {hmean_cfg}")
 
-        if len(hmean_cols) > 0:
-            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
-                lambda x: hmean(x), axis=1
-            )
+    hmean_cfg_dict = complete_hmean_cfg_dict(hmean_cfg_dict=hmean_cfg_dict, dcase=dcase)
+
+    for hmean_name, hmean_cols in hmean_cfg_dict.items():
+        if not hmean_is_available(
+            evaluate_df=evaluate_df, hmean_name=hmean_name, hmean_cols=hmean_cols
+        ):
+            continue
+
+        evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
+            lambda x: hmean(x), axis=1
+        )
     return evaluate_df

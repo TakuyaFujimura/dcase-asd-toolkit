@@ -1,3 +1,7 @@
+defaults:
+  - _self_
+  - experiments: null
+
 
 
 seed: null
@@ -7,6 +11,7 @@ version: null
 ckpt_ver: null
 result_dir: "./results"
 
+hmean_cfg_dict: {}
 dcase: null
 overwrite: false
 

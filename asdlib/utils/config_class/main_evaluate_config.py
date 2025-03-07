@@ -1,12 +1,9 @@
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel, Field, field_validator
 
-
-class CustomHmeanConfig(BaseModel):
-    name: str
-    cols: List[str]
+HmeanCfgDict = Dict[str, List[str]]
 
 
 class MainEvaluateConfig(BaseModel):
@@ -17,7 +14,8 @@ class MainEvaluateConfig(BaseModel):
     ckpt_ver: str
     result_dir: Path
 
-    hmean_cfg_list: List[str | CustomHmeanConfig] = Field(default_factory=list)
+    hmean_cfg_dict: HmeanCfgDict = Field(default_factory=dict)
+    dcase: str
 
     machine: str
 
@@ -31,3 +29,15 @@ class MainEvaluateConfig(BaseModel):
             return str(v)
         else:
             raise ValueError("Unexpected name type")
+
+    @field_validator("hmean_cfg_dict", mode="after")
+    def check_hmean_cfg_dict(cls, v: HmeanCfgDict):
+        for name, metric_list in v.items():
+            for metric in metric_list:
+                if metric[0] in ["0", "1", "2", "3", "4", "5"]:
+                    raise ValueError(
+                        f"{name}: hmean_cfg_dict cannot specify section.\n"
+                        + "Please remove it (e.g. '0_s_auc' -> 's_auc').\n"
+                        + "This is because the section to be collected is automatically determined by dcase."
+                    )
+        return v

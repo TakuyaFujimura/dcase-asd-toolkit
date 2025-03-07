@@ -56,8 +56,8 @@ def main(hydra_cfg: DictConfig) -> None:
             )
     evaluate_df = add_hmean(
         evaluate_df=evaluate_df,
-        hmean_cfg_list=cfg.hmean_cfg_list,
-        auc_type_list=auc_type_list,
+        dcase=cfg.dcase,
+        hmean_cfg_dict=cfg.hmean_cfg_dict,
     )
 
     evaluate_df = evaluate_df.reset_index().rename(columns={"index": "backend"})

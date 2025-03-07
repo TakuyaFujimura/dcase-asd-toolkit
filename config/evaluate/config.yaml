@@ -11,7 +11,8 @@ version: null
 ckpt_ver: null
 result_dir: "./results"
 
-hmean_cfg_list: []
+hmean_cfg_dict: {}
+dcase: null
 
 machine: null
 

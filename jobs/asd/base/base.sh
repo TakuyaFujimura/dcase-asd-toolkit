@@ -8,7 +8,8 @@ extract_exp=$5
 score_exp=$6
 evaluate_exp=$7
 umap_exp=$8
-IFS=',' read -r -a ckpt_ver_list <<< "$9"
+table_exp=$9
+IFS=',' read -r -a ckpt_ver_list <<< "${10}"
 ########################
 
 # get machines
@@ -56,16 +57,16 @@ for ckpt_ver in "${ckpt_ver_list[@]}"; do
 
         python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}'' 'dcase='${dcase}''
 
         python -m asdlib.bin.umap experiments="${umap_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
         'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
     done
 
-    python -m asdlib.bin.table dcase="${dcase}" \
+    python -m asdlib.bin.table experiments="${table_exp}" \
     'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-    'ckpt_ver='${ckpt_ver}''
+    'ckpt_ver='${ckpt_ver}'' dcase="${dcase}"
 done
 
 
