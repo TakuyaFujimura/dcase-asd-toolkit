@@ -20,7 +20,7 @@ class AdaProj(nn.Module):
         super().__init__()
         self.n_classes = n_classes
         self.subspace_dim = subspace_dim
-        self.s_init = np.sqrt(2) * np.log(n_classes * n_subclusters - 1)
+        self.s_init = np.sqrt(2) * np.log(n_classes - 1)
         self.eps = eps
 
         # Weight initialization
