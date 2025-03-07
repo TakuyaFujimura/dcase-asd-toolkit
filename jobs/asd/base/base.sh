@@ -56,7 +56,7 @@ for ckpt_ver in "${ckpt_ver_list[@]}"; do
 
         python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}'' 'dcase='${dcase}''
 
         python -m asdlib.bin.umap experiments="${umap_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \

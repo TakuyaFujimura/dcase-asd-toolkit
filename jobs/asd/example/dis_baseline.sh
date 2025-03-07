@@ -6,7 +6,7 @@ version="${dcase}_dis_baseline"
 seed=0
 extract_exp="shared"
 score_exp="dis_baseline"
-evaluate_exp="${dcase}"
+evaluate_exp="default"
 umap_exp="cosine"
 ckpt_ver_list="epoch_12,epoch_16"
 # ----------------------------------------------- #

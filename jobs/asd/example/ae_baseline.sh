@@ -6,7 +6,7 @@ version="${dcase}_ae_baseline"
 seed=0
 extract_exp="machinewise"
 score_exp="no_backend"
-evaluate_exp="${dcase}"
+evaluate_exp="default"
 umap_exp="euclid"
 ckpt_ver_list="last"
 # ----------------------------------------------- #
