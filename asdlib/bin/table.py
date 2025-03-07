@@ -41,9 +41,6 @@ def myround(x: float) -> float:
 def complete_hmean_cfg_dict(
     hmean_cfg_dict: Dict[str, List[str]], dcase: str, split: str
 ) -> HmeanCfgDict:
-    if any([key.startswith("official") for key in hmean_cfg_dict]):
-        raise ValueError("name starting with 'official' is reserved. Please rename.")
-
     sectionlist = get_official_sectionlist(dcase=dcase, split=split)
 
     hmean_cfg_dict_new = {}
@@ -92,7 +89,7 @@ def get_table_df(
 @hydra.main(version_base=None, config_path="../../config/table", config_name="config")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
-    logger.info(f"Start scoring: {HydraConfig().get().run.dir}")
+    logger.info(f"Start making table: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = (
@@ -105,9 +102,13 @@ def main(hydra_cfg: DictConfig) -> None:
 
     check_file_exists(dir_path=output_dir, file_name="*.csv", overwrite=cfg.overwrite)
 
+    if any([key.startswith("official") for key in cfg.hmean_cfg_dict]):
+        raise ValueError("name starting with 'official' is reserved. Please rename.")
+
     cfg.hmean_cfg_dict[f"official{cfg.dcase[-2:]}"] = get_official_metriclist(
         dcase=cfg.dcase
     )
+
     for split in ["dev", "eval"]:
         hmean_cfg_dict = complete_hmean_cfg_dict(
             hmean_cfg_dict=cfg.hmean_cfg_dict, dcase=cfg.dcase, split=split
