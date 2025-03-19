@@ -22,7 +22,7 @@ from asdit.bin.utils.evaluate import (
 )
 from asdit.bin.utils.path import check_file_exists
 from asdit.utils.config_class import MainTableConfig
-from asdit.utils.config_class.main_evaluate_config import HmeanCfgDict
+from asdit.utils.config_class.evaluate_config import HmeanCfgDict
 from asdit.utils.dcase_utils import MACHINE_DICT
 
 logger = logging.getLogger(__name__)

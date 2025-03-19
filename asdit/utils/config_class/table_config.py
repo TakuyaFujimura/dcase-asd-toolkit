@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field, field_validator
 
-from .main_evaluate_config import HmeanCfgDict
+from .evaluate_config import HmeanCfgDict
 
 
 class MainTableConfig(BaseModel):
