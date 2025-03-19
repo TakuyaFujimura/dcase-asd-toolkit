@@ -31,9 +31,7 @@ def get_dicts(
 
 def get_as_name(backend_cfg: Dict[str, Any]) -> str:
     join_list = [backend_cfg["tgt_class"].split(".")[-1]]
-    join_list += [
-        str(v) for k, v in backend_cfg["model_dict"].items() if k != "tgt_class"
-    ]
+    join_list += [str(v) for k, v in backend_cfg.items() if k != "tgt_class"]
     return "-".join(join_list)
 
 

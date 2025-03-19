@@ -19,11 +19,11 @@ for machine in $machines; do
     bash ../base/base.sh "${common_args[@]}" \
     --machine="${machine}" \
     --cfg_train="${name}/${version}" \
-    --cfg_extract="machinewise" \
+    --cfg_extract="resume_machinewise" \
     --cfg_score="no_backend" \
     --cfg_evaluate="default" \
     --cfg_umap="euclid" \
-    --ckpt_ver="last"
+    --infer_ver="last"
     exit
 done
 

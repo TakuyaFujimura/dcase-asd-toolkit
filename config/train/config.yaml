@@ -42,4 +42,4 @@ data_dir: "../data"
 
 hydra:
     run:
-        dir: ${result_dir}/${name}/${version}_${seed}/model/${model_ver}
+        dir: ${result_dir}/${name}/${dcase}/${version}_${seed}/model/${model_ver}

@@ -1,5 +1,5 @@
 # @package _global_
 resume_or_scratch: resume
 model_ver: ${machine}
-ckpt_ver: null
-infer_ver: ${ckpt_ver}
+ckpt_ver: ${infer_ver}
+infer_ver: null

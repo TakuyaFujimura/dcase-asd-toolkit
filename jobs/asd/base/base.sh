@@ -11,7 +11,7 @@ cfg_score="None"
 cfg_evaluate="None"
 cfg_umap="None"
 cfg_table="None"
-ckpt_ver="None"
+infer_ver="None"
 ########################
 
 cd "$(dirname "$0")"
@@ -40,11 +40,13 @@ if [ "${cfg_train}" = "None" ]; then
 else
     echo "Starting training"
     if [ "${machine}" = "None" ]; then
-        python -m asdit.bin.train experiments="${cfg_train}" seed="${seed}" \
-        name="${name}" version="${version}" dcase="${dcase}"
+        python -m asdit.bin.train experiments="${cfg_train}" \
+        seed="${seed}" dcase="${dcase}" \
+        name="${name}" version="${version}"
     else
-        python -m asdit.bin.train experiments="${cfg_train}" seed="${seed}" \
-        name="${name}" version="${version}" dcase="${dcase}" machine="${machine}"
+        python -m asdit.bin.train experiments="${cfg_train}" \
+        seed="${seed}" dcase="${dcase}" \
+        name="${name}" version="${version}" machine="${machine}"
     fi
 fi
 
@@ -54,8 +56,9 @@ if [ "${cfg_extract}" = "None" ]; then
 else
     echo "Starting extraction"
     python -m asdit.bin.extract experiments="${cfg_extract}" \
-    name="${name}" version="${version}" seed="${seed}" \
-    ckpt_ver="${ckpt_ver}" machine="${machine}"
+    seed="${seed}" dcase="${dcase}" \
+    name="${name}" version="${version}" \
+    infer_ver="${infer_ver}" machine="${machine}"
 fi
 
 # score
@@ -64,8 +67,9 @@ if [ "${cfg_score}" = "None" ]; then
 else
     echo "Starting scoring"
     python -m asdit.bin.score experiments="${cfg_score}" \
-    name="${name}" version="${version}" seed="${seed}" \
-    ckpt_ver="${ckpt_ver}" machine="${machine}"
+    seed="${seed}" dcase="${dcase}" \
+    name="${name}" version="${version}" \
+    infer_ver="${infer_ver}" machine="${machine}"
 fi
 
 # evaluate
@@ -74,8 +78,9 @@ if [ "${cfg_evaluate}" = "None" ]; then
 else
     echo "Starting evaluation"
     python -m asdit.bin.evaluate experiments="${cfg_evaluate}" \
-    name="${name}" version="${version}" seed="${seed}" \
-    ckpt_ver="${ckpt_ver}" machine="${machine}" dcase="${dcase}"
+    seed="${seed}" dcase="${dcase}" \
+    name="${name}" version="${version}" \
+    infer_ver="${infer_ver}" machine="${machine}" dcase="${dcase}"
 fi
 
 # umap
@@ -84,8 +89,9 @@ if [ "${cfg_umap}" = "None" ]; then
 else
     echo "Starting umap"
     python -m asdit.bin.umap experiments="${cfg_umap}" \
-    name="${name}" version="${version}" seed="${seed}" \
-    ckpt_ver="${ckpt_ver}" machine="${machine}"
+    seed="${seed}" dcase="${dcase}" \
+    name="${name}" version="${version}" \
+    infer_ver="${infer_ver}" machine="${machine}"
 fi
 
 # table
@@ -94,8 +100,9 @@ if [ "${cfg_table}" = "None" ]; then
 else
     echo "Starting table"
     python -m asdit.bin.table experiments="${table_exp}" \
-    name="${name}" version="${version}" seed="${seed}" \
-    ckpt_ver="${ckpt_ver}" dcase="${dcase}"
+    seed="${seed}" dcase="${dcase}" \
+    name="${name}" version="${version}" \
+    infer_ver="${infer_ver}"
 done
 
 

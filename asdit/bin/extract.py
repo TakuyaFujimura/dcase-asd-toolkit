@@ -65,7 +65,9 @@ def setup_plmodel_dmconfigmaker(
                 "plmodel_cfg must be specified when resume_or_scratch is scratch"
             )
         plmodel = instantiate_tgt(cfg.plmodel_cfg)
-        dmconfigmaker = ExtractDMConfigMaker(dcase=cfg.dcase, **cfg.datamodule)
+        dmconfigmaker = ExtractDMConfigMaker(
+            dcase=cfg.dcase, machine=cfg.machine, **cfg.datamodule
+        )
     else:
         raise ValueError(f"Unexpected resume_or_scratch: {cfg.resume_or_scratch}")
     return plmodel, dmconfigmaker

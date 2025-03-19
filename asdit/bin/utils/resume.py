@@ -20,7 +20,7 @@ class ExtractDMConfigMaker:
         dcase: str,
         sec: float | Literal["all"],
         sr: int,
-        machine: str,  # given by extract.py
+        machine: str,
         dataloader_cfg: Dict[str, Any] = {},
         collator_cfg: Dict[str, Any] = {},
         dataset_cfg: Dict[str, Any] = {},
@@ -114,6 +114,7 @@ def resume_dmconfigmaker(
         dcase=past_cfg.dcase,
         sec=past_collator_cfg["sec"],
         sr=past_collator_cfg["sr"],
+        machine=cfg.machine,
         **cfg.datamodule,
     )
     return dmconfigmaker
