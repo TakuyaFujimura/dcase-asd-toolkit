@@ -1,12 +1,18 @@
 #!/bin/bash
 
+# This is an example script for training and testing an autoencoder baseline model
+# Frontend models are created for each machine types
+
+
 dcase="dcase2023"
 seed="0"
 name="example"
-version="${dcase}_ae_baseline"
-common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}")
+version="ae_baseline"
 
 machines=$(bash ../base/get_machines.sh "${dcase}")
+
+# set common args
+common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}")
 
 # train and test
 for machine in $machines; do

@@ -4,8 +4,6 @@ defaults:
     - override /model: ae_mlp
     - override /trainer: default
 
-dcase: "dcase2022"
-
 label_dict_path: {}
 
 callback_opts:
@@ -13,7 +11,7 @@ callback_opts:
     every_n_epochs: 10
 
 trainer:
-  max_epochs: 100
+  max_epochs: 50
   devices: [1]
 
 model_ver: ${machine}

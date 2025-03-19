@@ -1,13 +1,17 @@
 #!/bin/bash
 
+# This is an example script for training and testing a discriminative baseline model
+# Frontend models are created and shared for all machine types
+
 dcase="dcase2023"
 seed="0"
 name="example"
-version="${dcase}_dis_baseline"
-common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}")
+version="dis_baseline"
 
 machines=$(bash ../base/get_machines.sh "${dcase}")
 
+# set common args
+common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}")
 
 # train
 bash ../base/base.sh "${common_args[@]}" \
