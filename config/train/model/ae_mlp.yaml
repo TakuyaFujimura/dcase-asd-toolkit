@@ -1,4 +1,4 @@
-tgt_class: asdlib.pl_models.AEPLModel
+tgt_class: asdit.pl_models.AEPLModel
 
 optim_cfg:
   tgt_class: torch.optim.AdamW
@@ -9,7 +9,7 @@ grad_cfg: {}
 
 
 audio_feat_cfg:
-  tgt_class: asdlib.models.audio_feature.FlattenSTFT
+  tgt_class: asdit.models.audio_feature.FlattenSTFT
   stft_cfg:
     use_mel: true
     sr: ${datamodule.sr}
@@ -25,7 +25,7 @@ audio_feat_cfg:
 
 model_cfg:
   network_cfg:
-    tgt_class: asdlib.models.autoencoder.AE_MLP
+    tgt_class: asdit.models.autoencoder.AE_MLP
     z_dim: 8
     h_dim: 128
   audio_feat_cfg: ${model.audio_feat_cfg}

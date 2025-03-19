@@ -14,7 +14,7 @@ ckpt_ver: null
 result_dir: "./results"
 
 datamodule:
-  tgt_class: asdlib.configmaker.extractdm.BasicExtractDMConfigMaker
+  tgt_class: asdit.configmaker.extractdm.BasicExtractDMConfigMaker
   dataloader_cfg:
     batch_size: 64
     num_workers: 0

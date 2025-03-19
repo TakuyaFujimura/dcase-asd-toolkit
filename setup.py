@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="asdlib",
+    name="asdit",
     version="0.0.0",
     description="Anomalous Sound Detection Library",
     author="Takuya Fujimura",

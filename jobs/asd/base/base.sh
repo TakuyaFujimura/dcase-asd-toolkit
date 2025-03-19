@@ -35,11 +35,11 @@ source "venv/bin/activate"
 
 # training
 if [ "${extract_exp}" = "shared" ]; then
-    python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+    python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
     'name='${name}'' 'version='${version}''
 elif [ "${extract_exp}" = "machinewise" ]; then
     for machine in "${machines[@]}"; do
-        python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+        python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
         'name='${name}'' 'version='${version}'' 'machine='${machine}''
     done
 fi
@@ -47,24 +47,24 @@ fi
 # testing
 for ckpt_ver in "${ckpt_ver_list[@]}"; do
     for machine in "${machines[@]}"; do
-        python -m asdlib.bin.extract experiments="${extract_exp}" \
+        python -m asdit.bin.extract experiments="${extract_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
         'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 
-        python -m asdlib.bin.score experiments="${score_exp}" \
+        python -m asdit.bin.score experiments="${score_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
         'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 
-        python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
+        python -m asdit.bin.evaluate experiments="${evaluate_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
         'ckpt_ver='${ckpt_ver}'' 'machine='${machine}'' 'dcase='${dcase}''
 
-        python -m asdlib.bin.umap experiments="${umap_exp}" \
+        python -m asdit.bin.umap experiments="${umap_exp}" \
         'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
         'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
     done
 
-    python -m asdlib.bin.table experiments="${table_exp}" \
+    python -m asdit.bin.table experiments="${table_exp}" \
     'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
     'ckpt_ver='${ckpt_ver}'' dcase="${dcase}"
 done

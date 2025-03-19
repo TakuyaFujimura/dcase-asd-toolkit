@@ -1,11 +1,11 @@
 # @package _global_
 backend:
-  - tgt_class: asdlib.backends.Kmeans
+  - tgt_class: asdit.backends.Kmeans
     hp_dict:
       n_clusters: 16
       metric: cosine
       sep_section: False
-  - tgt_class: asdlib.backends.Knn
+  - tgt_class: asdit.backends.Knn
     hp_dict:
       n_neighbors_so: 1
       n_neighbors_ta: 1
