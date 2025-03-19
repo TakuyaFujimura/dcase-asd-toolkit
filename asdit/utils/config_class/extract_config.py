@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -10,10 +10,15 @@ class MainExtractConfig(BaseModel):
     dcase: str
     name: str
     version: str
-    model_ver: str
 
-    ckpt_ver: str
+    resume_or_scratch: Literal["resume", "scratch"]
+
+    plmodel_cfg: Optional[Dict[str, Any]] = None
+    model_ver: Optional[str] = None
+    ckpt_ver: Optional[str] = None
+
     result_dir: Path
+    infer_ver: str
 
     datamodule: dict
     label_dict_path: Dict[str, Path] = Field(default_factory=dict)

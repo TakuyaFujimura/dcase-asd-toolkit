@@ -12,7 +12,7 @@ class MainEvaluateConfig(BaseModel):
     name: str
     version: str
 
-    ckpt_ver: str
+    infer_ver: str
     result_dir: Path
 
     hmean_cfg_dict: HmeanCfgDict = Field(default_factory=dict)

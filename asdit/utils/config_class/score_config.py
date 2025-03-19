@@ -10,7 +10,7 @@ class MainScoreConfig(BaseModel):
     name: str
     version: str
 
-    ckpt_ver: str
+    infer_ver: str
     result_dir: Path
 
     backend: List[Dict[str, Any]] = Field(default_factory=list)

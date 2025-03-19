@@ -27,7 +27,7 @@ def get_version_dir(
 def get_output_dir(
     cfg: MainExtractConfig | MainScoreConfig | MainEvaluateConfig | MainUmapConfig,
 ) -> Path:
-    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.ckpt_ver / cfg.machine
+    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.infer_ver / cfg.machine
     return output_dir
 
 

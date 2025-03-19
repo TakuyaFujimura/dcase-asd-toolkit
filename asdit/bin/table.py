@@ -91,7 +91,7 @@ def main(hydra_cfg: DictConfig) -> None:
     logger.info(f"Start making table: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.ckpt_ver
+    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.infer_ver
 
     check_file_exists(dir_path=output_dir, file_name="*.csv", overwrite=cfg.overwrite)
 

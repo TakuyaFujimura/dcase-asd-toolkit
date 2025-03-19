@@ -10,7 +10,7 @@ class MainUmapConfig(BaseModel):
     name: str
     version: str
 
-    ckpt_ver: str
+    infer_ver: str
     result_dir: Path
 
     machine: str
