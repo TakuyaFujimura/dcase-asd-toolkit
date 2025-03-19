@@ -1,69 +1,105 @@
 #!/bin/bash
 ########################
-name=$1
-version=$2
-dcase=$3
-seed=$4
-extract_exp=$5
-score_exp=$6
-evaluate_exp=$7
-umap_exp=$8
-table_exp=$9
-IFS=',' read -r -a ckpt_ver_list <<< "${10}"
+name="None"
+version="None"
+dcase="None"
+seed="None"
+machine="None"
+cfg_train="None"
+cfg_extract="None"
+cfg_score="None"
+cfg_evaluate="None"
+cfg_umap="None"
+cfg_table="None"
+ckpt_ver="None"
 ########################
 
-# get machines
-if [ "$dcase" = "dcase2021" ]; then
-    machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
-elif [ "$dcase" = "dcase2022" ]; then
-    machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")
-elif [ "$dcase" = "dcase2023" ]; then
-    machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
-elif [ "$dcase" = "dcase2024" ]; then
-    machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
-else
-    echo "Invalid dcase"
+cd "$(dirname "$0")"
+
+source ./parse_options.sh
+
+echo "name: ${name}"
+echo "version: ${version}"
+echo "dcase: ${dcase}"
+echo "seed: ${seed}"
+echo "machine: ${machine}"
+echo "cfg_train: ${cfg_train}"
+echo "cfg_extract: ${cfg_extract}"
+echo "cfg_score: ${cfg_score}"
+echo "cfg_evaluate: ${cfg_evaluate}"
+echo "cfg_umap: ${cfg_umap}"
+echo "cfg_table: ${cfg_table}"
+echo "ckpt_ver: ${ckpt_ver}"
+
+exit
+
+
+if [ "${name}" == "None" ] || [ "${version}" == "None" ] || [ "${dcase}" == "None" ] || [ "${seed}" == "None" ]; then
+    echo "Missing required arguments"
+    echo "name: ${name}, version: ${version}, dcase: ${dcase}, seed: ${seed}"
     exit 1
 fi
 
-
 # activate virtual environment
-cd ../../..
+if [ ! -d "venv" ]; then
+    echo "venv not found"
+    exit 1
+fi
 source "venv/bin/activate"
 
-
-
-# training
-if [ "${extract_exp}" = "shared" ]; then
-    python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
-    'name='${name}'' 'version='${version}''
-elif [ "${extract_exp}" = "machinewise" ]; then
-    for machine in "${machines[@]}"; do
-        python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
-        'name='${name}'' 'version='${version}'' 'machine='${machine}''
-    done
+# train
+if [ "${cfg_train}" == "None" ]; then
+    echo "Skipping training"
+else
+    if ["${machine}" == "None"]; then
+        python -m asdit.bin.train experiments="${cfg_train}" 'seed='${seed}'' \
+        'name='${name}'' 'version='${version}'' 'dcase='${dcase}''
+    else
+        python -m asdit.bin.train experiments="${cfg_train}" 'seed='${seed}'' \
+        'name='${name}'' 'version='${version}'' 'dcase='${dcase}'' 'machine='${machine}''
+    fi
 fi
 
-# testing
-for ckpt_ver in "${ckpt_ver_list[@]}"; do
-    for machine in "${machines[@]}"; do
-        python -m asdit.bin.extract experiments="${extract_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+# extract
+if [ "${cfg_extract}" == "None" ]; then
+    echo "Skipping extraction"
+else
+    python -m asdit.bin.extract experiments="${cfg_extract}" \
+    'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+    'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+fi
 
-        python -m asdit.bin.score experiments="${score_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+# score
+if [ "${cfg_score}" == "None" ]; then
+    echo "Skipping scoring"
+else
+    python -m asdit.bin.score experiments="${cfg_score}" \
+    'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+    'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+fi
 
-        python -m asdit.bin.evaluate experiments="${evaluate_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}'' 'dcase='${dcase}''
+# evaluate
+if [ "${cfg_evaluate}" == "None" ]; then
+    echo "Skipping evaluation"
+else
+    python -m asdit.bin.evaluate experiments="${cfg_evaluate}" \
+    'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+    'ckpt_ver='${ckpt_ver}'' 'machine='${machine}'' 'dcase='${dcase}''
+fi
 
-        python -m asdit.bin.umap experiments="${umap_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
-    done
+# umap
+if [ "${cfg_umap}" == "None" ]; then
+    echo "Skipping umap"
+else
+    python -m asdit.bin.umap experiments="${cfg_umap}" \
+    'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
+    'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
+fi
 
+# table
+if [ "${cfg_table}" == "None" ]; then
+    echo "Skipping table"
+else
     python -m asdit.bin.table experiments="${table_exp}" \
     'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
     'ckpt_ver='${ckpt_ver}'' dcase="${dcase}"
