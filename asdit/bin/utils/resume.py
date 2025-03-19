@@ -5,6 +5,7 @@ from typing import Any, Dict, cast
 
 from omegaconf import OmegaConf
 
+from asdit.bin.utils.path import get_version_dir
 from asdit.pl_models import BasePLModel
 from asdit.utils.common import get_best_path, get_path_glob
 from asdit.utils.config_class import MainExtractConfig, MainTrainConfig
@@ -14,26 +15,14 @@ logger = logging.getLogger(__name__)
 
 def get_past_cfg(cfg: MainExtractConfig) -> MainTrainConfig:
     config_path = (
-        cfg.result_dir
-        / cfg.name
-        / f"{cfg.version}_{cfg.seed}"
-        / "model"
-        / cfg.model_ver
-        / ".hydra/config.yaml"
+        get_version_dir(cfg=cfg) / "model" / cfg.model_ver / ".hydra/config.yaml"
     )
     past_cfg = MainTrainConfig(**cast(Dict[str, Any], OmegaConf.load(config_path)))
     return past_cfg
 
 
 def get_ckpt_path(cfg: MainExtractConfig) -> Path:
-    ckpt_dir = (
-        cfg.result_dir
-        / cfg.name
-        / f"{cfg.version}_{cfg.seed}"
-        / "model"
-        / cfg.model_ver
-        / "checkpoints"
-    )
+    ckpt_dir = get_version_dir(cfg=cfg) / "model" / cfg.model_ver / "checkpoints"
     if cfg.ckpt_ver == "best":
         ckpt_path = get_best_path(ckpt_dir)
     elif cfg.ckpt_ver == "last":

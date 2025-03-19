@@ -8,6 +8,7 @@ HmeanCfgDict = Dict[str, List[str]]
 
 class MainEvaluateConfig(BaseModel):
     seed: int
+    dcase: str
     name: str
     version: str
 
@@ -15,7 +16,6 @@ class MainEvaluateConfig(BaseModel):
     result_dir: Path
 
     hmean_cfg_dict: HmeanCfgDict = Field(default_factory=dict)
-    dcase: str
 
     machine: str
 

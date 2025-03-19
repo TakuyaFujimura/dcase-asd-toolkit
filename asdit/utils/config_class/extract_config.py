@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 class MainExtractConfig(BaseModel):
     device: str
     seed: int
+    dcase: str
     name: str
     version: str
     model_ver: str

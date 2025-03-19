@@ -4,21 +4,30 @@ from asdit.utils.config_class import (
     MainEvaluateConfig,
     MainExtractConfig,
     MainScoreConfig,
+    MainTableConfig,
     MainUmapConfig,
 )
+from asdit.utils.config_class.train_config import MainTrainConfig
+
+
+def get_version_dir(
+    cfg: (
+        MainTrainConfig
+        | MainExtractConfig
+        | MainScoreConfig
+        | MainEvaluateConfig
+        | MainUmapConfig
+        | MainTableConfig
+    ),
+) -> Path:
+    version_dir = cfg.result_dir / cfg.name / cfg.dcase / f"{cfg.version}_{cfg.seed}"
+    return version_dir
 
 
 def get_output_dir(
     cfg: MainExtractConfig | MainScoreConfig | MainEvaluateConfig | MainUmapConfig,
 ) -> Path:
-    output_dir = (
-        cfg.result_dir
-        / cfg.name
-        / f"{cfg.version}_{cfg.seed}"
-        / "output"
-        / cfg.ckpt_ver
-        / cfg.machine
-    )
+    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.ckpt_ver / cfg.machine
     return output_dir
 
 

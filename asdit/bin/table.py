@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
-from pydantic import BaseModel
 from scipy.stats import hmean
 
 from asdit.bin.utils.evaluate import (
@@ -20,7 +19,7 @@ from asdit.bin.utils.evaluate import (
     get_official_sectionlist,
     hmean_is_available,
 )
-from asdit.bin.utils.path import check_file_exists
+from asdit.bin.utils.path import check_file_exists, get_version_dir
 from asdit.utils.config_class import MainTableConfig
 from asdit.utils.config_class.evaluate_config import HmeanCfgDict
 from asdit.utils.dcase_utils import MACHINE_DICT
@@ -92,13 +91,7 @@ def main(hydra_cfg: DictConfig) -> None:
     logger.info(f"Start making table: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = (
-        cfg.result_dir
-        / cfg.name
-        / f"{cfg.version}_{cfg.seed}"
-        / "output"
-        / cfg.ckpt_ver
-    )
+    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.ckpt_ver
 
     check_file_exists(dir_path=output_dir, file_name="*.csv", overwrite=cfg.overwrite)
 

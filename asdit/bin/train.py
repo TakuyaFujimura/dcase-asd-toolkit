@@ -11,6 +11,7 @@ from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 
 from asdit.bin.utils import NaNCheckCallback
+from asdit.bin.utils.path import get_version_dir
 from asdit.datasets import PLDataModule
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainTrainConfig
@@ -32,8 +33,8 @@ def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
-        save_dir=cfg.result_dir,
-        name=cfg.name,
+        save_dir=f"{cfg.result_dir}/{cfg.name}",
+        name=cfg.dcase,
         version=f"{cfg.version}_{cfg.seed}",
         sub_dir=f"model/{cfg.model_ver}",
     )
@@ -79,14 +80,7 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(cfg.seed, workers=True)
     # torch.autograd.set_detect_anomaly(False)
 
-    ckpt_dir = (
-        cfg.result_dir
-        / cfg.name
-        / f"{cfg.version}_{cfg.seed}"
-        / "model"
-        / cfg.model_ver
-        / "checkpoints"
-    )
+    ckpt_dir = get_version_dir(cfg=cfg) / "model" / cfg.model_ver / "checkpoints"
     if ckpt_dir.exists():
         logger.warning("already done")
         return

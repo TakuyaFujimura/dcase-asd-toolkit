@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class MainScoreConfig(BaseModel):
     seed: int
+    dcase: str
     name: str
     version: str
 

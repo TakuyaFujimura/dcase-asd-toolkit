@@ -7,6 +7,7 @@ from .evaluate_config import HmeanCfgDict
 
 class MainTableConfig(BaseModel):
     seed: int
+    dcase: str
     name: str
     version: str
 
@@ -14,7 +15,6 @@ class MainTableConfig(BaseModel):
     result_dir: Path
 
     hmean_cfg_dict: HmeanCfgDict = Field(default_factory=dict)
-    dcase: str
     overwrite: bool = False
 
     @field_validator("name", mode="before")
