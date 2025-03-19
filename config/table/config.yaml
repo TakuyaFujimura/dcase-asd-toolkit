@@ -13,7 +13,6 @@ infer_ver: null
 result_dir: "./results"
 
 hmean_cfg_dict: {}
-dcase: null
 overwrite: false
 
 

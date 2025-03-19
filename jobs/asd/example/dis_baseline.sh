@@ -11,7 +11,7 @@ version="dis_baseline"
 machines=$(bash ../base/get_machines.sh "${dcase}")
 
 # set common args
-common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}")
+common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}" --infer_ver="last")
 
 # train
 bash ../base/base.sh "${common_args[@]}" \
@@ -25,7 +25,6 @@ for machine in $machines; do
     --cfg_score="dis_baseline" \
     --cfg_evaluate="default" \
     --cfg_umap="cosine" \
-    --infer_ver="last"
 done
 
 # table

@@ -99,10 +99,10 @@ if [ "${cfg_table}" = "None" ]; then
     echo "Skipping table"
 else
     echo "Starting table"
-    python -m asdit.bin.table experiments="${table_exp}" \
+    python -m asdit.bin.table experiments="${cfg_table}" \
     seed="${seed}" dcase="${dcase}" \
     name="${name}" version="${version}" \
     infer_ver="${infer_ver}"
-done
+fi
 
 

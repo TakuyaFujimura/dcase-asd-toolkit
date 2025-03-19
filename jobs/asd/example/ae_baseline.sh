@@ -12,7 +12,7 @@ version="ae_baseline"
 machines=$(bash ../base/get_machines.sh "${dcase}")
 
 # set common args
-common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}")
+common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}" --infer_ver="last")
 
 # train and test
 for machine in $machines; do
@@ -23,7 +23,6 @@ for machine in $machines; do
     --cfg_score="no_backend" \
     --cfg_evaluate="default" \
     --cfg_umap="euclid" \
-    --infer_ver="last"
     exit
 done
 
