@@ -34,7 +34,7 @@ echo "ckpt_ver: ${ckpt_ver}"
 exit
 
 
-if [ "${name}" == "None" ] || [ "${version}" == "None" ] || [ "${dcase}" == "None" ] || [ "${seed}" == "None" ]; then
+if [ "${name}" = "None" ] || [ "${version}" = "None" ] || [ "${dcase}" = "None" ] || [ "${seed}" = "None" ]; then
     echo "Missing required arguments"
     echo "name: ${name}, version: ${version}, dcase: ${dcase}, seed: ${seed}"
     exit 1
@@ -48,10 +48,10 @@ fi
 source "venv/bin/activate"
 
 # train
-if [ "${cfg_train}" == "None" ]; then
+if [ "${cfg_train}" = "None" ]; then
     echo "Skipping training"
 else
-    if ["${machine}" == "None"]; then
+    if [ "${machine}" = "None" ]; then
         python -m asdit.bin.train experiments="${cfg_train}" 'seed='${seed}'' \
         'name='${name}'' 'version='${version}'' 'dcase='${dcase}''
     else
@@ -61,7 +61,7 @@ else
 fi
 
 # extract
-if [ "${cfg_extract}" == "None" ]; then
+if [ "${cfg_extract}" = "None" ]; then
     echo "Skipping extraction"
 else
     python -m asdit.bin.extract experiments="${cfg_extract}" \
@@ -70,7 +70,7 @@ else
 fi
 
 # score
-if [ "${cfg_score}" == "None" ]; then
+if [ "${cfg_score}" = "None" ]; then
     echo "Skipping scoring"
 else
     python -m asdit.bin.score experiments="${cfg_score}" \
@@ -79,7 +79,7 @@ else
 fi
 
 # evaluate
-if [ "${cfg_evaluate}" == "None" ]; then
+if [ "${cfg_evaluate}" = "None" ]; then
     echo "Skipping evaluation"
 else
     python -m asdit.bin.evaluate experiments="${cfg_evaluate}" \
@@ -88,7 +88,7 @@ else
 fi
 
 # umap
-if [ "${cfg_umap}" == "None" ]; then
+if [ "${cfg_umap}" = "None" ]; then
     echo "Skipping umap"
 else
     python -m asdit.bin.umap experiments="${cfg_umap}" \
@@ -97,7 +97,7 @@ else
 fi
 
 # table
-if [ "${cfg_table}" == "None" ]; then
+if [ "${cfg_table}" = "None" ]; then
     echo "Skipping table"
 else
     python -m asdit.bin.table experiments="${table_exp}" \
