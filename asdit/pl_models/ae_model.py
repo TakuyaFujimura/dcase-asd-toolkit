@@ -1,20 +1,17 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
 import torch
 from torch import Tensor
 
 from asdit.models.audio_feature.base import BaseAudioFeature
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig, PLOutput
-from asdit.utils.dcase_utils import get_domain_idx
 
-from .auroc import AUROC
-from .base_model import BasePLModel
+from .base_model import BaseAUCPLModel
 
 
-class AEPLModel(BasePLModel):
+class AEPLModel(BaseAUCPLModel):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
@@ -30,20 +27,6 @@ class AEPLModel(BasePLModel):
             grad_cfg=grad_cfg,
             label_dict_path=label_dict_path,
         )
-
-    def setup_auc(self):
-        self.auc_type_list = [
-            "all_s_auc",  # AUC with all sections in source domain
-            "all_t_auc",
-            "all_smix_auc",
-            "all_tmix_auc",
-            "all_mix_auc",
-        ]
-        self.anomaly_score_name = ["recon"]
-        self.auroc_model_dict: Dict[str, AUROC] = {}
-        for auc_key in self.auc_type_list:
-            for as_key in self.anomaly_score_name:
-                self.auroc_model_dict[f"{auc_key}_{as_key}"] = AUROC()
 
     def _constructor(
         self,
@@ -115,34 +98,4 @@ class AEPLModel(BasePLModel):
         self.log_loss(torch.tensor(len(wave)).float(), "valid/batch_size", 1)
         for key_, val_ in loss_dict.items():
             self.log_loss(val_, f"valid/{key_}", len(wave))
-        self.validation_auc(anomaly_score_dict=anomaly_score_dict, batch=batch)
-
-    def validation_auc(self, anomaly_score_dict: Dict[str, torch.Tensor], batch: dict):
-        is_normal_np = np.array(batch["is_normal"])
-        is_target_np = np.array(batch["is_target"])
-        is_anomaly_tensor = 1 - torch.tensor(batch["is_normal"])
-        for auc_model_key in self.auroc_model_dict:
-            auc_type = "_".join(auc_model_key.split("_")[:3])
-            as_key = "_".join(auc_model_key.split("_")[3:])
-            domain_idx_np = get_domain_idx(
-                auc_type=auc_type,
-                is_target=is_target_np,
-                is_normal=is_normal_np,
-            )
-            domain_idx = torch.tensor(domain_idx_np, dtype=torch.bool)
-            score_tensor = anomaly_score_dict[as_key]
-            self.auroc_model_dict[auc_model_key].update(
-                score=score_tensor[domain_idx],
-                target=is_anomaly_tensor[domain_idx],
-            )
-
-    def on_validation_epoch_end(self) -> None:
-        for auc_model_key in self.auroc_model_dict:
-            auc = self.auroc_model_dict[auc_model_key].compute()
-            self.log(
-                f"valid/auc/{auc_model_key}",
-                torch.tensor([auc]),
-                on_step=False,
-                on_epoch=True,
-            )
-            self.auroc_model_dict[auc_model_key].reset()
+        self.validation_step_auc(anomaly_score_dict=anomaly_score_dict, batch=batch)
