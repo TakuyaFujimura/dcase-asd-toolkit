@@ -5,10 +5,11 @@ defaults:
 
 
 seed: null
+dcase: null
 name: null
 version: null
 
-ckpt_ver: null
+infer_ver: null
 result_dir: "./results"
 
 hmean_cfg_dict: {}
@@ -20,4 +21,4 @@ overwrite: false
 hydra:
   output_subdir: .hydra_table
   run:
-    dir: ${result_dir}/${name}/${version}_${seed}/output/${ckpt_ver}
+    dir: ${result_dir}/${name}/${dcase}/${version}_${seed}/output/${infer_ver}
