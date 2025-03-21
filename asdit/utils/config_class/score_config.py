@@ -17,6 +17,8 @@ class MainScoreConfig(BaseModel):
 
     machine: str
 
+    extract_items: List[str] = Field(default_factory=list)
+
     overwrite: bool = False
 
     @field_validator("name", mode="before")

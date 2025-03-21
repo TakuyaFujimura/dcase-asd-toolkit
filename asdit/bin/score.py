@@ -32,7 +32,9 @@ def main(hydra_cfg: DictConfig) -> None:
         dir_path=output_dir, file_name="*_score.csv", overwrite=cfg.overwrite
     )
 
-    extract_df_dict, score_df_dict = get_dicts(output_dir=output_dir)
+    extract_df_dict, score_df_dict = get_dicts(
+        output_dir=output_dir, extract_items=cfg.extract_items
+    )
 
     # Loop for backend
     for backend_cfg in cfg.backend:

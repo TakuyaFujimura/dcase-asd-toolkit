@@ -30,8 +30,8 @@ label_dict_path: {}
 machine: null
 
 extract_items:
-  - "embed-*"
-  - "AS-*"
+  - "embed-.*"
+  - "AS-.*"
 
 
 overwrite: false

@@ -1,6 +1,5 @@
 # Copyright 2024 Takuya Fujimura
 
-import fnmatch
 import logging
 from collections import defaultdict
 from typing import Dict, List, Optional
@@ -12,9 +11,9 @@ import tqdm
 from torch.utils.data import DataLoader
 
 from asdit.pl_models import BasePLModel
+from asdit.utils.common import item_match
 from asdit.utils.config_class import PLOutput
-
-INFOLIST = ["path", "section", "is_normal", "is_target"]
+from asdit.utils.dcase_utils import INFOLIST
 
 logger = logging.getLogger(__name__)
 
@@ -52,10 +51,6 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
     return df
 
 
-def item_match(key: str, patterns: List[str]) -> bool:
-    return any(fnmatch.fnmatch(key, p) for p in patterns)
-
-
 def loader2df(
     dataloader: Optional[DataLoader],
     plmodel: BasePLModel,
@@ -84,11 +79,11 @@ def loader2df(
             for key1 in ["embed", "logits", "AS"]:
                 for key2, value in getattr(pl_output, key1).items():
                     key = f"{key1}-{key2}"
-                    if item_match(key=key, patterns=extract_items):
+                    if item_match(item=key, patterns=extract_items):
                         extract__dict_of_list[key].append(value.cpu().numpy())
 
             for key, value in batch.items():
-                if not item_match(key=key, patterns=extract_items):
+                if not item_match(item=key, patterns=extract_items):
                     continue
 
                 if isinstance(value, torch.Tensor):

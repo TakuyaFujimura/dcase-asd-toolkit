@@ -1,31 +1,24 @@
-import copy
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
+from asdit.utils.common.df_util import pickup_cols
 from asdit.utils.common.instantiate_util import instantiate_tgt
-
-
-def rm_unnecesary_col(df: pd.DataFrame) -> pd.DataFrame:
-    rm_cols = []
-    for col in df.keys():
-        if col.startswith("e_") and int(col.split("_")[-1]) >= 0:
-            rm_cols.append(col)
-        elif col.startswith("l_") and int(col.split("_")[-1]) >= 0:
-            rm_cols.append(col)
-    return df.drop(rm_cols, axis=1)
+from asdit.utils.dcase_utils import INFOLIST
 
 
 def get_dicts(
-    output_dir: Path,
+    output_dir: Path, extract_items: List[str]
 ) -> Tuple[Dict[str, pd.DataFrame], Dict[str, pd.DataFrame]]:
     extract_df_dict: Dict[str, pd.DataFrame] = {}
     score_df_dict: Dict[str, pd.DataFrame] = {}
+    extract_items = list(set(INFOLIST + extract_items))
     for split in ["train", "test"]:
         extract_df_dict[split] = pd.read_csv(output_dir / f"{split}_extract.csv")
-        score_df_dict[split] = copy.deepcopy(extract_df_dict[split])
-        score_df_dict[split] = rm_unnecesary_col(score_df_dict[split])
+        score_df_dict[split] = pickup_cols(
+            df=extract_df_dict[split], extract_items=extract_items
+        )
     return extract_df_dict, score_df_dict
 
 

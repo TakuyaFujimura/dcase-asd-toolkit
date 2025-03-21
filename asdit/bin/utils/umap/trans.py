@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 import umap
 
-from asdit.bin.utils.extract import INFOLIST
 from asdit.utils.common import get_embed_from_df
+from asdit.utils.common.df_util import pickup_cols
+from asdit.utils.dcase_utils import INFOLIST
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,8 @@ def trans_umap(
     embed = get_embed_from_df(df=df, embed_key=embed_key)
     umap_model = umap.UMAP(random_state=0, metric=metric)
     umap_embed = umap_model.fit_transform(embed)  # (N, 2)
-    extract_items = INFOLIST + extract_items
-    umap_df = df[extract_items]
+    extract_items = list(set(INFOLIST + extract_items))
+    umap_df = pickup_cols(df=df, extract_items=extract_items)
     additional_df = pd.DataFrame(
         {
             "is_test": is_test,  # type: ignore
