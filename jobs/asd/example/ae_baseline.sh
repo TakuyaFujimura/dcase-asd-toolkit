@@ -22,8 +22,7 @@ for machine in $machines; do
     --cfg_extract="resume_machinewise" \
     --cfg_score="no_backend" \
     --cfg_evaluate="default" \
-    --cfg_umap="euclid" \
-    exit
+    --cfg_umap="euclid"
 done
 
 # table

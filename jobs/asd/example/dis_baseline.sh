@@ -24,7 +24,7 @@ for machine in $machines; do
     --cfg_extract="resume_shared" \
     --cfg_score="dis_baseline" \
     --cfg_evaluate="default" \
-    --cfg_umap="cosine" \
+    --cfg_umap="cosine"
 done
 
 # table
