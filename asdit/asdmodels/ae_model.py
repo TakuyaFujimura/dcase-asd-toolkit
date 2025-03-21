@@ -8,10 +8,10 @@ from asdit.models.audio_feature.base import BaseAudioFeature
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig, PLOutput
 
-from .base_model import BaseAUCPLModel
+from .base_asdplmodel import BaseASDPLAUCModel
 
 
-class AEPLModel(BaseAUCPLModel):
+class AEPLModel(BaseASDPLAUCModel):
     def __init__(
         self,
         model_cfg: Dict[str, Any],

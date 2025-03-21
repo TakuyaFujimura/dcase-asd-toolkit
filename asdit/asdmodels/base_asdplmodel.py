@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -7,11 +6,12 @@ import numpy as np
 import torch
 
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig, PLOutput
+from asdit.utils.config_class import GradConfig
 from asdit.utils.dcase_utils import get_label_dict
 from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
 from .auroc import AUROC
+from .base_asdmodel import BaseASDModel
 
 
 def grad_norm(module: torch.nn.Module) -> float:
@@ -24,7 +24,7 @@ def grad_norm(module: torch.nn.Module) -> float:
     return total_norm
 
 
-class BasePLModel(pl.LightningModule, ABC):
+class BaseASDPLModel(pl.LightningModule, BaseASDModel):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
@@ -50,10 +50,6 @@ class BasePLModel(pl.LightningModule, ABC):
         self._constructor(**model_cfg)
 
     def _constructor(self):
-        pass
-
-    @abstractmethod
-    def forward(self, batch: dict) -> PLOutput:
         pass
 
     def log_loss(self, loss: Any, log_name: str, batch_size: int):
@@ -104,7 +100,7 @@ class BasePLModel(pl.LightningModule, ABC):
         scheduler.step()
 
 
-class BaseAUCPLModel(BasePLModel):
+class BaseASDPLAUCModel(BaseASDPLModel):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
