@@ -91,13 +91,14 @@ def plot_and_save(
         for cfg in cfg_list_of_dict[i].values():
             plot_ax_cfg(ax=axes[i], umap_df=umap_df, cfg=cfg)
     for i in range(2):
-        axes[i].legend(bbox_to_anchor=(1, 1.1), ncol=2, loc="upper right", fontsize=15)
+        axes[i].legend(bbox_to_anchor=(1, 1.15), ncol=2, loc="upper right", fontsize=15)
         axes[i].set_xlim(u0min - 0.5, u0max + 0.5)
         axes[i].set_ylim(u1min - 0.5, u1max + 0.5)
     plt.savefig(save_path, bbox_inches="tight")
 
 
-def vis_standard(umap_df: pd.DataFrame, path_stem: Path) -> None:
+def vis_standard(umap_df: pd.DataFrame, save_path: Path) -> None:
+    save_path_stem = save_path.parent / save_path.stem
     ulim_dict = {
         "u0min": umap_df["u0"].min(),
         "u0max": umap_df["u0"].max(),
@@ -106,13 +107,13 @@ def vis_standard(umap_df: pd.DataFrame, path_stem: Path) -> None:
     }
     plot_and_save(
         umap_df=umap_df,
-        save_path=f"{path_stem}_sectionall.png",
+        save_path=f"{save_path_stem}_sectionall.png",
         **ulim_dict,
     )
     for section in umap_df["section"].unique():
         umap_df_selected = umap_df[umap_df["section"] == section]
         plot_and_save(
             umap_df=umap_df_selected,
-            save_path=f"{path_stem}_section{section}.png",
+            save_path=f"{save_path_stem}_section{section}.png",
             **ulim_dict,
         )

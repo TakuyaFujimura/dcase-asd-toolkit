@@ -28,8 +28,6 @@ def trans_umap(
     save_path: Path,
     extract_items: List[str],
 ) -> None:
-    logger.info(f"Start UMAP transformation: {output_dir}")
-
     df, is_test = get_df(output_dir=output_dir)
     embed = get_embed_from_df(df=df, embed_key=embed_key)
     umap_model = umap.UMAP(random_state=0, metric=metric)

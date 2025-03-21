@@ -1,3 +1,5 @@
+import logging
+import sys
 from pathlib import Path
 
 from asdit.utils.config_class import (
@@ -8,6 +10,8 @@ from asdit.utils.config_class import (
     MainUmapConfig,
 )
 from asdit.utils.config_class.train_config import MainTrainConfig
+
+logger = logging.getLogger(__name__)
 
 
 def get_version_dir(
@@ -37,7 +41,9 @@ def dir_has_file(dir_path: Path, file_name: str) -> bool:
 
 def check_file_exists(dir_path: Path, file_name: str, overwrite: bool) -> None:
     if dir_has_file(dir_path, file_name) and not overwrite:
-        raise FileExistsError(
+        logger.warning(
+            "[Skip this process] "
             f"{dir_path}/{file_name} already exists. "
-            + "Set config.overwrite=True to overwrite."
+            + "Set config.overwrite=True to overwrite it."
         )
+        sys.exit(1)

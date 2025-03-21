@@ -14,19 +14,13 @@ result_dir: "./results"
 
 machine: null
 
-overwrite_embed: false
-overwrite_image: false
 
 metric: null
-vis_type: null
 embed_key: null
 
 extract_items: []
 
-trans_exec: true
-trans_overwrite: false
-vis_exec: true
-vis_overwrite: false
+overwrite: false
 
 
 hydra:
