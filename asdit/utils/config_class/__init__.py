@@ -1,5 +1,5 @@
 from .datamodule import AudioFeatDSConfig, BasicCollatorConfig, BasicDSConfig
-from .evaluate_config import HmeanCfgDict, MainEvaluateConfig
+from .evaluate_config import MainEvaluateConfig
 from .extract_config import MainExtractConfig
 from .label import LabelInfo
 from .nparray_class import Np1DArray

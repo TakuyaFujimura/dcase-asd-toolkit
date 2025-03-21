@@ -21,7 +21,6 @@ from asdit.bin.utils.evaluate import (
 )
 from asdit.bin.utils.path import check_file_exists, get_version_dir
 from asdit.utils.config_class import MainTableConfig
-from asdit.utils.config_class.evaluate_config import HmeanCfgDict
 from asdit.utils.dcase_utils import MACHINE_DICT
 
 logger = logging.getLogger(__name__)
@@ -37,9 +36,9 @@ def myround(x: float) -> float:
     return float(Decimal(str(x)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-def complete_hmean_cfg_dict(
+def complete_hmean_cfg(
     hmean_cfg_dict: Dict[str, List[str]], dcase: str, split: str
-) -> HmeanCfgDict:
+) -> Dict[str, List[str]]:
     sectionlist = get_official_sectionlist(dcase=dcase, split=split)
 
     hmean_cfg_dict_new = {}
@@ -65,6 +64,10 @@ def get_table_df(
                 "Different backends are provided. "
                 + "This script assumes the same backends for all machines."
             )
+            # TODO:
+            # For example, when machine-A has backend1 and machine-B has backend1 and backend2,
+            # the current script will raise an error.
+            # However, we can handle this case.
 
         # check hmean
         if not hmean_is_available(
@@ -103,7 +106,7 @@ def main(hydra_cfg: DictConfig) -> None:
     )
 
     for split in ["dev", "eval"]:
-        hmean_cfg_dict = complete_hmean_cfg_dict(
+        hmean_cfg_dict = complete_hmean_cfg(
             hmean_cfg_dict=cfg.hmean_cfg_dict, dcase=cfg.dcase, split=split
         )
         machinelist = MACHINE_DICT[f"{cfg.dcase}-{split}"]

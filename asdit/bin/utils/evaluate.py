@@ -1,14 +1,13 @@
 # Copyright 2024 Takuya Fujimura
 
 import logging
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
 from scipy.stats import hmean
 from sklearn.metrics import roc_auc_score
 
-from asdit.utils.config_class import HmeanCfgDict
 from asdit.utils.dcase_utils import get_dcase_idx
 
 logger = logging.getLogger(__name__)
@@ -93,7 +92,9 @@ def combine_section_metric(sectionlist: List[int], metriclist: List[str]) -> Lis
     return [f"{section}_{metric}" for section in sectionlist for metric in metriclist]
 
 
-def add_section_to_metric(hmean_cfg_dict: HmeanCfgDict, dcase: str) -> HmeanCfgDict:
+def complete_hmean_cfg(
+    hmean_cfg_dict: Dict[str, List[str]], dcase: str
+) -> Dict[str, List[str]]:
     hmean_cfg_dict_new = {}
     for hmean_name, metriclist in hmean_cfg_dict.items():
         if dcase in ["dcase2021", "dcase2022"]:
@@ -112,16 +113,6 @@ def add_section_to_metric(hmean_cfg_dict: HmeanCfgDict, dcase: str) -> HmeanCfgD
     return hmean_cfg_dict_new
 
 
-def complete_hmean_cfg_dict(hmean_cfg_dict: HmeanCfgDict, dcase: str) -> HmeanCfgDict:
-    if any([key.startswith("official") for key in hmean_cfg_dict]):
-        raise ValueError("name starting with 'official' is reserved. Please rename.")
-    hmean_cfg_dict[f"official{dcase[-2:]}"] = get_official_metriclist(dcase=dcase)
-    # Dict of metriclist: {hmean_name: [smix_auc, tmix_auc, mix_pauc]}
-    hmean_cfg_dict = add_section_to_metric(hmean_cfg_dict=hmean_cfg_dict, dcase=dcase)
-    # Dict of metriclist w/ section: {hmean_name: [0_smix_auc, 1_smix_auc, ..., 2_mix_pauc]}
-    return hmean_cfg_dict
-
-
 def hmean_is_available(
     evaluate_df: pd.DataFrame, hmean_name: str, hmean_cols: List[str]
 ) -> bool:
@@ -137,10 +128,13 @@ def hmean_is_available(
 def add_hmean(
     evaluate_df: pd.DataFrame,
     dcase: str,
-    hmean_cfg_dict: HmeanCfgDict,
+    hmean_cfg_dict: Dict[str, List[str]],
 ) -> pd.DataFrame:
 
-    hmean_cfg_dict = complete_hmean_cfg_dict(hmean_cfg_dict=hmean_cfg_dict, dcase=dcase)
+    # added official metriclist
+    hmean_cfg_dict[f"official{dcase[-2:]}"] = get_official_metriclist(dcase=dcase)
+    # added section to metric
+    hmean_cfg_dict = complete_hmean_cfg(hmean_cfg_dict=hmean_cfg_dict, dcase=dcase)
 
     for hmean_name, hmean_cols in hmean_cfg_dict.items():
         if not hmean_is_available(
