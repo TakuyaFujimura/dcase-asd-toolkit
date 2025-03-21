@@ -31,21 +31,23 @@ class DMSplitConfig(BaseModel):
 
 class MainTrainConfig(BaseModel):
     seed: int
+    dcase: str
     name: str
     version: str
-    refresh_rate: int
-    num_workers: int
-    callback_opts: Dict[str, Dict[str, Any]]
-    every_n_epochs_valid: int
     result_dir: Path
+    data_dir: str
+
     model: ModelConfig
     trainer: Dict[str, Any]
     label_dict_path: Dict[str, Path] = Field(default_factory=dict)
     datamodule: DMSplitConfig
 
-    data_dir: str
-    dcase: str
     model_ver: str
+
+    num_workers: int = 0
+    refresh_rate: int = 1
+    callback_opts: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    every_n_epochs_valid: int = 1
 
     @field_validator("name", mode="before")
     def cast_name(cls, v):
