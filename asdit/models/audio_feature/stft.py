@@ -12,30 +12,30 @@ logger = logging.getLogger(__name__)
 class STFT(nn.Module):
     def __init__(
         self,
-        use_mel: bool,
         sr: int,
         n_fft: int,
         hop_length: int,
-        n_mels: Optional[int],
         power: float,
         f_min: float,
         f_max: float,
+        n_mels: Optional[int] = None,
         use_log: bool = False,
         temporal_norm: bool = False,
     ):
         super().__init__()
-        self.use_mel = use_mel
+
         self.n_fft = n_fft
         self.n_mels = n_mels
+        self.use_mel = n_mels is not None
         self.sr = sr
         self.f_min = f_min
         self.f_max = f_max
         self.power = power
         self.use_log = use_log
         self.temporal_norm = temporal_norm
-        if use_mel:
-            assert n_mels is not None
-            self.output_freq_size = n_mels
+        if self.use_mel:
+            assert self.n_mels is not None
+            self.output_freq_size = self.n_mels
             self.stft = T.MelSpectrogram(
                 sample_rate=sr,
                 n_fft=n_fft,
@@ -43,7 +43,7 @@ class STFT(nn.Module):
                 f_min=f_min,
                 f_max=f_max,
                 pad=0,
-                n_mels=n_mels,
+                n_mels=self.n_mels,
                 power=power,
                 normalized=True,
                 center=True,

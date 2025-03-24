@@ -3,12 +3,10 @@ backend:
   - tgt_class: asdit.backends.Kmeans
     n_clusters: 16
     metric: cosine
-    sep_section: False
   - tgt_class: asdit.backends.Knn
     n_neighbors_so: 1
     n_neighbors_ta: 1
     smote_ratio: 0.05
     smote_neighbors: 5
     metric: cosine
-    sep_section: False
 

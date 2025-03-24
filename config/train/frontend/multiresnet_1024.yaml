@@ -21,7 +21,6 @@ model_cfg:
         hop_length: 512
         n_mels: null
         power: 1.0
-        use_mel: false
         f_min: 200.0
         f_max: 8000.0
         temporal_norm: false
