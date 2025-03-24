@@ -78,8 +78,8 @@ def get_ckpt_path(cfg: MainExtractConfig) -> Path:
     assert cfg.model_ver is not None
     assert cfg.ckpt_ver is not None
     ckpt_dir = get_version_dir(cfg=cfg) / "model" / cfg.model_ver / "checkpoints"
-    if cfg.ckpt_ver == "best":
-        ckpt_path = get_best_path(ckpt_dir)
+    if cfg.ckpt_ver in ["min", "max"]:
+        ckpt_path = get_best_path(ckpt_dir, cfg.ckpt_ver)
     elif cfg.ckpt_ver == "last":
         ckpt_path = ckpt_dir / "last.ckpt"
     elif cfg.ckpt_ver.startswith("epoch"):
@@ -93,6 +93,7 @@ def resume_plfrontend(
     cfg: MainExtractConfig, past_cfg: MainTrainConfig
 ) -> BasePLFrontend:
     ckpt_path = get_ckpt_path(cfg)
+    logger.info(f"Loading model from {ckpt_path}")
     module_name = ".".join(past_cfg.frontend.tgt_class.split(".")[:-1])
     class_name = past_cfg.frontend.tgt_class.split(".")[-1]
     module = importlib.import_module(module_name)
@@ -100,7 +101,7 @@ def resume_plfrontend(
     frontend = frontend_cls.load_from_checkpoint(ckpt_path)
     frontend.to(cfg.device)
     frontend.eval()
-    logger.info("Model was successfully loaded from ckpt_path")
+    logger.info("Model was successfully loaded from the ckpt_path")
     return frontend
 
 

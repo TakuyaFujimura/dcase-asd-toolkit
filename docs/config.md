@@ -7,7 +7,7 @@
 - machine (str): Machine type
 - model_ver (str): Arbitrary string used to identify the model version. 
 In the ae_baseline, model_ver is set to machine type because ae_baseline constructs machine-wise ASD system. In the dis_baseline, it is set to "all" because dis_baseline constructs shared single ASD system.
-- ckpt_ver (str): String used to identify the checkpoint version. `epoch_??`, `best`, and `last` are acceptable.
+- ckpt_ver (str): String used to identify the checkpoint version. `epoch_??`, `last`, `min`, and `max` are acceptable, where `min` and `max` are the checkpoint with the minimum and maximum validation loss, respectively.
 - result_dir (Path): result directory path from `asdit`
 - data_dir (Path): data directory path from `asdit`
 - overwrite (bool): If True, the existing files will be overwritten. Otherwise, the process will be skipped.
