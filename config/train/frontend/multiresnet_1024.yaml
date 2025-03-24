@@ -9,6 +9,7 @@ grad_cfg: {}
 
 
 model_cfg:
+  normalize: true
   extractor_cfg:
     tgt_class: asdit.models.multiresnet.MultiResNet
     sec: ${datamodule.sec}

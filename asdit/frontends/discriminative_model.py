@@ -32,18 +32,20 @@ class BasicDisPLModel(BasePLFrontend):
         )
 
     def check_loss_cfg(self, loss_cfg: Dict[str, Any]):
-        # tgt_class: asdit.models.losses.SCAdaCos
+        # If tgt_class is known loss class, this check the normalize flag.
+        # e.g., tgt_class: asdit.models.losses.SCAdaCos
         split_loss_tgt = loss_cfg["tgt_class"].split(".")
         if "asdit.losses" != ".".join(split_loss_tgt[:-1]):
-            logger.error(f"Unexpected loss class: {loss_cfg['tgt_class']}")
-            raise ValueError(f"Invalid loss class: {loss_cfg['tgt_class']}")
+            return 0
 
-        # TODO: set normalize flag based on loss name. AdaProj
-        if split_loss_tgt[-1] in ["AdaCos", "ArcFace", "SCAdaCos"]:
-            self.normalize = True
+        if split_loss_tgt[-1] not in ["AdaCos", "ArcFace", "SCAdaCos", "AdaProj"]:
+            return 0
+
+        if not self.normalize:
+            logging.error("normalize is False, but loss uses normalized embedding.")
+            raise ValueError("normalize is False, but loss uses normalized embedding.")
         else:
-            logger.error(f"Unexpected loss class: {loss_cfg['tgt_class']}")
-            raise NotImplementedError()
+            return 0
 
     def set_head_dict(self, loss_label2lam_dict: Dict[str, float]):
         self.head_dict = torch.nn.ModuleDict({})
@@ -62,12 +64,14 @@ class BasicDisPLModel(BasePLFrontend):
 
     def _constructor(
         self,
+        normalize: bool,
         extractor_cfg: Dict[str, Any] = {},
         loss_cfg: Dict[str, Any] = {},
         loss_label2lam_dict: Dict[str, float] = {},
         augmentation_cfg_list: List[Dict[str, Any]] = [],
         use_compile: bool = False,
     ) -> None:
+        self.normalize = normalize
         self.extractor = instantiate_tgt(extractor_cfg)
         if use_compile:
             self.extractor = torch.compile(self.extractor)  # type: ignore
