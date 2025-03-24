@@ -24,7 +24,6 @@ def parse_path_selector(selector: str) -> List[str]:
     elif selector.endswith(".wav"):  # single file format
         path_list = [selector]
     else:
-        logger.error(f"Unknown path_list format: {selector}")
         raise ValueError(f"Unknown path_list format: {selector}")
     return path_list  # type: ignore
 

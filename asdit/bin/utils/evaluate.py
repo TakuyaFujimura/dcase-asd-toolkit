@@ -40,7 +40,6 @@ def dcase_auc(
             y_true=is_anomaly[idx], y_score=anomaly_score[idx], max_fpr=0.1
         )
     else:
-        logger.error(f"Unexpected auc_type: {auc_type}")
         raise NotImplementedError()
     return auc_score  # type: ignore
 
@@ -72,7 +71,6 @@ def get_official_metriclist(dcase: str) -> List[str]:
     elif dcase in ["dcase2022", "dcase2023", "dcase2024"]:
         return ["smix_auc", "tmix_auc", "mix_pauc"]
     else:
-        logger.error(f"Unexpected dcase: {dcase}")
         raise NotImplementedError()
 
 
@@ -83,7 +81,6 @@ def get_official_sectionlist(dcase: str, split: str = "") -> List[int]:
         elif split == "eval":
             return [3, 4, 5]
         else:
-            logger.error(f"Unexpected split: {split}")
             raise NotImplementedError()
     elif dcase in ["dcase2023", "dcase2024"]:
         return [0]
@@ -111,7 +108,6 @@ def complete_hmean_cfg(
                 sectionlist=get_official_sectionlist(dcase=dcase), metriclist=metriclist
             )
         else:
-            logger.error(f"Unexpected dcase: {dcase}")
             raise NotImplementedError()
 
     return hmean_cfg_dict_new

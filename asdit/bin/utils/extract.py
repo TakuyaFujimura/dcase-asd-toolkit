@@ -43,7 +43,6 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
         elif values_np.ndim == 1:
             df = pd.DataFrame(columns=[key], data=values_np)
         else:
-            logger.error(f"Unexpected shape: {values_np.shape}")
             raise NotImplementedError(f"Unexpected shape: {values_np.shape}")
         df_list.append(df)
     df = pd.concat(df_list, axis=1)
@@ -90,7 +89,6 @@ def loader2df(
                 elif isinstance(value, list):
                     extract__dict_of_list[key].append(value)
                 else:
-                    logger.error(f"Unexpected type: {type(value)}")
                     raise NotImplementedError(f"Unexpected type: {type(value)}")
 
     df = make_df(extract__dict_of_list)

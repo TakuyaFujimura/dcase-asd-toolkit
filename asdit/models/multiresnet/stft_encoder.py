@@ -29,7 +29,6 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
         self.stride = stride
         self.kernel = kernel
         if self.kernel != 3:
-            logger.error("Only 3x3 kernel is supported")
             raise NotImplementedError()
 
         self.bn = nn.BatchNorm2d(num_features=input_size[0])
@@ -49,7 +48,6 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
                 ),
             )
         else:
-            logger.error("Only stride 1 or 2 is supported")
             raise NotImplementedError()
 
         self.layer = nn.Sequential(
@@ -76,7 +74,6 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
         if additional_layer == "SEBlock":
             self.additional_layer = SEBlock(out_channel, ratio=16)
         else:
-            logger.error(f"Unexpected additional_layer: {additional_layer}")
             raise NotImplementedError()
 
     def calc_outsize(self, input_size: tuple) -> tuple:
@@ -156,10 +153,8 @@ class Conv2dEncoderLayer(nn.Module):
     ):
         super().__init__()
         if emb_base_size % 8 != 0:
-            logger.error("emb_base_size must be divisible by 8")
             raise ValueError("emb_base_size must be divisible by 8")
         if len(input_size) != 2:
-            logger.error("input_size must be in the form of (H, W), i.e., no channel")
             raise ValueError(
                 "input_size must be in the form of (H, W), i.e., no channel"
             )
@@ -302,7 +297,6 @@ class STFTEncoderLayer(nn.Module):
         self.stft = STFT(**stft_cfg)
         spectrogram_size = self.stft(torch.randn(sec * sr)).shape
         if min(spectrogram_size) < 36:
-            logger.error("input sequence or n_fft is too short")
             raise ValueError("input sequence or n_fft is too short")
         self.layer = Conv2dEncoderLayer(
             input_size=spectrogram_size,

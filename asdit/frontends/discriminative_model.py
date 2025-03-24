@@ -42,7 +42,6 @@ class BasicDisPLModel(BasePLFrontend):
             return 0
 
         if not self.normalize:
-            logger.error("normalize is False, but loss uses normalized embedding.")
             raise ValueError("normalize is False, but loss uses normalized embedding.")
         else:
             return 0

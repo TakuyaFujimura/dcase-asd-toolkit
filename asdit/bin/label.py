@@ -77,7 +77,6 @@ def get_labelinfo_dict(path_list: List[str], labeler) -> dict:
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if cfg.save_path.exists() and not cfg.overwrite:
-        logger.error(f"{cfg.save_path} already exists. Please set overwrite=True")
         raise FileExistsError(
             f"{cfg.save_path} already exists. Please set overwrite=True"
         )

@@ -71,7 +71,6 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
                 on_epoch=False,
             )
         else:
-            logger.error("Loss is not a scalar tensor")
             raise ValueError("Loss is not a scalar tensor")
 
     def on_after_backward(self):

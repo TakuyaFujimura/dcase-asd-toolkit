@@ -18,11 +18,9 @@ class STFTPoolModel(BaseFrontend):
         elif axis == "time":
             self.axis = 2
         else:
-            logger.error(f"Invalid axis: {axis}")
             raise ValueError(f"Invalid axis: {axis}")
 
         if pool not in ["mean", "max"]:
-            logger.error(f"Invalid pool: {pool}")
             raise ValueError(f"Invalid pool: {pool}")
         self.pool = pool
 

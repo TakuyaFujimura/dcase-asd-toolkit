@@ -42,7 +42,6 @@ def min_cosine(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 class Kmeans(BaseBackend):
     def __init__(self, n_clusters: int, metric: str, sep_section: bool = False):
         if metric not in ["euclid", "cosine"]:
-            logger.error(f"Unexpected metric: {metric}")
             raise ValueError(f"Unexpected metric: {metric}")
         self.n_clusters = n_clusters
         self.metric = metric

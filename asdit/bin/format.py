@@ -26,14 +26,12 @@ def get_traintest_dir_dict(dcase: str) -> Dict[str, list]:
             "test": ["source_test", "target_test"],
         }
     else:
-        logger.error(f"Unknown dcase: {dcase}.")
         raise ValueError(f"Unknown dcase: {dcase}.")
     return traintest_dir_dict
 
 
 def check_src_dir(src_dir: Path, dcase: str):
     if not src_dir.exists():
-        logger.error(f"{src_dir} does not exist.")
         raise FileNotFoundError(f"{src_dir} does not exist.")
 
     traintest_dir_dict = get_traintest_dir_dict(dcase=dcase)
@@ -43,14 +41,12 @@ def check_src_dir(src_dir: Path, dcase: str):
         est_machines = [d.name for d in split_de_dir.iterdir() if d.is_dir()]
         ref_machines = MACHINE_DICT[f"{dcase}-{split_de}"]  # type: ignore
         if sorted(est_machines) != sorted(ref_machines):
-            logger.error(f"{split_de_dir} does not contain correct machines.")
             raise ValueError(f"{split_de_dir} does not contain correct machines.")
 
         for machine in ref_machines:
             for split_tt in chain(*traintest_dir_dict.values()):
                 split_tt_dir = split_de_dir / machine / split_tt
                 if not split_tt_dir.exists():
-                    logger.error(f"{split_tt_dir} does not exist.")
                     raise FileNotFoundError(f"{split_tt_dir} does not exist.")
 
 
@@ -72,7 +68,6 @@ class RenameTestPath:
 
     def __call__(self, wav_path: Path) -> Path:
         if wav_path.parents[4].name != self.dcase:
-            logger.error(f"{wav_path} is not in {self.dcase}.")
             raise ValueError(f"{wav_path} is not in {self.dcase}.")
 
         split_tt = wav_path.parents[0].name
@@ -82,14 +77,12 @@ class RenameTestPath:
         if split_tt == "train":
             return wav_path
         elif split_tt not in ["test", "source_test", "target_test"]:
-            logger.error(f"Unknown split_tt: {split_tt}.")
             raise ValueError(f"Unknown split_tt: {split_tt}.")
 
         # check dev/eval
         if split_de == "dev_data":
             return wav_path
         elif split_de != "eval_data":
-            logger.error(f"Unknown split_de: {split_de}.")
             raise ValueError(f"Unknown split_de: {split_de}.")
 
         # path is in eval_data/test

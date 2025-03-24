@@ -60,10 +60,6 @@ def get_table_df(
         if i == 0:
             backend_list = evaluate_df.backend.values
         elif np.any(backend_list != evaluate_df.backend.values):
-            logger.error(
-                "Different backends are provided. "
-                + "This script assumes the same backends for all machines."
-            )
             raise ValueError(
                 "Different backends are provided. "
                 + "This script assumes the same backends for all machines."
@@ -77,7 +73,6 @@ def get_table_df(
         if not hmean_is_available(
             evaluate_df=evaluate_df, hmean_name=hmean_name, hmean_cols=hmean_cols
         ):
-            logger.error(f"{hmean_name}: {hmean_cols} is not available.")
             raise ValueError(f"{hmean_name}: {hmean_cols} is not available.")
 
         # get hmean
@@ -104,7 +99,6 @@ def main(hydra_cfg: DictConfig) -> None:
     check_file_exists(dir_path=output_dir, file_name="*.csv", overwrite=cfg.overwrite)
 
     if any([key.startswith("official") for key in cfg.hmean_cfg_dict]):
-        logger.error("name starting with 'official' is reserved. Please rename.")
         raise ValueError("name starting with 'official' is reserved. Please rename.")
 
     cfg.hmean_cfg_dict[f"official{cfg.dcase[-2:]}"] = get_official_metriclist(

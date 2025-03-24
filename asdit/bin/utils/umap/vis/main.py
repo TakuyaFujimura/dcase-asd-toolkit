@@ -14,7 +14,6 @@ def visualize_umap(
     if vis_type == "standard":
         vis_standard(umap_df=umap_df, save_path=save_path)
     else:
-        logger.error(f"Unexpected vis_type: {vis_type}")
         raise ValueError(f"Unexpected vis_type: {vis_type}")
 
     logger.info(f"Visualized UMAP: {save_path}")

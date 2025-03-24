@@ -25,7 +25,6 @@ class Knn(BaseBackend):
         sep_section: bool = False,
     ):
         if metric not in ["euclid", "cosine"]:
-            logger.error(f"Unexpected metric: {metric}")
             raise ValueError(f"Unexpected metric: {metric}")
         self.metric = metric
         self.n_neighbors_so = n_neighbors_so
