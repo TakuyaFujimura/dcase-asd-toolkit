@@ -6,7 +6,7 @@ from typing import Any, Dict, Literal, cast
 from omegaconf import OmegaConf
 
 from asdit.bin.utils.path import get_version_dir
-from asdit.pl_models import BasePLModel
+from asdit.frontends.base_plmodel import BasePLFrontend
 from asdit.utils.common import get_best_path, get_path_glob
 from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfig
 
@@ -89,17 +89,19 @@ def get_ckpt_path(cfg: MainExtractConfig) -> Path:
     return ckpt_path
 
 
-def resume_plmodel(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -> BasePLModel:
+def resume_plfrontend(
+    cfg: MainExtractConfig, past_cfg: MainTrainConfig
+) -> BasePLFrontend:
     ckpt_path = get_ckpt_path(cfg)
     module_name = ".".join(past_cfg.model.tgt_class.split(".")[:-1])
     class_name = past_cfg.model.tgt_class.split(".")[-1]
     module = importlib.import_module(module_name)
-    plmodel_cls = getattr(module, class_name)
-    plmodel = plmodel_cls.load_from_checkpoint(ckpt_path)
-    plmodel.to(cfg.device)
-    plmodel.eval()
+    frontend_cls = getattr(module, class_name)
+    frontend = frontend_cls.load_from_checkpoint(ckpt_path)
+    frontend.to(cfg.device)
+    frontend.eval()
     logger.info("Model was successfully loaded from ckpt_path")
-    return plmodel
+    return frontend
 
 
 def resume_dmconfigmaker(

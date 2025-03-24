@@ -8,10 +8,10 @@ from torch import Tensor
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig, PLOutput
 
-from .base_asdplmodel import BaseASDPLModel
+from .base_plmodel import BasePLFrontend
 
 
-class BasicDisPLModel(BaseASDPLModel):
+class BasicDisPLModel(BasePLFrontend):
     def __init__(
         self,
         model_cfg: Dict[str, Any],

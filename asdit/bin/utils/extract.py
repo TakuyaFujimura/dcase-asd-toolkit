@@ -10,7 +10,7 @@ import torch
 import tqdm
 from torch.utils.data import DataLoader
 
-from asdit.pl_models import BasePLModel
+from asdit.frontends import BaseFrontend
 from asdit.utils.common import item_match
 from asdit.utils.config_class import PLOutput
 from asdit.utils.dcase_utils import INFOLIST
@@ -53,7 +53,7 @@ def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
 
 def loader2df(
     dataloader: Optional[DataLoader],
-    plmodel: BasePLModel,
+    frontend: BaseFrontend,
     device: str,
     extract_items: List[str],
 ) -> pd.DataFrame:
@@ -63,7 +63,6 @@ def loader2df(
         return pd.DataFrame()
 
     logger.info("Start extract_loader")
-    plmodel.eval()
     extract__dict_of_list = defaultdict(list)
     extract_items = list(set(INFOLIST + extract_items))
 
@@ -75,7 +74,7 @@ def loader2df(
         }
 
         with torch.no_grad():
-            pl_output: PLOutput = plmodel(batch)
+            pl_output = frontend.extract(batch)
             for key1 in ["embed", "logits", "AS"]:
                 for key2, value in getattr(pl_output, key1).items():
                     key = f"{key1}-{key2}"

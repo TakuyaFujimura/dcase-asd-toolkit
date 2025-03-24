@@ -12,7 +12,7 @@ version: null
 
 resume_or_scratch: null
 
-plmodel_cfg: null
+frontend_cfg: null
 model_ver: null
 ckpt_ver: null
 

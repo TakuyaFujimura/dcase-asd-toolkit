@@ -11,29 +11,29 @@ In the ae_baseline, model_ver is set to machine type because ae_baseline constru
 - result_dir (Path): result directory path from `asdit`
 - data_dir (Path): data directory path from `asdit`
 - overwrite (bool): If True, the existing files will be overwritten. Otherwise, the process will be skipped.
-<!-- - model (asdit.utils.config_class.ModelConfig): Configuration of asdmodel -->
+<!-- - model (asdit.utils.config_class.ModelConfig): Configuration of frontend -->
 <!-- - trainer (Dict[str, Any]): Configuration of pl.Trainer -->
 <!-- - label_dict_path (Dict[str, Path]): Label file path -->
 <!-- - datamodule (asdit.utils.config_class.DMSplitConfig): Configuration of DataModule -->
 
-## asdmodel
+## frontend
 - hoge
 
 
 ## Extract
-This extracts information from audio file by using asdmodel.
-Output file `*_extract.csv` can include path, section, is_normal, is_target, and outputs of asdmodel.
+This extracts information from audio file by using frontend.
+Output file `*_extract.csv` can include path, section, is_normal, is_target, and outputs of frontend.
 
 <details><summary>Configuration Items</summary>
 
 - resume_or_scratch (str): ["resume", "scratch"]
-- plmodel_cfg (Dict[str, Any]): Required when resume_or_scratch is "scratch".
+- frontend_cfg (Dict[str, Any]): Required when resume_or_scratch is "scratch".
 - ckpt_ver (str): Required when resume_or_scratch is "resume"
 - model_ver (str): Required when resume_or_scratch is "resume"
 - extract_items (List[str]): A list of `re` patterns used to select extracted items. These patterns will be combined with the default items (path, section, is_normal, and is_target).
 </details>
 
-<details><summary>Extract features from pre-trained asdmodel</summary>
+<details><summary>Extract features from pre-trained frontend</summary>
 
 The model will be resumed from the checkpoint file of `ckpt_ver` version in `<result_dir>/<name>/<dcase>/<version>/model/<model_ver>/checkpoints`.
 
@@ -45,13 +45,13 @@ Configuration items:
 </details>
 
 
-<details><summary>Extract features from training-free asdmodel</summary>
+<details><summary>Extract features from training-free frontend</summary>
 
-Training-free asdmodel (e.g., simple audio feature extractor) will be constructed based on the configuration of `plmodel_cfg`. 
+Training-free frontend (e.g., simple audio feature extractor) will be constructed based on the configuration of `frontend_cfg`. 
 
 Configuration items:
 - resume_or_scratch (str): "scratch"
-- plmodel_cfg (Dict[str, Any]): Please write the configuration of the model used for feature extraction.
+- frontend_cfg (Dict[str, Any]): Please write the configuration of the model used for feature extraction.
 
 </details>
 

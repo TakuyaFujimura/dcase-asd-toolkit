@@ -13,7 +13,7 @@ class MainExtractConfig(BaseModel):
 
     resume_or_scratch: Literal["resume", "scratch"]
 
-    plmodel_cfg: Optional[Dict[str, Any]] = None
+    frontend_cfg: Optional[Dict[str, Any]] = None
     model_ver: Optional[str] = None
     ckpt_ver: Optional[str] = None
 

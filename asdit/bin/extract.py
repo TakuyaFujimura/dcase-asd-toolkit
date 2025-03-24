@@ -15,10 +15,10 @@ from asdit.bin.utils.resume import (
     ExtractDMConfigMaker,
     get_past_cfg,
     resume_dmconfigmaker,
-    resume_plmodel,
+    resume_plfrontend,
 )
 from asdit.datasets.pl_datamodule import PLDataModule
-from asdit.pl_models.base_model import BasePLModel
+from asdit.frontends.base import BaseFrontend
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainExtractConfig
 
@@ -42,9 +42,9 @@ def make_dir(cfg: MainExtractConfig) -> Path:
     return output_dir
 
 
-def setup_plmodel_dmconfigmaker(
+def setup_frontend_dmconfigmaker(
     cfg: MainExtractConfig,
-) -> Tuple[BasePLModel, ExtractDMConfigMaker]:
+) -> Tuple[BaseFrontend, ExtractDMConfigMaker]:
     if cfg.resume_or_scratch == "resume":
         # check
         if cfg.model_ver is None:
@@ -56,21 +56,21 @@ def setup_plmodel_dmconfigmaker(
                 "ckpt_ver must be specified when resume_or_scratch is resume"
             )
         past_cfg = get_past_cfg(cfg=cfg)
-        plmodel = resume_plmodel(cfg=cfg, past_cfg=past_cfg)
+        frontend = resume_plfrontend(cfg=cfg, past_cfg=past_cfg)
         dmconfigmaker = resume_dmconfigmaker(cfg=cfg, past_cfg=past_cfg)
 
     elif cfg.resume_or_scratch == "scratch":
-        if cfg.plmodel_cfg is None:
+        if cfg.frontend_cfg is None:
             raise ValueError(
-                "plmodel_cfg must be specified when resume_or_scratch is scratch"
+                "frontend_cfg must be specified when resume_or_scratch is scratch"
             )
-        plmodel = instantiate_tgt(cfg.plmodel_cfg)
+        frontend = instantiate_tgt(cfg.frontend_cfg)
         dmconfigmaker = ExtractDMConfigMaker(
             dcase=cfg.dcase, machine=cfg.machine, **cfg.datamodule
         )
     else:
         raise ValueError(f"Unexpected resume_or_scratch: {cfg.resume_or_scratch}")
-    return plmodel, dmconfigmaker
+    return frontend, dmconfigmaker
 
 
 @hydra.main(version_base=None, config_path="../../config/extract", config_name="config")
@@ -80,7 +80,7 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = make_dir(cfg=cfg)
-    plmodel, dmconfigmaker = setup_plmodel_dmconfigmaker(cfg=cfg)
+    frontend, dmconfigmaker = setup_frontend_dmconfigmaker(cfg=cfg)
 
     for split in ["train", "test"]:
         logger.info(f"Extracting {split} data now...")
@@ -90,7 +90,7 @@ def main(hydra_cfg: DictConfig) -> None:
         )
         df = loader2df(
             dataloader=dataloader,
-            plmodel=plmodel,
+            frontend=frontend,
             device=cfg.device,
             extract_items=cfg.extract_items,
         )

@@ -4,7 +4,6 @@ from typing import Any, Dict, List, cast
 
 import hydra
 import lightning.pytorch as pl
-import torch
 from hydra.core.hydra_config import HydraConfig
 from lightning.pytorch.callbacks import ModelCheckpoint, TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
@@ -59,15 +58,15 @@ def setup_datamodule(cfg: MainTrainConfig) -> pl.LightningDataModule:
     return dm
 
 
-def setup_plmodel(cfg: MainTrainConfig) -> pl.LightningModule:
-    logger.info("Create plmodel")
-    plmodel = instantiate_tgt(
+def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
+    logger.info("Create frontend")
+    frontend = instantiate_tgt(
         {
             "label_dict_path": cfg.label_dict_path,
             **cfg.model.model_dump(),
         }
     )
-    return plmodel
+    return frontend
 
 
 @hydra.main(version_base=None, config_path="../../config/train", config_name="config")
@@ -86,11 +85,11 @@ def main(hydra_cfg: DictConfig) -> None:
         return
 
     dm = setup_datamodule(cfg)
-    plmodel = setup_plmodel(cfg)
+    frontend = setup_frontend(cfg)
     trainer = make_trainer(cfg, ckpt_dir)
 
     logger.info("Start Training")
-    trainer.fit(plmodel, dm.train_dataloader(), dm.val_dataloader())
+    trainer.fit(frontend, dm.train_dataloader(), dm.val_dataloader())
 
 
 if __name__ == "__main__":

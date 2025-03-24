@@ -7,11 +7,12 @@ import torch
 
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig
+from asdit.utils.config_class.output_config import PLOutput
 from asdit.utils.dcase_utils import get_label_dict
 from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
 from .auroc import AUROC
-from .base_asdmodel import BaseASDModel
+from .base import BaseFrontend
 
 
 def grad_norm(module: torch.nn.Module) -> float:
@@ -24,7 +25,7 @@ def grad_norm(module: torch.nn.Module) -> float:
     return total_norm
 
 
-class BaseASDPLModel(pl.LightningModule, BaseASDModel):
+class BasePLFrontend(pl.LightningModule, BaseFrontend):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
@@ -52,6 +53,9 @@ class BaseASDPLModel(pl.LightningModule, BaseASDModel):
     def _constructor(self):
         pass
 
+    def extract(self, batch: dict) -> PLOutput:
+        return self(batch)
+
     def log_loss(self, loss: Any, log_name: str, batch_size: int):
         if isinstance(loss, torch.Tensor) and loss.numel() == 1:
             self.log(
@@ -77,7 +81,7 @@ class BaseASDPLModel(pl.LightningModule, BaseASDModel):
         if self.trainer.global_step % self.grad_cfg.log_every_n_steps == 0:
             opt = self.trainer.optimizers[0]
             current_lr = opt.state_dict()["param_groups"][0]["lr"]
-            self.logger.log_metrics(
+            self.logger.log_metrics(  # type: ignore
                 {
                     "grad/norm": grad_norm_val,
                     "grad/clipped_norm": clipped_norm_val,
@@ -100,7 +104,7 @@ class BaseASDPLModel(pl.LightningModule, BaseASDModel):
         scheduler.step()
 
 
-class BaseASDPLAUCModel(BaseASDPLModel):
+class BasePLAUCFrontend(BasePLFrontend):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
