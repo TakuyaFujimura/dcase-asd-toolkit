@@ -5,7 +5,7 @@
 
 dcase="dcase2023"
 seed="0"
-name="example"
+name="recipe"
 version="dis_baseline"
 
 machines=$(bash ../base/get_machines.sh "${dcase}")
