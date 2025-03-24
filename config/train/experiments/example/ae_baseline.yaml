@@ -1,7 +1,7 @@
 # @package _global_
 defaults:
     - override /datamodule: ae_flattenstft
-    - override /model: ae_mlp
+    - override /frontend: ae_mlp
     - override /trainer: default
 
 label_dict_path: {}

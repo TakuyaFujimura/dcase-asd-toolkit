@@ -15,7 +15,7 @@ train:
         tgt_class: asdit.datasets.AudioFeatDataset
         path_selector_list:
             - "${data_dir}/formatted/${dcase}/raw/${machine}/train/*.wav"
-        audio_feat_cfg: ${model.audio_feat_cfg}
+        audio_feat_cfg: ${frontend.audio_feat_cfg}
     batch_sampler: null
     collator:
         tgt_class: asdit.datasets.BasicCollator

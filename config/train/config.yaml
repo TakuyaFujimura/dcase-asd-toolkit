@@ -1,7 +1,7 @@
 defaults:
     - _self_
     - datamodule: null
-    - model: null
+    - frontend: null
     - trainer: null
     - experiments: null
 

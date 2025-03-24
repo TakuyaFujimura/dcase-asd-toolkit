@@ -93,8 +93,8 @@ def resume_plfrontend(
     cfg: MainExtractConfig, past_cfg: MainTrainConfig
 ) -> BasePLFrontend:
     ckpt_path = get_ckpt_path(cfg)
-    module_name = ".".join(past_cfg.model.tgt_class.split(".")[:-1])
-    class_name = past_cfg.model.tgt_class.split(".")[-1]
+    module_name = ".".join(past_cfg.frontend.tgt_class.split(".")[:-1])
+    class_name = past_cfg.frontend.tgt_class.split(".")[-1]
     module = importlib.import_module(module_name)
     frontend_cls = getattr(module, class_name)
     frontend = frontend_cls.load_from_checkpoint(ckpt_path)

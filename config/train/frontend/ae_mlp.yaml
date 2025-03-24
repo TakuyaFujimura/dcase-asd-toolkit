@@ -28,7 +28,7 @@ model_cfg:
     tgt_class: asdit.models.autoencoder.AE_MLP
     z_dim: 8
     h_dim: 128
-  audio_feat_cfg: ${model.audio_feat_cfg}
+  audio_feat_cfg: ${frontend.audio_feat_cfg}
   loss_cfg:
     tgt_class: torch.nn.MSELoss
   use_compile: true

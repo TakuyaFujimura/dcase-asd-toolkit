@@ -63,7 +63,7 @@ def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
     frontend = instantiate_tgt(
         {
             "label_dict_path": cfg.label_dict_path,
-            **cfg.model.model_dump(),
+            **cfg.frontend.model_dump(),
         }
     )
     return frontend

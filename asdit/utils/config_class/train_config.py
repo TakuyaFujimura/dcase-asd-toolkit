@@ -9,7 +9,7 @@ class GradConfig(BaseModel):
     clipper_cfg: Optional[Dict[str, Any]] = None
 
 
-class ModelConfig(BaseModel):
+class FrontendConfig(BaseModel):
     tgt_class: str
     model_cfg: Dict[str, Any]
     optim_cfg: Dict[str, Any]
@@ -37,7 +37,7 @@ class MainTrainConfig(BaseModel):
     result_dir: Path
     data_dir: str
 
-    model: ModelConfig
+    frontend: FrontendConfig
     trainer: Dict[str, Any]
     label_dict_path: Dict[str, Path] = Field(default_factory=dict)
     datamodule: DMSplitConfig
