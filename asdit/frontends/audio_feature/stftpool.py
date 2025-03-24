@@ -1,9 +1,12 @@
+import logging
 from typing import Any, Dict
 
 from asdit.models.audio_feature.stft import STFT
 from asdit.utils.config_class.output_config import PLOutput
 
 from ..base import BaseFrontend
+
+logger = logging.getLogger(__name__)
 
 
 class STFTPoolModel(BaseFrontend):
@@ -15,9 +18,11 @@ class STFTPoolModel(BaseFrontend):
         elif axis == "time":
             self.axis = 2
         else:
+            logger.error(f"Invalid axis: {axis}")
             raise ValueError(f"Invalid axis: {axis}")
 
         if pool not in ["mean", "max"]:
+            logger.error(f"Invalid pool: {pool}")
             raise ValueError(f"Invalid pool: {pool}")
         self.pool = pool
 

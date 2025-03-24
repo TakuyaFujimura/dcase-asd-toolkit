@@ -1,9 +1,12 @@
+import logging
 from typing import Any, Dict
 
 import torch
 
 from .base import BaseAudioFeature
 from .stft import STFT
+
+logger = logging.getLogger(__name__)
 
 
 class FlattenSTFT(BaseAudioFeature):
@@ -41,6 +44,7 @@ class FlattenSTFT(BaseAudioFeature):
                     ...
         """
         if len(wave.shape) != 2:
+            logger.error("Input shape must be [Batch, Time]")
             raise ValueError("Input shape must be [Batch, Time]")
 
         batch_size = wave.shape[0]
@@ -48,6 +52,7 @@ class FlattenSTFT(BaseAudioFeature):
         n_vectors = spectrograms.shape[-1] - self.n_frames + 1
         n_fft = spectrograms.shape[1]
         if n_vectors <= 0:
+            logger.error("n_frames is too large or length of wave is too short")
             raise ValueError("n_frames is too large or length of wave is too short")
         x = torch.zeros((n_vectors * batch_size, n_fft * self.n_frames)).to(wave.device)
         for i in range(batch_size):

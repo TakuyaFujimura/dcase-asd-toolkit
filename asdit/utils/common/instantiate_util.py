@@ -1,13 +1,22 @@
+import logging
+
 from hydra.utils import instantiate
+
+logger = logging.getLogger(__name__)
 
 
 def instantiate_tgt(config_org: dict):
     if "_target_" in config_org:
+        logger.error(
+            "'_target_' key should be replaced with 'tgt_class' key. "
+            + "(Pydantic does not allow keys starting with '_'.)"
+        )
         raise ValueError(
             "'_target_' key should be replaced with 'tgt_class' key. "
             + "(Pydantic does not allow keys starting with '_'.)"
         )
     if "tgt_class" not in config_org:
+        logger.error("tgt_class key is missing")
         raise ValueError("tgt_class key is missing")
     config = config_org.copy()
     tgt_class = config.pop("tgt_class")

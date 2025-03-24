@@ -1,11 +1,15 @@
 import glob
+import logging
 from operator import gt, lt
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def get_path_glob(glob_condition: str) -> str:
     path_list = glob.glob(glob_condition)
     if len(path_list) != 1:
+        logger.error(f"Error: {len(path_list)} files found for {glob_condition}")
         raise FileNotFoundError(
             f"Error: {len(path_list)} files found for {glob_condition}"
         )
@@ -20,6 +24,7 @@ def get_best_path(ckpt_dir: Path, best_type: str) -> Path:
         best_loss: float = float("-inf")
         compare_fn = gt
     else:
+        logger.error(f"Invalid best_type: {best_type}")
         raise ValueError(f"Invalid best_type: {best_type}")
 
     best_path: Path = Path("tmp")

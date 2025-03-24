@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -13,6 +14,8 @@ from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
 from .auroc import AUROC
 from .base import BaseFrontend
+
+logger = logging.getLogger(__name__)
 
 
 def grad_norm(module: torch.nn.Module) -> float:
@@ -68,6 +71,7 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
                 on_epoch=False,
             )
         else:
+            logger.error("Loss is not a scalar tensor")
             raise ValueError("Loss is not a scalar tensor")
 
     def on_after_backward(self):

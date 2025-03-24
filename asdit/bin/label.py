@@ -13,7 +13,6 @@ from asdit.datasets.torch_dataset import parse_path_selector
 from asdit.labelers.base import LabelerBase
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.common.json_util import write_json
-from asdit.utils.config_class import LabelInfo
 from asdit.utils.dcase_utils import get_dcase_info
 
 logger = logging.getLogger(__name__)
@@ -78,6 +77,7 @@ def get_labelinfo_dict(path_list: List[str], labeler) -> dict:
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if cfg.save_path.exists() and not cfg.overwrite:
+        logger.error(f"{cfg.save_path} already exists. Please set overwrite=True")
         raise FileExistsError(
             f"{cfg.save_path} already exists. Please set overwrite=True"
         )

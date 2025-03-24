@@ -26,6 +26,7 @@ def wave_pad(wave: torch.Tensor, crop_len: int, pad_type: str = "tile") -> torch
         if pad_type == "tile":
             wave = wave.tile(int(np.ceil(crop_len / len(wave))))
         else:
+            logger.error(f"Unexpected pad_type: {pad_type}")
             raise NotImplementedError()
     return wave
 
@@ -52,6 +53,7 @@ class BasicCollator(object):
         self.crop_len: int | Literal["all", "none"]
 
         if sr != 16000:
+            logger.error(f"Unexpected sampling rate: {sr}")
             raise ValueError("Unexpected sampling rate")
 
         if sec == "all":
@@ -67,6 +69,7 @@ class BasicCollator(object):
         self.need_wave: bool = self.crop_len != "none"
         self.need_feat = need_feat
         if self.need_feat and self.need_wave:
+            logger.error("Cannot use both wave and feat at the same time.")
             raise ValueError("Cannot use both wave and feat at the same time.")
         # If we use only `feat`, `sec` will not be used and
         # meaningless `sec` parameters will appear in hparams.yaml.

@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -9,6 +10,8 @@ from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig, PLOutput
 
 from .base_plmodel import BasePLFrontend
+
+logger = logging.getLogger(__name__)
 
 
 class BasicDisPLModel(BasePLFrontend):
@@ -32,12 +35,14 @@ class BasicDisPLModel(BasePLFrontend):
         # tgt_class: asdit.models.losses.SCAdaCos
         split_loss_tgt = loss_cfg["tgt_class"].split(".")
         if "asdit.losses" != ".".join(split_loss_tgt[:-1]):
+            logger.error(f"Unexpected loss class: {loss_cfg['tgt_class']}")
             raise ValueError(f"Invalid loss class: {loss_cfg['tgt_class']}")
 
-        # set normalize flag based on loss name
+        # TODO: set normalize flag based on loss name. AdaProj
         if split_loss_tgt[-1] in ["AdaCos", "ArcFace", "SCAdaCos"]:
             self.normalize = True
         else:
+            logger.error(f"Unexpected loss class: {loss_cfg['tgt_class']}")
             raise NotImplementedError()
 
     def set_head_dict(self, loss_label2lam_dict: Dict[str, float]):

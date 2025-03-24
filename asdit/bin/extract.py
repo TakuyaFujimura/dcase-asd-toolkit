@@ -48,10 +48,12 @@ def setup_frontend_dmconfigmaker(
     if cfg.resume_or_scratch == "resume":
         # check
         if cfg.model_ver is None:
+            logger.error("model_ver must be specified when resume_or_scratch is resume")
             raise ValueError(
                 "model_ver must be specified when resume_or_scratch is resume"
             )
         if cfg.ckpt_ver is None:
+            logger.error("ckpt_ver must be specified when resume_or_scratch is resume")
             raise ValueError(
                 "ckpt_ver must be specified when resume_or_scratch is resume"
             )
@@ -61,6 +63,9 @@ def setup_frontend_dmconfigmaker(
 
     elif cfg.resume_or_scratch == "scratch":
         if cfg.frontend_cfg is None:
+            logger.error(
+                "frontend_cfg must be specified when resume_or_scratch is scratch"
+            )
             raise ValueError(
                 "frontend_cfg must be specified when resume_or_scratch is scratch"
             )
@@ -69,6 +74,7 @@ def setup_frontend_dmconfigmaker(
             dcase=cfg.dcase, machine=cfg.machine, **cfg.datamodule
         )
     else:
+        logger.error(f"Unexpected resume_or_scratch: {cfg.resume_or_scratch}")
         raise ValueError(f"Unexpected resume_or_scratch: {cfg.resume_or_scratch}")
     return frontend, dmconfigmaker
 
