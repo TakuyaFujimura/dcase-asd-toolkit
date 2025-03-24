@@ -3,3 +3,4 @@ from .audio_feature.stftpool import STFTPoolModel
 from .base import BaseFrontend
 from .base_plmodel import BasePLFrontend
 from .discriminative_model import BasicDisPLModel
+from .pretrained_feature import BeatsPoolModel
