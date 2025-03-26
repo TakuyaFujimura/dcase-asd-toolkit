@@ -1,108 +1,82 @@
 #!/bin/bash
-########################
-name="None"
-version="None"
-dcase="None"
-seed="None"
-machine="None"
-cfg_train="None"
-cfg_extract="None"
-cfg_score="None"
-cfg_evaluate="None"
-cfg_umap="None"
-cfg_table="None"
-infer_ver="None"
-########################
 
-cd "$(dirname "$0")"
+get_machines() {
+    if [ "$1" = "dcase2021" ]; then
+        machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
+    elif [ "$1" = "dcase2022" ]; then
+        machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")
+    elif [ "$1" = "dcase2023" ]; then
+        machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
+    elif [ "$1" = "dcase2024" ]; then
+        machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
+    else
+        echo "Invalid dcase"
+        exit 1
+    fi
 
-source ./parse_options.sh
+    echo "${machines[@]}"
+}
 
-# check required arguments
-if [ "${name}" = "None" ] || [ "${version}" = "None" ] || [ "${dcase}" = "None" ] || [ "${seed}" = "None" ]; then
-    echo "Missing required arguments"
-    echo "name: ${name}, version: ${version}, dcase: ${dcase}, seed: ${seed}"
-    exit 1
-fi
+collect_args() {
+    local vars=("$@")
+    local args=()
 
+    for var in "${vars[@]}"; do
+        if [[ -z $var ]]; then
+            echo "Error: $var is required but not defined"
+            exit 1
+        elif [[ $var == experiments_* ]]; then 
+            args+=("experiments=${!var}")
+        else
+            args+=("$var=${!var}")
+        fi
+    done
+
+    echo "${args[@]}"
+}
+
+asdit_train() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_train"))
+    echo "${args[@]}"
+    python -m asdit.bin.train "${args[@]}" "$@"
+}
+
+asdit_extract() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_extract" "infer_ver" "machine"))
+    python -m asdit.bin.extract "${args[@]}" "$@"
+}
+
+asdit_score() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_score" "infer_ver" "machine"))
+    python -m asdit.bin.score "${args[@]}" "$@"
+}
+
+asdit_evaluate() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
+    python -m asdit.bin.evaluate "${args[@]}" "$@"
+}
+
+asdit_umap() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_umap" "infer_ver" "machine"))
+    python -m asdit.bin.umap "${args[@]}" "$@"
+}
+
+
+asdit_table() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver"))
+    python -m asdit.bin.table "${args[@]}" "$@"
+}
+
+# get machines
+machines=$(get_machines "${dcase}")
+echo "machines: $machines"
+
+# change directory to project root
 cd ../../..
 
 # activate virtual environment
 if [ ! -d "venv" ]; then
-    echo "venv not found in $(pwd)"
+    echo "venv not found in $(pwd). Did you run it from 'jobs/asd/base'?"
     exit 1
 fi
 source "venv/bin/activate"
-
-# train
-if [ "${cfg_train}" = "None" ]; then
-    echo "Skipping training"
-else
-    echo "Starting training"
-    if [ "${machine}" = "None" ]; then
-        python -m asdit.bin.train experiments="${cfg_train}" \
-        seed="${seed}" dcase="${dcase}" \
-        name="${name}" version="${version}"
-    else
-        python -m asdit.bin.train experiments="${cfg_train}" \
-        seed="${seed}" dcase="${dcase}" \
-        name="${name}" version="${version}" machine="${machine}"
-    fi
-fi
-
-# extract
-if [ "${cfg_extract}" = "None" ]; then
-    echo "Skipping extraction"
-else
-    echo "Starting extraction"
-    python -m asdit.bin.extract experiments="${cfg_extract}" \
-    seed="${seed}" dcase="${dcase}" \
-    name="${name}" version="${version}" \
-    infer_ver="${infer_ver}" machine="${machine}"
-fi
-
-# score
-if [ "${cfg_score}" = "None" ]; then
-    echo "Skipping scoring"
-else
-    echo "Starting scoring"
-    python -m asdit.bin.score experiments="${cfg_score}" \
-    seed="${seed}" dcase="${dcase}" \
-    name="${name}" version="${version}" \
-    infer_ver="${infer_ver}" machine="${machine}"
-fi
-
-# evaluate
-if [ "${cfg_evaluate}" = "None" ]; then
-    echo "Skipping evaluation"
-else
-    echo "Starting evaluation"
-    python -m asdit.bin.evaluate experiments="${cfg_evaluate}" \
-    seed="${seed}" dcase="${dcase}" \
-    name="${name}" version="${version}" \
-    infer_ver="${infer_ver}" machine="${machine}" dcase="${dcase}"
-fi
-
-# umap
-if [ "${cfg_umap}" = "None" ]; then
-    echo "Skipping umap"
-else
-    echo "Starting umap"
-    python -m asdit.bin.umap experiments="${cfg_umap}" \
-    seed="${seed}" dcase="${dcase}" \
-    name="${name}" version="${version}" \
-    infer_ver="${infer_ver}" machine="${machine}"
-fi
-
-# table
-if [ "${cfg_table}" = "None" ]; then
-    echo "Skipping table"
-else
-    echo "Starting table"
-    python -m asdit.bin.table experiments="${cfg_table}" \
-    seed="${seed}" dcase="${dcase}" \
-    name="${name}" version="${version}" \
-    infer_ver="${infer_ver}"
-fi
-
-
