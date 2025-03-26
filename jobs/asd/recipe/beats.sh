@@ -7,7 +7,7 @@
 dcase="dcase2023"
 seed="0"
 name="recipe"
-version="spectrogram"
+version="beats_pool"
 infer_ver="mean"
 # ---------------------------- #
 # experiments_train=""

@@ -3,30 +3,25 @@
 # This is an example script for training and testing a discriminative baseline model
 # Frontend models are created and shared for all machine types
 
+# ---------------------------- #
 dcase="dcase2023"
 seed="0"
 name="recipe"
 version="dis_baseline"
+infer_ver="last"
+# ---------------------------- #
+experiments_train="${name}/${version}"
+experiments_extract="resume_shared"
+experiments_score="dis_baseline"
+experiments_umap="cosine"
+# ---------------------------- #
+source ../base/base.sh
 
-machines=$(bash ../base/get_machines.sh "${dcase}")
-
-# set common args
-common_args=(--name="${name}" --version="${version}" --dcase="${dcase}" --seed="${seed}" --infer_ver="last")
-
-# train
-bash ../base/base.sh "${common_args[@]}" \
---cfg_train="${name}/${version}" \
-
-# test
+asdit_train
 for machine in $machines; do
-    bash ../base/base.sh "${common_args[@]}" \
-    --machine="${machine}" \
-    --cfg_extract="resume_shared" \
-    --cfg_score="dis_baseline" \
-    --cfg_evaluate="default" \
-    --cfg_umap="cosine"
+    asdit_extract
+    asdit_score
+    asdit_evaluate
+    asdit_umap
 done
-
-# table
-bash ../base/base.sh "${common_args[@]}" \
---cfg_table="default"
+asdit_table
