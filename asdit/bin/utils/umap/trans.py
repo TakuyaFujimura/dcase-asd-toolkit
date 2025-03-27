@@ -28,10 +28,19 @@ def trans_umap(
     save_path: Path,
     extract_items: List[str],
 ) -> None:
+    # Load data
     df, is_test = get_df(output_dir=output_dir)
     embed = get_embed_from_df(df=df, embed_key=embed_key)
+
+    # accept "euclid" as an alias for "euclidean"
+    if metric == "euclid":
+        metric = "euclidean"
+
+    # UMAP transformation
     umap_model = umap.UMAP(random_state=0, metric=metric)
     umap_embed = umap_model.fit_transform(embed)  # (N, 2)
+
+    # Save
     extract_items = list(set(INFOLIST + extract_items))
     umap_df = pickup_cols(df=df, extract_items=extract_items)
     additional_df = pd.DataFrame(
