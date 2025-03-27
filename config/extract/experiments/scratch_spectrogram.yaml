@@ -13,8 +13,7 @@ frontend_cfg:
     f_min: 0.0
     f_max: 8000.0
     temporal_norm: false
-  axis: "time"
-  pool: "mean"
+  pool: ${infer_ver}
 
 datamodule:
   data_dir: "../data"

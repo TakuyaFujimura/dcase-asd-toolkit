@@ -10,9 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class STFTPoolModel(BaseFrontend):
-    def __init__(
-        self, stft_cfg: Dict[str, Any], axis: str, pool: str
-    ):  # Literal["freq", "time"], pool: Literal["mean", "max"]):
+    def __init__(self, stft_cfg: Dict[str, Any], pool: str):
+        if len(pool.split("_")) != 2:
+            raise ValueError(
+                f"Invalid pool: {pool}. Must be in the form of '<axis>_<pool>'"
+            )
+        axis, agg = pool.split("_")
         if axis == "freq":
             self.axis = 1
         elif axis == "time":
@@ -20,17 +23,17 @@ class STFTPoolModel(BaseFrontend):
         else:
             raise ValueError(f"Invalid axis: {axis}")
 
-        if pool not in ["mean", "max"]:
-            raise ValueError(f"Invalid pool: {pool}")
-        self.pool = pool
+        if agg not in ["mean", "max"]:
+            raise ValueError(f"Invalid agg: {agg}")
+        self.agg = agg
 
         self.stft = STFT(**stft_cfg)
 
     def extract(self, batch: dict) -> PLOutput:
         spectrogram = self.stft(batch["wave"])  # B, F, T
-        if self.pool == "mean":
+        if self.agg == "mean":
             embed = spectrogram.mean(dim=self.axis)
-        elif self.pool == "max":
+        elif self.agg == "max":
             embed = spectrogram.max(dim=self.axis).values
 
         embed_dict = {"main": embed}
