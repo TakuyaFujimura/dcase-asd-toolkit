@@ -12,10 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 class BeatsPoolModel(BaseFrontend):
-    def __init__(self, ckpt_path: str):
+    def __init__(self, ckpt_path: str, layer: str = "last"):
         self.model = resume(Path(ckpt_path))
         self.model.eval()
         self.device = next(self.model.parameters()).device
+        self.layer = layer
+        if self.layer != "last":
+            raise NotImplementedError("Only last layer is supported for now")
 
     def extract(self, batch: dict) -> PLOutput:
         x = batch["wave"]
