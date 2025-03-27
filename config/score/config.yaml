@@ -16,7 +16,10 @@ backend: []
 
 machine: null
 
-extract_items: []
+
+extract_items:
+  - "AS-.*"
+
 
 overwrite: false
 
