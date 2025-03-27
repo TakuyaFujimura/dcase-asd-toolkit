@@ -1,0 +1,15 @@
+# @package _global_
+resume_or_scratch: scratch
+
+infer_ver: null
+
+
+frontend_cfg:
+  tgt_class: asdit.frontends.BeatsPoolModel
+  ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+  layer: ${infer_ver}
+
+datamodule:
+  data_dir: "../data"
+  sec: "all"
+  sr: 16000
