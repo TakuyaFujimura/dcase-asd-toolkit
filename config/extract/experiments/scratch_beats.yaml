@@ -4,7 +4,7 @@ infer_ver: null
 
 frontend_cfg:
   tgt_class: asdit.frontends.BeatsPoolModel
-  ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+  ckpt_path: "pretrained_models/beats/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt1.pt"
 
 datamodule:
   data_dir: "../data"

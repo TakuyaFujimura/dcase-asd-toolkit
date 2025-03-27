@@ -1,6 +1,6 @@
 # @package _global_
 defaults:
-    - override /datamodule: ae_flattenstft
+    - override /datamodule: audiofeat
     - override /frontend: ae_mlp
     - override /trainer: default
 

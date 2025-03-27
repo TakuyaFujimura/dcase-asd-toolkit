@@ -1,5 +1,0 @@
-# @package _global_
-
-metric: "euclidean"
-embed_key: "e_main"
-

@@ -42,12 +42,12 @@ asdit_train() {
 }
 
 asdit_extract() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_extract" "infer_ver" "machine"))
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine" "experiments_extract"))
     python -m asdit.bin.extract "${args[@]}" "$@"
 }
 
 asdit_score() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_score" "infer_ver" "machine"))
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine" "experiments_score"))
     python -m asdit.bin.score "${args[@]}" "$@"
 }
 
@@ -57,7 +57,7 @@ asdit_evaluate() {
 }
 
 asdit_umap() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_umap" "infer_ver" "machine"))
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
     python -m asdit.bin.umap "${args[@]}" "$@"
 }
 

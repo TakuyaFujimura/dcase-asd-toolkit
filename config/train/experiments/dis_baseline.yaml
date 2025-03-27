@@ -1,7 +1,7 @@
 # @package _global_
 defaults:
     - override /datamodule: basic
-    - override /frontend: multiresnet_1024
+    - override /frontend: dis_multiresnet_1024
     - override /trainer: default
 
 

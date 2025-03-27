@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# This is an example script for training and testing an autoencoder baseline model
-# Frontend models are created for each machine types
+# This is a recipe for an autoencoder-based ASD system
+# Different Frontend models are created for each machine type
 
 # ---------------------------- #
 dcase="dcase2023"
@@ -9,11 +9,11 @@ seed="0"
 name="recipe"
 version="ae_baseline"
 infer_ver="last"
+metric="euclid"
 # ---------------------------- #
-experiments_train="${name}/${version}"
+experiments_train="${version}"
 experiments_extract="resume_machinewise"
 experiments_score="no_backend"
-experiments_umap="euclid"
 # ---------------------------- #
 source ../base/base.sh
 
@@ -22,6 +22,6 @@ for machine in $machines; do
     asdit_extract
     asdit_score
     asdit_evaluate
-    asdit_umap
+    asdit_umap metric="${metric}"
 done
 asdit_table

@@ -26,7 +26,6 @@ class BeatsPoolModel(BaseFrontend):
             self.model.to(self.device)
 
         with torch.no_grad():
-            # padding_mask = torch.zeros_like(x).bool()
             z = self.model.extract_features(x)[0]
             z = z.mean(1)  # (B, L, C) -> (B, C)
         embed_dict = {"main": z}
