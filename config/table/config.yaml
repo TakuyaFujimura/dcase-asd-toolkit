@@ -12,7 +12,10 @@ version: null
 infer_ver: null
 result_dir: "./results"
 
-hmean_cfg_dict: {}
+hmean_cfg_dict: 
+  s_auc: [s_auc]
+  t_auc: [t_auc]
+  mix_auc: [mix_auc]
 overwrite: false
 
 
