@@ -1,11 +1,11 @@
 #!/bin/bash
 # ---------------------------- #
-dcase_list=("dcase2023")
+dcase_list=("dcase2024")
 seed_list=("0" "1" "2" "3" "4")
 # ---------------------------- #
 
 
-recipe=$(basename $0)
+recipe="dis_baseline.sh"
 cd ../recipe
 
 for dcase in "${dcase_list[@]}"; do
