@@ -5,8 +5,8 @@
 # https://arxiv.org/abs/2305.03328
 
 # ---------------------------- #
-dcase="dcase2023"
-seed="0"
+dcase=$1
+seed=$2
 name="recipe"
 version="spectrogram"
 infer_ver="time_mean"

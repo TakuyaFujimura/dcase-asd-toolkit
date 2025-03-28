@@ -4,8 +4,8 @@
 # Different Frontend models are created for each machine type
 
 # ---------------------------- #
-dcase="dcase2023"
-seed="0"
+dcase=$1
+seed=$2
 name="recipe"
 version="ae_baseline"
 infer_ver="last"

@@ -5,8 +5,8 @@
 # https://arxiv.org/abs/2409.05035
 
 # ---------------------------- #
-dcase="dcase2023"
-seed="0"
+dcase=$1
+seed=$2
 name="recipe"
 version="beats"
 infer_ver="last"

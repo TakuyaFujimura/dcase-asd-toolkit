@@ -38,4 +38,4 @@ every_n_epochs_valid: 1
 
 hydra:
     run:
-        dir: ${result_dir}/${name}/${dcase}/${version}_${seed}/model/${model_ver}
+        dir: ${result_dir}/${name}/${dcase}/${version}/${seed}/model/${model_ver}
