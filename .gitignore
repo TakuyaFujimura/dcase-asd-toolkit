@@ -5,6 +5,7 @@ labels/*/logs
 *.pt
 .d00*
 *.out
+analysis/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
