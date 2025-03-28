@@ -13,7 +13,6 @@ model_ver: "all"
 frontend:
   model_cfg:
     loss_cfg:
-      tgt_class: asdit.losses.SCAdaCos
-      n_subclusters: 16
+      tgt_class: asdit.losses.AdaCos
       dynamic: false
       trainable: false

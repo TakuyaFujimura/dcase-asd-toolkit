@@ -12,6 +12,6 @@ callback_opts:
 
 trainer:
   max_epochs: 50
-  devices: [1]
+  devices: [0]
 
 model_ver: ${machine}

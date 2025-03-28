@@ -27,11 +27,7 @@ model_cfg:
         temporal_norm: false
     use_bias: false
     emb_base_size: 128
-  loss_cfg:
-    tgt_class: asdit.losses.SCAdaCos
-    n_subclusters: 16
-    dynamic: false
-    trainable: false
+  loss_cfg: {}
   loss_label2lam_dict:
     main_label: 1
   augmentation_cfg_list:
