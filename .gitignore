@@ -3,6 +3,8 @@ results/
 labels/*/logs
 *.ckpt
 *.pt
+.d00*
+*.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
