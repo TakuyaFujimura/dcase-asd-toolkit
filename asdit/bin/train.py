@@ -34,8 +34,8 @@ def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
     pl_logger = TensorBoardLogger(
         save_dir=f"{cfg.result_dir}/{cfg.name}",
         name=cfg.dcase,
-        version=f"{cfg.version}_{cfg.seed}",
-        sub_dir=f"model/{cfg.model_ver}",
+        version=f"{cfg.version}",
+        sub_dir=f"{cfg.seed}/model/{cfg.model_ver}",
     )
     # Trainer
     trainer = instantiate_tgt(
@@ -75,7 +75,7 @@ def main(hydra_cfg: DictConfig) -> None:
     if not cfg.trainer.get("deterministic", False):
         raise ValueError("Not deterministic!!!")
     logger.info(f"Start experiment: {HydraConfig().get().run.dir}")
-    logger.info(f"version: {cfg.version}_{cfg.seed}")
+    logger.info(f"version: {cfg.version}/{cfg.seed}")
     pl.seed_everything(cfg.seed, workers=True)
     # torch.autograd.set_detect_anomaly(False)
 

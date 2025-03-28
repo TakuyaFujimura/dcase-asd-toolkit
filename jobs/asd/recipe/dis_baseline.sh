@@ -4,8 +4,8 @@
 # Frontend models are shared for all machine types
 
 # ---------------------------- #
-dcase="dcase2023"
-seed="0"
+dcase=$1
+seed=$2
 name="recipe"
 version="dis_baseline"
 infer_ver="last"

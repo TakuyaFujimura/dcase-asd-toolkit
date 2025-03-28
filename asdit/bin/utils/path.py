@@ -24,7 +24,7 @@ def get_version_dir(
         | MainTableConfig
     ),
 ) -> Path:
-    version_dir = cfg.result_dir / cfg.name / cfg.dcase / f"{cfg.version}_{cfg.seed}"
+    version_dir = cfg.result_dir / cfg.name / cfg.dcase / cfg.version / str(cfg.seed)
     return version_dir
 
 
