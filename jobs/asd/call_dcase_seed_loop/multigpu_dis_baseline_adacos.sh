@@ -4,7 +4,7 @@
 #PJM -L elapse=12:00:00
 #PJM -j
 # ---------------------------- #
-dcase_list=("dcase2023" "dcase2022" "dcase2021" "dcase2024")
+dcase_list=("dcase2022" "dcase2021" "dcase2024") #"dcase2023" 
 # ---------------------------- #
 
 
