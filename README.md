@@ -79,15 +79,13 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 
 **How to**
 - Specify `data_dir` in `config/train/config.yaml`
-- Specify `dcase` in `jobs/asd/example/?.sh`
-    - Two example scripts are provided: `dis_baseline.sh` and `ae_baseline.sh`
-- This process will automatically execute the training and testing pipeline.
-
+- Specify `dcase` and `seed` in `jobs/asd/call/?.sh`
+- This script will automatically execute the training and testing process.
 
 
 ```bash
-[dcase-asd-toolkit]$ cd jobs/asd/example
-[dcase-asd-toolkit/jobs/asd/example]$ bash dis_baseline.sh
+[dcase-asd-toolkit]$ cd jobs/asd/call
+[dcase-asd-toolkit/jobs/asd/call]$ bash dis_baseline.sh
 ```
 
 **Result**
@@ -97,31 +95,34 @@ dcase-asd-toolkit
 ├── ...
 └── results
     ├── ...
-    └── <name> # `example`
+    └── <name> # `recipe`
         ├── ...
-        └── <version> # `dcase2023_baseline_0`
-            ├── model
-            │   └── <model_ver> # all
-            │       ├── .hydra
-            │       ├── checkpoints
-            │       ├── events.out.tfevents.*
-            │       ├── hparams.yaml
-            │       └── train.log
-            └── output
-                └── <ckpt_ver> # `epoch_12`
-                    ├── bandsaw
-                    ├── bearing
-                    ├── ...
-                    ├── valve
-                    │   ├── hparams.yaml
-                    │   ├── test_evaluate.csv # AUC scores on test data
-                    │   ├── test_extract.csv # Extracted test data information, including embedding values
-                    │   ├── test_score.csv # Anomaly scores for test data
-                    │   ├── train_extract.csv # Extracted training data information, including embedding values
-                    │   ├── train_score.csv # Anomaly scores for training data
-                    │   └── umap # UMAP visualization
-                    │── official23-dev.csv # Summarized evaluation results
-                    └── official23-eval.csv
+        └── <dcase>
+            └── <version> # `dis_baseline`
+                ├── ...
+                └── <seed> # `0`
+                    ├── model
+                    │   └── <model_ver> # all
+                    │       ├── .hydra
+                    │       ├── checkpoints
+                    │       ├── events.out.tfevents.*
+                    │       ├── hparams.yaml
+                    │       └── train.log
+                    └── output
+                        └── <infer_ver> # `last`
+                            ├── bandsaw
+                            ├── bearing
+                            ├── ...
+                            ├── valve
+                            │   ├── hparams.yaml
+                            │   ├── test_evaluate.csv # AUC scores on test data
+                            │   ├── test_extract.csv # Extracted test data information, including embedding values
+                            │   ├── test_score.csv # Anomaly scores for test data
+                            │   ├── train_extract.csv # Extracted training data information, including embedding values
+                            │   ├── train_score.csv # Anomaly scores for training data
+                            │   └── umap # UMAP visualization
+                            │── official23-dev.csv # Summarized evaluation results
+                            └── official23-eval.csv
 ```
 
 </details>
