@@ -70,7 +70,7 @@ class BasicCollator(object):
                 sec = 12.0
             elif type(sec) is str:
                 raise ValueError(f"Unexpected sec: {sec}")
-            assert type(sec) is float
+            assert type(sec) is float or type(sec) is int
             self.crop_len = int(sr * sec)
 
         self.need_wave: bool = self.crop_len != "none"
