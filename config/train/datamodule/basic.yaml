@@ -1,7 +1,7 @@
 
 batch_size: 64
 sr: 16000
-sec: 18
+sec: ${dcase}
 num_workers: 4
 
 train:

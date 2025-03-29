@@ -42,7 +42,7 @@ class BasicCollator(object):
     def __init__(
         self,
         label_dict_path: Dict[str, Path],
-        sec: float | Literal["all", "none"],
+        sec: float | str,
         sr: int,
         need_feat: bool = False,
         shuffle: bool = True,
@@ -62,6 +62,15 @@ class BasicCollator(object):
                 "`wave` in batch will be ignored. If you need it, set `sec` parameter."
             )
         else:
+            if sec in ["dcase2021", "dcase2022"]:
+                sec = 10.0
+            elif sec == "dcase2023":
+                sec = 18.0
+            elif sec == "dcase2024":
+                sec = 12.0
+            elif type(sec) is str:
+                raise ValueError(f"Unexpected sec: {sec}")
+            assert type(sec) is float
             self.crop_len = int(sr * sec)
 
         self.need_wave: bool = self.crop_len != "none"
