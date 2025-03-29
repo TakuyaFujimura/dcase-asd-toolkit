@@ -1,10 +1,10 @@
 #!/bin/bash
 # ---------------------------- #
-recipe="spectrogram.sh"
+recipe="spectrogram"
 dcase="dcase2023"
 seed="0"
 # ---------------------------- #
 
 
 cd ../recipe
-bash "${recipe}" "${dcase}" "${seed}"
+bash "${recipe}.sh" "${dcase}" "${seed}"

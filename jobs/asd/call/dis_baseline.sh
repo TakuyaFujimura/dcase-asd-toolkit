@@ -1,10 +1,10 @@
 #!/bin/bash
 # ---------------------------- #
-recipe="dis_baseline.sh"
+recipe="dis_baseline"
 dcase="dcase2023"
 seed="0"
 # ---------------------------- #
 
 
 cd ../recipe
-bash "${recipe}" "${dcase}" "${seed}"
+bash dis_any_version.sh "${dcase}" "${seed}" "${recipe}"

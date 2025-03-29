@@ -7,7 +7,7 @@
 dcase=$1
 seed=$2
 name="recipe"
-version="dis_baseline_scac_trainable"
+version=$3
 infer_ver="last"
 metric="cosine"
 # ---------------------------- #

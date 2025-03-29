@@ -1,10 +1,10 @@
 #!/bin/bash
 # ---------------------------- #
-recipe="beats"
+recipe="dis_baseline_adacos_trainable"
 dcase="dcase2023"
 seed="0"
 # ---------------------------- #
 
 
 cd ../recipe
-bash "${recipe}.sh" "${dcase}" "${seed}"
+bash dis_any_version.sh "${dcase}" "${seed}" "${recipe}"
