@@ -82,8 +82,7 @@ def get_table_df(
     table_df = pd.concat(df_list, axis=1)
     table_df.columns = machinelist
     table_df["hmean"] = table_df.apply(lambda x: hmean(x), axis=1)
-    table_df = table_df.applymap(lambda x: myround(x * 100))  # type: ignore
-    table_df.index = backend_list
+    table_df.index = backend_list  # type: ignore
     table_df = table_df.reset_index().rename(columns={"index": "backend"})
     return table_df
 
