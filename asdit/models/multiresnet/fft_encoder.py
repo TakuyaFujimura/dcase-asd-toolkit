@@ -96,9 +96,11 @@ class Conv1dEncoderLayer(nn.Module):
 
 
 class FFTEncoderLayer(nn.Module):
-    def __init__(self, sec, sr, use_bias=False, emb_base_size=128):
+    def __init__(
+        self, sec: float, sr: int, use_bias: bool = False, emb_base_size: int = 128
+    ):
         super().__init__()
-        fft_len = (sec * sr) // 2 + 1
+        fft_len = int(sec * sr) // 2 + 1
         conv_param_list = [{"k": 256, "s": 64}, {"k": 64, "s": 32}, {"k": 16, "s": 4}]
         self.layer = Conv1dEncoderLayer(
             1, fft_len, use_bias, emb_base_size, conv_param_list

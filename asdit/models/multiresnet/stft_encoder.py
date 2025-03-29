@@ -286,7 +286,7 @@ class Conv2dEncoderLayer(nn.Module):
 class STFTEncoderLayer(nn.Module):
     def __init__(
         self,
-        sec: int,
+        sec: float,
         sr: int,
         stft_cfg: dict,
         use_bias: bool,
@@ -295,7 +295,7 @@ class STFTEncoderLayer(nn.Module):
     ):
         super().__init__()
         self.stft = STFT(**stft_cfg)
-        spectrogram_size = self.stft(torch.randn(sec * sr)).shape
+        spectrogram_size = self.stft(torch.randn(int(sec * sr))).shape
         if min(spectrogram_size) < 36:
             raise ValueError("input sequence or n_fft is too short")
         self.layer = Conv2dEncoderLayer(

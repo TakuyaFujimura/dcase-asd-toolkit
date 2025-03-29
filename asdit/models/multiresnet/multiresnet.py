@@ -3,6 +3,8 @@ from typing import List
 import torch
 from torch import nn
 
+from asdit.utils.dcase_utils import dcase2sec
+
 from .fft_encoder import FFTEncoderLayer
 from .stft_encoder import STFTEncoderLayer
 
@@ -10,7 +12,7 @@ from .stft_encoder import STFTEncoderLayer
 class MultiResNet(nn.Module):
     def __init__(
         self,
-        sec: int,
+        sec: float | str,
         sr: int,
         use_fft: bool,
         stft_cfg_list: List[dict],
@@ -19,6 +21,9 @@ class MultiResNet(nn.Module):
         resnet_additional_layer: str = "SEBlock",
     ):
         super().__init__()
+        if isinstance(sec, str):
+            sec = dcase2sec(sec)
+
         if use_fft:
             self.fft_layer = FFTEncoderLayer(
                 sec=sec, sr=sr, use_bias=use_bias, emb_base_size=emb_base_size

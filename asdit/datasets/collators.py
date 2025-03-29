@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from asdit.utils.config_class import LabelInfo
-from asdit.utils.dcase_utils import get_dcase_info, get_label_dict
+from asdit.utils.dcase_utils import dcase2sec, get_dcase_info, get_label_dict
 
 logger = logging.getLogger(__name__)
 
@@ -62,14 +62,8 @@ class BasicCollator(object):
                 "`wave` in batch will be ignored. If you need it, set `sec` parameter."
             )
         else:
-            if sec in ["dcase2021", "dcase2022"]:
-                sec = 10.0
-            elif sec == "dcase2023":
-                sec = 18.0
-            elif sec == "dcase2024":
-                sec = 12.0
-            elif type(sec) is str:
-                raise ValueError(f"Unexpected sec: {sec}")
+            if isinstance(sec, str):
+                sec = dcase2sec(sec)
             assert type(sec) is float or type(sec) is int
             self.crop_len = int(sr * sec)
 
