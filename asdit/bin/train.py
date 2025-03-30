@@ -14,13 +14,14 @@ from asdit.bin.utils.path import get_version_dir
 from asdit.datasets import PLDataModule
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainTrainConfig
+from asdit.utils.dcase_utils import parse_sec_cfg
 
 logger = logging.getLogger(__name__)
 
 
 def hydra_to_pydantic(config: DictConfig) -> MainTrainConfig:
     """Converts Hydra config to Pydantic config."""
-    config_dict = cast(Dict[str, Any], OmegaConf.to_object(config))
+    config_dict = parse_sec_cfg(OmegaConf.to_object(config))
     return MainTrainConfig(**config_dict)
 
 

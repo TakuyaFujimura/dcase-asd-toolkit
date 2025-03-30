@@ -21,13 +21,14 @@ from asdit.datasets.pl_datamodule import PLDataModule
 from asdit.frontends.base import BaseFrontend
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainExtractConfig
+from asdit.utils.dcase_utils import parse_sec_cfg
 
 logger = logging.getLogger(__name__)
 
 
 def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
     """Converts Hydra config to Pydantic config."""
-    config_dict = cast(Dict[str, Any], OmegaConf.to_object(config))
+    config_dict = parse_sec_cfg(OmegaConf.to_object(config))
     return MainExtractConfig(**config_dict)
 
 
