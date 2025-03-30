@@ -33,4 +33,3 @@ model_cfg:
   augmentation_cfg_list:
     - tgt_class: asdit.augmentations.Mixup
       prob: 0.5
-  use_compile: false

@@ -30,4 +30,3 @@ model_cfg:
   audio_feat_cfg: ${frontend.audio_feat_cfg}
   loss_cfg:
     tgt_class: torch.nn.MSELoss
-  use_compile: true
