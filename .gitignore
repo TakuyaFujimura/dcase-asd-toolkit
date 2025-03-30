@@ -6,6 +6,7 @@ labels/*/logs
 .d00*
 *.out
 analysis/
+jobs/asd/call_dcase_seed_loop/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
