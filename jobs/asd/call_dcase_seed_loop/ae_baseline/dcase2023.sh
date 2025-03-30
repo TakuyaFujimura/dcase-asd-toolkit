@@ -12,6 +12,8 @@ recipe_stem="ae_baseline"
 recipe="${recipe_stem}.sh"
 cd ../../recipe
 
+mkdir ../logs/${recipe_stem}
+
 for dcase in "${dcase_list[@]}"; do
     CUDA_VISIBLE_DEVICES=0 bash "${recipe}" "${dcase}" "0" > "../logs/${recipe_stem}/${dcase}_0.log" 2>&1 &
     CUDA_VISIBLE_DEVICES=1 bash "${recipe}" "${dcase}" "1" > "../logs/${recipe_stem}/${dcase}_1.log" 2>&1 &
