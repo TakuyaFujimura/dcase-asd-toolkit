@@ -5,3 +5,5 @@ bash ./base.sh dcase2024_msad
 
 bash ./base.sh dcase2021_ms
 bash ./base.sh dcase2022_ms
+bash ./base.sh dcase2023_ms
+bash ./base.sh dcase2024_ms
