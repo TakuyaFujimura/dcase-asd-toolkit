@@ -9,6 +9,7 @@ from asdit.bin.utils.path import get_version_dir
 from asdit.frontends.base_plmodel import BasePLFrontend
 from asdit.utils.common import get_best_path, get_path_glob
 from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfig
+from asdit.utils.dcase_utils.parse_sec import parse_sec_cfg
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,8 @@ def get_past_cfg(cfg: MainExtractConfig) -> MainTrainConfig:
     config_path = (
         get_version_dir(cfg=cfg) / "model" / cfg.model_ver / ".hydra/config.yaml"
     )
-    past_cfg = MainTrainConfig(**cast(Dict[str, Any], OmegaConf.load(config_path)))
+
+    past_cfg = MainTrainConfig(**parse_sec_cfg(OmegaConf.to_object(OmegaConf.load(config_path))))
     return past_cfg
 
 
