@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 dcase2sec_dict = {
+    "dcase2020": 11.0,
     "dcase2021": 10.0,
     "dcase2022": 10.0,
     "dcase2023": 18.0,
@@ -32,8 +33,8 @@ def parse_sec_inplace(cfg: Any):
         for v in cfg:
             parse_sec_inplace(v)
 
+
 def parse_sec_cfg(cfg: dict) -> dict:
     cfg_new = copy.deepcopy(cfg)
     parse_sec_inplace(cfg_new)
     return cfg_new
-
