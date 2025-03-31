@@ -71,6 +71,10 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
     └── ...
 ```
 
+**Note**
+
+On Windows, creating symbolic links needs to be allowed. An easy way to do this is to turn on the developer mode under ```Settings > System > For Developers```.
+
 </details>
 
 <details>
