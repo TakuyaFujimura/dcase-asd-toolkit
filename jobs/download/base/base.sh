@@ -6,7 +6,9 @@ if [ -d "${data_dir}/original/${dcase}" ]; then
   exit 1
 fi
 
-if [ "${dcase}" = "dcase2021" ]; then
+if [ "${dcase}" = "dcase2020" ]; then
+  ./dcase2020.sh "${data_dir}/original"
+elif [ "${dcase}" = "dcase2021" ]; then
   ./dcase2021.sh "${data_dir}/original"
 elif [ "${dcase}" = "dcase2022" ]; then
   ./dcase2022.sh "${data_dir}/original"

@@ -18,7 +18,7 @@ def mk_symlink(link_path: Path, target_path: Path) -> None:
 
 
 def get_traintest_dir_dict(dcase: str) -> Dict[str, list]:
-    if dcase in ["dcase2022", "dcase2023", "dcase2024"]:
+    if dcase in ["dcase2020", "dcase2022", "dcase2023", "dcase2024"]:
         traintest_dir_dict = {"train": ["train"], "test": ["test"]}
     elif dcase in ["dcase2021"]:
         traintest_dir_dict = {
@@ -66,7 +66,35 @@ class RenameTestPath:
                     assert csv_data_list[1].endswith(".wav")
                     self.path_dict[current_machine][csv_data_list[0]] = csv_data_list[1]
 
+    def postprocess(self, wav_path: Path) -> Path:
+        """This is postprocess function for dcase2020."""
+        if self.dcase != "dcase2020":
+            return wav_path
+
+        # dcase2020 wav_path #################################################
+        # original
+        # dcase2020/dev_data/raw/fan/train/normal_id_00_00000001.wav
+        # formatted
+        # dcase2020/raw/fan/train/section_00_source_train_normal_00000001.wav
+        ######################################################################
+        split_tt = wav_path.parents[0].name
+        split_name = wav_path.name.split("_")
+        new_name = "_".join(
+            [
+                "section",
+                split_name[2],
+                "source",
+                split_tt,
+                split_name[0],
+                split_name[-1],
+            ]
+        )
+        return wav_path.parent / new_name
+
     def __call__(self, wav_path: Path) -> Path:
+        """
+        Change the name of wav_path. Parents path is not changed.
+        """
         if wav_path.parents[4].name != self.dcase:
             raise ValueError(f"{wav_path} is not in {self.dcase}.")
 
@@ -75,20 +103,20 @@ class RenameTestPath:
 
         # check train/test
         if split_tt == "train":
-            return wav_path
+            return self.postprocess(wav_path)
         elif split_tt not in ["test", "source_test", "target_test"]:
             raise ValueError(f"Unknown split_tt: {split_tt}.")
 
         # check dev/eval
         if split_de == "dev_data":
-            return wav_path
+            return self.postprocess(wav_path)
         elif split_de != "eval_data":
             raise ValueError(f"Unknown split_de: {split_de}.")
 
         # path is in eval_data/test
         machine = wav_path.parents[1].name
         renamed_wav_path = wav_path.parent / self.path_dict[machine][wav_path.name]
-        return renamed_wav_path
+        return self.postprocess(renamed_wav_path)
 
 
 def cp_dataset(src_dir: Path, dst_dir: Path, dcase: str):
