@@ -11,7 +11,7 @@ def check_hmean_cfg_dict(v: Dict[str, List[str]]) -> Dict[str, List[str]]:
                 "name starting with 'official' is reserved. Please rename it."
             )
         for metric in metric_list:
-            if metric[0] in ["0", "1", "2", "3", "4", "5"]:
+            if metric[0] in ["0", "1", "2", "3", "4", "5", "6", "7"]:
                 raise ValueError(
                     f"{name}: hmean_cfg_dict cannot specify section.\n"
                     + "Please remove it (e.g. '0_s_auc' -> 's_auc').\n"

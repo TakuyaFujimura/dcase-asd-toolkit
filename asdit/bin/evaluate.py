@@ -58,6 +58,7 @@ def main(hydra_cfg: DictConfig) -> None:
         evaluate_df=evaluate_df,
         dcase=cfg.dcase,
         hmean_cfg_dict=cfg.hmean_cfg_dict,
+        machine=cfg.machine,
     )
 
     evaluate_df = evaluate_df.reset_index().rename(columns={"index": "backend"})

@@ -3,7 +3,7 @@
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Optional, cast
 
 import hydra
 import lightning.pytorch as pl
@@ -50,9 +50,10 @@ def complete_hmean_cfg(
 
 
 def get_table_df(
-    machinelist: List[str], output_dir: Path, hmean_name: str, hmean_cols: List[str]
-) -> pd.DataFrame:
+    dcase: str, split: str, output_dir: Path, hmean_name: str, metriclist: List[str]
+) -> Optional[pd.DataFrame]:
     df_list = []
+    machinelist = MACHINE_DICT[f"{dcase}-{split}"]
     for i, m in enumerate(machinelist):
         evaluate_df = pd.read_csv(output_dir / m / "test_evaluate.csv")
 
@@ -69,11 +70,19 @@ def get_table_df(
             # the current script will raise an error.
             # However, we can handle this case.
 
+        sectionlist = get_official_sectionlist(dcase=dcase, split=split, machine=m)
+        hmean_cols = combine_section_metric(
+            sectionlist=sectionlist, metriclist=metriclist
+        )
+
         # check hmean
         if not hmean_is_available(
             evaluate_df=evaluate_df, hmean_name=hmean_name, hmean_cols=hmean_cols
         ):
-            raise ValueError(f"{hmean_name}: {hmean_cols} is not available.")
+            logger.warning(
+                f"Skipped {hmean_name} because {hmean_cols} is not available."
+            )
+            return None
 
         # get hmean
         df_list += [evaluate_df[hmean_cols].apply(lambda x: hmean(x), axis=1)]
@@ -105,18 +114,16 @@ def main(hydra_cfg: DictConfig) -> None:
     )
 
     for split in ["dev", "eval"]:
-        hmean_cfg_dict = complete_hmean_cfg(
-            hmean_cfg_dict=cfg.hmean_cfg_dict, dcase=cfg.dcase, split=split
-        )
-        machinelist = MACHINE_DICT[f"{cfg.dcase}-{split}"]
-        for hmean_name, hmean_cols in hmean_cfg_dict.items():
+        for hmean_name, metriclist in cfg.hmean_cfg_dict.items():
             table_df = get_table_df(
-                machinelist=machinelist,
+                dcase=cfg.dcase,
+                split=split,
                 output_dir=output_dir,
                 hmean_name=hmean_name,
-                hmean_cols=hmean_cols,
+                metriclist=metriclist,
             )
-            table_df.to_csv(output_dir / f"{hmean_name}-{split}.csv", index=False)
+            if table_df is not None:
+                table_df.to_csv(output_dir / f"{hmean_name}-{split}.csv", index=False)
 
 
 if __name__ == "__main__":
