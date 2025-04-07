@@ -1,4 +1,20 @@
 MACHINE_DICT = {
+    "dcase2020-dev": [
+        "fan",
+        "pump",
+        "slider",
+        "ToyCar",
+        "ToyConveyor",
+        "valve",
+    ],
+    "dcase2020-eval": [
+        "fan",
+        "pump",
+        "slider",
+        "ToyCar",
+        "ToyConveyor",
+        "valve",
+    ],
     "dcase2021-dev": [
         "fan",
         "gearbox",

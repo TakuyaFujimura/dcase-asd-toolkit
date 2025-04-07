@@ -1,7 +1,9 @@
 #!/bin/bash
 
 get_machines() {
-    if [ "$1" = "dcase2021" ]; then
+    if [ "$1" = "dcase2020" ]; then
+        machines=("fan"  "pump"  "slider"  "ToyCar"  "ToyConveyor"  "valve")
+    elif [ "$1" = "dcase2021" ]; then
         machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
     elif [ "$1" = "dcase2022" ]; then
         machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")

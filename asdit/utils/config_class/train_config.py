@@ -53,10 +53,19 @@ class MainTrainConfig(BaseModel):
     def cast_name(cls, v):
         if isinstance(v, str):
             return v
-        elif isinstance(v, int):
+        elif isinstance(v, (int, float)):
             return str(v)
         else:
             raise ValueError("Unexpected name type")
+
+    @field_validator("version", mode="before")
+    def cast_version(cls, v):
+        if isinstance(v, str):
+            return v
+        elif isinstance(v, (int, float)):
+            return str(v)
+        else:
+            raise ValueError("Unexpected version type")
 
     @field_validator("dcase", mode="before")
     def check_dcase(cls, v):
