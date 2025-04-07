@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,9 @@ class Knn(BaseBackend):
         self.smote_neighbors = smote_neighbors
         self.sep_section = sep_section
 
-        self.knn_dict: Dict[int, List[NearestNeighbors]] = {}
+        self.knn_dict: Dict[
+            int, Tuple[NearestNeighbors, Optional[NearestNeighbors]]
+        ] = {}
         if self.smote_ratio == 0:
             self.smote = None
         else:
@@ -43,7 +45,9 @@ class Knn(BaseBackend):
                 k_neighbors=self.smote_neighbors,
             )
 
-    def get_knn(self, train_df: pd.DataFrame) -> List[NearestNeighbors]:
+    def get_knn(
+        self, train_df: pd.DataFrame
+    ) -> Tuple[NearestNeighbors, Optional[NearestNeighbors]]:
         is_target = np.asarray(train_df["is_target"].values)
         self.check_target(is_target)
         embed = get_embed_from_df(train_df)
@@ -51,16 +55,22 @@ class Knn(BaseBackend):
         if self.metric == "cosine":
             embed = normalize_vector(embed)
 
-        if self.smote is not None:
-            embed, is_target = self.smote.fit_resample(embed, is_target)  # type: ignore
-            if self.metric == "cosine":
-                embed = normalize_vector(embed)  # type: ignore
-
         knn_so = NearestNeighbors(n_neighbors=self.n_neighbors_so, metric="euclidean")
-        knn_ta = NearestNeighbors(n_neighbors=self.n_neighbors_ta, metric="euclidean")
         knn_so.fit(embed[is_target == 0])  # type: ignore
-        knn_ta.fit(embed[is_target == 1])  # type: ignore
-        return [knn_so, knn_ta]
+
+        if np.sum(is_target) > 0:
+            if self.smote is not None:
+                embed, is_target = self.smote.fit_resample(embed, is_target)  # type: ignore
+                if self.metric == "cosine":
+                    embed = normalize_vector(embed)  # type: ignore
+            knn_ta = NearestNeighbors(
+                n_neighbors=self.n_neighbors_ta, metric="euclidean"
+            )
+            knn_ta.fit(embed[is_target == 1])  # type: ignore
+        else:
+            knn_ta = None
+
+        return knn_so, knn_ta
 
     def fit(self, train_df: pd.DataFrame) -> None:
         section = train_df["section"].values
@@ -71,7 +81,9 @@ class Knn(BaseBackend):
             self.knn_dict[0] = self.get_knn(train_df)
 
     def calc_score(
-        self, test_df: pd.DataFrame, knn_list: List[NearestNeighbors]
+        self,
+        test_df: pd.DataFrame,
+        knn_list: Tuple[NearestNeighbors, Optional[NearestNeighbors]],
     ) -> np.ndarray:
         knn_so, knn_ta = knn_list
         embed = get_embed_from_df(test_df)
@@ -79,13 +91,15 @@ class Knn(BaseBackend):
             embed = normalize_vector(embed)
 
         scores_so: np.ndarray = knn_so.kneighbors(embed)[0].mean(1)
-        scores_ta: np.ndarray = knn_ta.kneighbors(embed)[0].mean(1)
+        if knn_ta is None:
+            scores = scores_so
+        else:
+            scores_ta: np.ndarray = knn_ta.kneighbors(embed)[0].mean(1)
+            scores = np.minimum(scores_so, scores_ta)
 
         if self.metric == "cosine":
-            scores_so /= 2
-            scores_ta /= 2
-
-        return np.minimum(scores_so, scores_ta)
+            scores /= 2
+        return scores
 
     def anomaly_score(self, test_df: pd.DataFrame) -> Dict[str, np.ndarray]:
         section = test_df["section"].values
