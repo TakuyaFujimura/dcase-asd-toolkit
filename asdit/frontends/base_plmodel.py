@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import lightning.pytorch as pl
 import numpy as np
@@ -123,8 +123,13 @@ class BasePLAUCFrontend(BasePLFrontend):
             grad_cfg=grad_cfg,
             label_dict_path=label_dict_path,
         )
+        self.anomaly_score_name: Optional[List[str]] = None
 
     def setup_auc(self):
+        if self.anomaly_score_name is None:
+            raise ValueError(
+                "Please set self.anomaly_score_name before setup_auc and after __init__()"
+            )
         self.auc_type_list = [
             "all_s_auc",  # AUC with all sections in source domain
             "all_t_auc",
@@ -132,7 +137,6 @@ class BasePLAUCFrontend(BasePLFrontend):
             "all_tmix_auc",
             "all_mix_auc",
         ]
-        self.anomaly_score_name = ["recon"]
         self.auroc_model_dict: Dict[str, AUROC] = {}
         for auc_key in self.auc_type_list:
             for as_key in self.anomaly_score_name:
@@ -162,10 +166,11 @@ class BasePLAUCFrontend(BasePLFrontend):
     def on_validation_epoch_end(self) -> None:
         for auc_model_key in self.auroc_model_dict:
             auc = self.auroc_model_dict[auc_model_key].compute()
-            self.log(
-                f"valid/auc/{auc_model_key}",
-                torch.tensor([auc]),
-                on_step=False,
-                on_epoch=True,
-            )
+            if auc is not None:
+                self.log(
+                    f"valid/auc/{auc_model_key}",
+                    torch.tensor([auc]),
+                    on_step=False,
+                    on_epoch=True,
+                )
             self.auroc_model_dict[auc_model_key].reset()

@@ -44,6 +44,7 @@ class AEPLModel(BasePLAUCFrontend):
             self.network = torch.compile(self.network)  # type: ignore
         self.loss = instantiate_tgt({**loss_cfg, "reduction": "none"})
         self.condition_label = condition_label
+        self.anomaly_score_name = ["recon"]
         self.setup_auc()
 
     def feat2net(

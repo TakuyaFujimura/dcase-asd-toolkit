@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+from .cast_utils import cast_str, check_dcase
+
 
 class MainExtractConfig(BaseModel):
     device: str
@@ -31,18 +33,12 @@ class MainExtractConfig(BaseModel):
 
     @field_validator("name", mode="before")
     def cast_name(cls, v):
-        if isinstance(v, str):
-            return v
-        elif isinstance(v, (int, float)):
-            return str(v)
-        else:
-            raise ValueError("Unexpected name type")
+        return cast_str(v)
 
     @field_validator("version", mode="before")
     def cast_version(cls, v):
-        if isinstance(v, str):
-            return v
-        elif isinstance(v, (int, float)):
-            return str(v)
-        else:
-            raise ValueError("Unexpected version type")
+        return cast_str(v)
+
+    @field_validator("dcase", mode="before")
+    def check_dcase(cls, v):
+        return check_dcase(v)
