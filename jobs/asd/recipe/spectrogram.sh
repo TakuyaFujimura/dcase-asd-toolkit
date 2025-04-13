@@ -6,7 +6,7 @@
 
 # ---------------------------- #
 dcase=$1
-seed=$2
+seed=0
 name="recipe"
 version="spectrogram"
 infer_ver="time_mean"

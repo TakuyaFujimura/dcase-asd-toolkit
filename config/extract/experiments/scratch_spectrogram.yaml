@@ -17,5 +17,5 @@ frontend_cfg:
 
 datamodule:
   data_dir: "../data"
-  sec: "all"
+  sec: ${dcase}
   sr: 16000
