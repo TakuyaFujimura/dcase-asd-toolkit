@@ -12,8 +12,7 @@ get_machines() {
     elif [ "$1" = "dcase2024" ]; then
         machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
     else
-        echo "Invalid dcase"
-        exit 1
+        machines="InvalidDCASE"
     fi
 
     echo "${machines[@]}"
@@ -71,6 +70,10 @@ asdit_table() {
 
 # get machines
 machines=$(get_machines "${dcase}")
+if [ "$machines" = "InvalidDCASE" ]; then
+    echo "Error: Invalid DCASE"
+    exit 1
+fi
 echo "machines: $machines"
 
 # change directory to project root
