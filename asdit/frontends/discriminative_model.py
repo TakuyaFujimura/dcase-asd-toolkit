@@ -61,7 +61,7 @@ class BasicDisPLModel(BasePLFrontend):
         for cfg in augmentation_cfg_list:
             self.augmentations.append(instantiate_tgt(cfg))
 
-    def _constructor(
+    def construct_model(
         self,
         normalize: bool,
         extractor_cfg: Dict[str, Any] = {},

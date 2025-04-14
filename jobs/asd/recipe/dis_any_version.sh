@@ -17,7 +17,13 @@ experiments_score="baseline"
 # ---------------------------- #
 source ../base/base.sh
 
-asdit_train
+if [ $dcase = "dcase2020" ]; then
+    additional_args="label_dict_path.main_label=labels/${dcase}/machine_section.json"
+else
+    additional_args="label_dict_path.main_label=labels/${dcase}/machine_section_attr_domain.json"
+fi
+
+asdit_train ${additional_args}
 for machine in $machines; do
     asdit_extract
     asdit_score

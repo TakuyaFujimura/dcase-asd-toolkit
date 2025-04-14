@@ -51,9 +51,9 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         else:
             self.grad_clipper = None
 
-        self._constructor(**model_cfg)
+        self.construct_model(**model_cfg)
 
-    def _constructor(self):
+    def construct_model(self):
         pass
 
     def extract(self, batch: dict) -> PLOutput:
