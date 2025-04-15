@@ -15,6 +15,11 @@ class SpecAug(nn.Module):
         iid: bool = True,
     ):
         super().__init__()
+
+        if not (0 <= time_p <= 1):
+            raise ValueError(f"time_p should be in [0, 1], but got {time_p}.")
+        if not (0 <= freq_p <= 1):
+            raise ValueError(f"freq_p should be in [0, 1], but got {freq_p}.")
         self.time_masking = T.TimeMasking(time_mask_param=time_width, iid_masks=iid)
         self.freq_masking = T.FrequencyMasking(
             freq_mask_param=freq_width, iid_masks=iid
