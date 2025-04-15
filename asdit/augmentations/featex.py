@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 import torch
 from torch import nn
 
-from .utils import get_dec, get_perm
+from .utils import get_dec, get_rand_perm
 
 
 class FeatEx(nn.Module):
@@ -62,9 +62,11 @@ class FeatEx(nn.Module):
             dec = get_dec(len(embed), self.prob, embed.device)
         dec = dec.float()
 
-        perm_list = [get_perm(len(embed), embed.device) for _ in range(embed_num)]
-
-        embed = self.process_emb(perm_list, dec, embed)
+        perm_list = [torch.arange(len(embed), device=embed.device)]
+        perm_list += [
+            get_rand_perm(len(embed), embed.device) for _ in range(embed_num - 1)
+        ]
+        new_embed = self.process_emb(perm_list, dec, embed)
         new_batch: Dict[str, torch.Tensor] = {}
         for key in batch:
             if isinstance(batch[key], torch.Tensor):
@@ -84,5 +86,4 @@ class FeatEx(nn.Module):
                     "is_target",
                 ]
                 new_batch[key] = batch[key]
-
-        return embed, new_batch
+        return new_embed, new_batch

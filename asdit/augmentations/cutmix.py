@@ -4,7 +4,7 @@ from typing import Dict
 import torch
 from torch import nn
 
-from .utils import get_dec, get_perm
+from .utils import get_dec, get_reverse_perm
 
 
 class Cutmix(nn.Module):
@@ -51,7 +51,7 @@ class Cutmix(nn.Module):
         new_batch: Dict[str, torch.Tensor] = {}
         wave = batch["wave"]
         lam = torch.rand(len(wave), device=wave.device)
-        perm = get_perm(len(wave), wave.device)
+        perm = get_reverse_perm(len(wave), wave.device)
         dec = get_dec(len(wave), self.prob, wave.device)
 
         for key in batch:
