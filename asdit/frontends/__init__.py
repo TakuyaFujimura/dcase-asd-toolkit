@@ -3,5 +3,6 @@ from .audio_feature.stftpool import STFTPoolModel
 from .base import BaseFrontend
 from .base_plmodel import BasePLFrontend
 from .discriminative_model import BasicDisPLModel
+from .featex_model import FeatExPLModel
 from .pretrained_feature import BeatsPoolModel
 from .subspaceloss_model import SubspaceLossPLModel
