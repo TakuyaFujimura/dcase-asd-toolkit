@@ -9,8 +9,9 @@ from .utils import get_dec, get_perm
 class Mixup(nn.Module):
     def __init__(self, prob: float):
         super().__init__()
+        if not (0 <= prob <= 1):
+            raise ValueError(f"prob should be in [0, 1], but got {prob}.")
         self.prob = prob
-        assert 0 <= prob <= 1
 
     @staticmethod
     def process(

@@ -28,7 +28,7 @@ class AEPLModel(BasePLAUCFrontend):
             label_dict_path=label_dict_path,
         )
 
-    def _constructor(
+    def construct_model(
         self,
         network_cfg: Dict[str, Any] = {},
         audio_feat_cfg: Dict[str, Any] = {},
