@@ -54,17 +54,19 @@ class SubspaceLossPLModel(BasicDisPLModel):
                 ]
             )
 
-    def construct_model(
+    def construct_model(  # type: ignore
         self,
-        subspace_embed_size: int,
         normalize: bool,
         extractor_cfg: Dict[str, Any] = {},
         loss_cfg: Dict[str, Any] = {},
         label_to_lossratio_dict: Dict[str, float] = {},
         augmentation_cfg_list: List[Dict[str, Any]] = [],
         use_compile: bool = False,
+        subspace_embed_size: Optional[int] = None,
         subspace_loss_ratio: float = 1.0,
     ) -> None:
+        if subspace_embed_size is None:
+            raise ValueError("subspace_embed_size is should be specified")
         self.subspace_embed_size = subspace_embed_size
         self.subspace_loss_ratio = subspace_loss_ratio
         super().construct_model(

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------- #
-recipe="dis_subspaceloss"
+recipe="dis_baseline_subspaceloss"
 dcase="dcase2023"
 seed="0"
 # ---------------------------- #
