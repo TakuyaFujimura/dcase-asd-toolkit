@@ -46,9 +46,9 @@ class BasicDisPLModel(BasePLFrontend):
         else:
             return 0
 
-    def set_head_dict(self, loss_label2lam_dict: Dict[str, float]):
+    def set_head_dict(self, label_to_lossratio_dict: Dict[str, float]):
         self.head_dict = torch.nn.ModuleDict({})
-        for label_name in loss_label2lam_dict:
+        for label_name in label_to_lossratio_dict:
             loss_cfg = {
                 "n_classes": self.num_class_dict[label_name],
                 "embed_size": self.embed_size,
@@ -66,7 +66,7 @@ class BasicDisPLModel(BasePLFrontend):
         normalize: bool,
         extractor_cfg: Dict[str, Any] = {},
         loss_cfg: Dict[str, Any] = {},
-        loss_label2lam_dict: Dict[str, float] = {},
+        label_to_lossratio_dict: Dict[str, float] = {},
         augmentation_cfg_list: List[Dict[str, Any]] = [],
         use_compile: bool = False,
     ) -> None:
@@ -76,16 +76,16 @@ class BasicDisPLModel(BasePLFrontend):
             self.extractor = torch.compile(self.extractor)  # type: ignore
         self.loss_cfg = loss_cfg
         self.embed_size = self.extractor.embed_size
-        self.loss_label2lam_dict = loss_label2lam_dict
+        self.label_to_lossratio_dict = label_to_lossratio_dict
         self.check_loss_cfg(self.loss_cfg)
-        self.set_head_dict(self.loss_label2lam_dict)
+        self.set_head_dict(self.label_to_lossratio_dict)
         self.set_augmentations(augmentation_cfg_list)
 
     def forward(self, batch: dict) -> PLOutput:
         logit_dict: Dict[str, Tensor] = {}
         embed = self.extractor(batch["wave"])  # (B, D)
 
-        for label_name in self.loss_label2lam_dict:
+        for label_name in self.label_to_lossratio_dict:
             logits = self.head_dict[label_name].calc_logits(embed)  # type: ignore
             logit_dict[label_name] = logits
 
@@ -100,11 +100,11 @@ class BasicDisPLModel(BasePLFrontend):
         embed = self.extractor(wave)
         loss_dict = {"main": 0.0}
 
-        for label_name, lam in self.loss_label2lam_dict.items():
+        for label_name, ratio in self.label_to_lossratio_dict.items():
             loss_dict[label_name] = self.head_dict[label_name](
                 embed, batch[f"onehot_{label_name}"]
             )
-            loss_dict["main"] += loss_dict[label_name] * lam
+            loss_dict["main"] += loss_dict[label_name] * ratio
         return loss_dict
 
     def training_step(self, batch, batch_idx):
