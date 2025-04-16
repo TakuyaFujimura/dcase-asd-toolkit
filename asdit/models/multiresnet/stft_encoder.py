@@ -31,7 +31,7 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
         if self.kernel != 3:
             raise NotImplementedError()
 
-        self.bn = nn.BatchNorm2d(num_features=input_size[0])
+        self.bn = nn.BatchNorm2d(num_features=input_size[0], affine=use_bias)
 
         if stride == 1:
             self.skip_connect = None
@@ -60,7 +60,7 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
                 padding=1,
                 bias=use_bias,
             ),
-            nn.BatchNorm2d(out_channel),
+            nn.BatchNorm2d(out_channel, affine=use_bias),
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=self.out_channel,
@@ -121,7 +121,7 @@ class Conv2dEncoderLayer_FirstConv(nn.Module):
                 bias=use_bias,
                 padding=0,
             ),
-            nn.BatchNorm2d(out_channel),
+            nn.BatchNorm2d(out_channel, affine=use_bias),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=self.pool_kernel, stride=self.pool_stride),
         )
@@ -159,7 +159,7 @@ class Conv2dEncoderLayer(nn.Module):
                 "input_size must be in the form of (H, W), i.e., no channel"
             )
 
-        self.bn_freq = nn.BatchNorm1d(num_features=input_size[0])
+        self.bn_freq = nn.BatchNorm1d(num_features=input_size[0], affine=use_bias)
         self.layers = nn.ModuleList()
         logger.info("===Conv2dEncoderLayer============")
         intermediate_size = self.setup_first_layer(
@@ -178,7 +178,9 @@ class Conv2dEncoderLayer(nn.Module):
             resnet_additional_layer=resnet_additional_layer,
         )
         logger.info("=================================")
-        self.bn = nn.BatchNorm1d(num_features=emb_base_size * intermediate_size[1])
+        self.bn = nn.BatchNorm1d(
+            num_features=emb_base_size * intermediate_size[1], affine=use_bias
+        )
         self.linear = nn.Linear(
             in_features=emb_base_size * intermediate_size[1],
             out_features=emb_base_size,
