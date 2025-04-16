@@ -5,7 +5,7 @@
 #PJM -j
 # ---------------------------- #
 
-dcase_list=("dcase2024")
+dcase_list=("dcase2020")
 # ---------------------------- #
 recipe="dis_baseline"
 cd ../../recipe
