@@ -17,7 +17,6 @@ label_dict_path: {}
 machine: null
 model_ver: null
 
-num_workers: 4
 refresh_rate: 1
 callback_opts:
   best:
