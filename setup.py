@@ -27,5 +27,7 @@ setup(
         "torchvision==0.16.1",
         "torchaudio==2.1.1",
         "imbalanced-learn==0.13.0",
+        "peft==0.15.1",
+        "timm==1.0.15",
     ],
 )
