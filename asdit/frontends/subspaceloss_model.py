@@ -18,6 +18,7 @@ class SubspaceLossPLModel(BasicDisPLModel):
         scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
         label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
+        partially_saved_param_list: List[str] = [],
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -25,6 +26,7 @@ class SubspaceLossPLModel(BasicDisPLModel):
             scheduler_cfg=scheduler_cfg,
             grad_cfg=grad_cfg,
             label_dict_path=label_dict_path,
+            partially_saved_param_list=partially_saved_param_list,
         )
 
     def set_head_dict(self, label_to_lossratio_dict: Dict[str, float]):

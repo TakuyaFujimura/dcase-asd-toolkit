@@ -72,7 +72,9 @@ def get_past_cfg(cfg: MainExtractConfig) -> MainTrainConfig:
         get_version_dir(cfg=cfg) / "model" / cfg.model_ver / ".hydra/config.yaml"
     )
 
-    past_cfg = MainTrainConfig(**parse_sec_cfg(OmegaConf.to_object(OmegaConf.load(config_path))))
+    past_cfg = MainTrainConfig(
+        **parse_sec_cfg(OmegaConf.to_object(OmegaConf.load(config_path)))
+    )
     return past_cfg
 
 
@@ -98,9 +100,10 @@ def resume_plfrontend(
     logger.info(f"Loading model from {ckpt_path}")
     module_name = ".".join(past_cfg.frontend.tgt_class.split(".")[:-1])
     class_name = past_cfg.frontend.tgt_class.split(".")[-1]
+    strict = not getattr(past_cfg.frontend, "partially_saved_param_list", False)
     module = importlib.import_module(module_name)
     frontend_cls = getattr(module, class_name)
-    frontend = frontend_cls.load_from_checkpoint(ckpt_path)
+    frontend = frontend_cls.load_from_checkpoint(ckpt_path, strict=strict)
     frontend.to(cfg.device)
     frontend.eval()
     logger.info("Model was successfully loaded from the ckpt_path")

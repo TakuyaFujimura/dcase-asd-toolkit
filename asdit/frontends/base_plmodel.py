@@ -36,6 +36,7 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
         label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
+        partially_saved_param_list: List[str] = [],
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -50,6 +51,7 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
             self.grad_clipper = instantiate_tgt(self.grad_cfg.clipper_cfg)
         else:
             self.grad_clipper = None
+        self.partially_saved_param_list = partially_saved_param_list
 
         self.construct_model(**model_cfg)
 
@@ -103,8 +105,23 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         else:
             return optimizer
 
-    def lr_scheduler_step(self, scheduler, optimizer_idx, metric):
-        scheduler.step()
+    def lr_scheduler_step(self, scheduler: Any, metric: Optional[Any]) -> None:
+        if scheduler.__class__.__module__.startswith("timm.scheduler."):
+            scheduler.step(self.global_step)
+        else:
+            super().lr_scheduler_step(scheduler=scheduler, metric=metric)
+
+    def state_dict(self):
+        full_state = super().state_dict()
+        if not self.partially_saved_param_list:
+            return full_state
+        else:
+            partial_state = {
+                name: param
+                for name, param in full_state.items()
+                if any(key in name for key in self.partially_saved_param_list)
+            }
+            return partial_state
 
 
 class BasePLAUCFrontend(BasePLFrontend):
@@ -115,6 +132,7 @@ class BasePLAUCFrontend(BasePLFrontend):
         scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
         label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
+        partially_saved_param_list: List[str] = [],
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -122,6 +140,7 @@ class BasePLAUCFrontend(BasePLFrontend):
             scheduler_cfg=scheduler_cfg,
             grad_cfg=grad_cfg,
             label_dict_path=label_dict_path,
+            partially_saved_param_list=partially_saved_param_list,
         )
         self.anomaly_score_name: Optional[List[str]] = None
 

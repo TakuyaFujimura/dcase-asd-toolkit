@@ -1,9 +1,8 @@
 import torch
 
-
-def get_reverse_perm(batch_size: int, device: torch.device) -> torch.Tensor:
-    perm = torch.arange(batch_size - 1, -1, -1).to(device)
-    return perm
+# def get_reverse_perm(batch_size: int, device: torch.device) -> torch.Tensor:
+#     perm = torch.arange(batch_size - 1, -1, -1).to(device)
+#     return perm
 
 
 def get_rand_perm(batch_size: int, device: torch.device) -> torch.Tensor:
