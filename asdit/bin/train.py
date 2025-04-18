@@ -90,7 +90,12 @@ def main(hydra_cfg: DictConfig) -> None:
     trainer = make_trainer(cfg, ckpt_dir)
 
     logger.info("Start Training")
-    trainer.fit(frontend, dm.train_dataloader(), dm.val_dataloader())
+    trainer.fit(
+        frontend,
+        dm.train_dataloader(),
+        dm.val_dataloader(),
+        ckpt_path=cfg.resume_ckpt_path,
+    )
 
 
 if __name__ == "__main__":

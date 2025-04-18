@@ -51,6 +51,8 @@ class MainTrainConfig(BaseModel):
     callback_opts: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     every_n_epochs_valid: int = 1
 
+    resume_ckpt_path: Optional[str] = None
+
     @field_validator("name", mode="before")
     def cast_name(cls, v):
         return cast_str(v)
