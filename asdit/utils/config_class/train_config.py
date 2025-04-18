@@ -47,7 +47,6 @@ class MainTrainConfig(BaseModel):
 
     model_ver: str
 
-    num_workers: int = 0
     refresh_rate: int = 1
     callback_opts: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     every_n_epochs_valid: int = 1
