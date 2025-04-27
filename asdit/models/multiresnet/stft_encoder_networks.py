@@ -1,10 +1,10 @@
 # Copyright 2024 Takuya Fujimura
 import logging
+from typing import Literal
 
 import torch
 from torch import nn
 
-from asdit.models.audio_feature.stft import STFT
 from asdit.models.modules import SEBlock, calc_filtered_size_3d
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
         kernel: int,
         stride: int,
         use_bias: bool,
-        additional_layer: str = "SEBlock",
+        additional_layer: Literal["SEBlock", "none"],
     ):
         """
         Args
@@ -73,6 +73,8 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
         )
         if additional_layer == "SEBlock":
             self.additional_layer = SEBlock(out_channel, ratio=16)
+        elif additional_layer == "none":
+            self.additional_layer = nn.Identity()
         else:
             raise NotImplementedError()
 
@@ -149,16 +151,18 @@ class Conv2dEncoderLayer(nn.Module):
         input_size: tuple,
         use_bias: bool,
         emb_base_size: int,
-        resnet_additional_layer: str,
+        resnet_additional_layer: Literal["SEBlock", "none"] = "SEBlock",
+        aggregate: Literal["mlp", "gap"] = "mlp",
     ):
         super().__init__()
         if emb_base_size % 8 != 0:
             raise ValueError("emb_base_size must be divisible by 8")
         if len(input_size) != 2:
+            raise ValueError("input_size must be in the form of (H, W) not (C, H, W)")
+        if min(input_size) < 36:
             raise ValueError(
-                "input_size must be in the form of (H, W), i.e., no channel"
+                f"input_size must be larger than 36 (input_size={input_size}"
             )
-
         self.bn_freq = nn.BatchNorm1d(num_features=input_size[0], affine=use_bias)
         self.layers = nn.ModuleList()
         logger.info("===Conv2dEncoderLayer============")
@@ -178,14 +182,29 @@ class Conv2dEncoderLayer(nn.Module):
             resnet_additional_layer=resnet_additional_layer,
         )
         logger.info("=================================")
-        self.bn = nn.BatchNorm1d(
-            num_features=emb_base_size * intermediate_size[1], affine=use_bias
-        )
-        self.linear = nn.Linear(
-            in_features=emb_base_size * intermediate_size[1],
-            out_features=emb_base_size,
-            bias=use_bias,
-        )
+
+        if aggregate == "mlp":
+            self.aggregate_layer = nn.Sequential(
+                nn.Flatten(),  # B, C, F -> B, C*F
+                nn.BatchNorm1d(
+                    num_features=emb_base_size * intermediate_size[1], affine=use_bias
+                ),
+                nn.Linear(
+                    in_features=emb_base_size * intermediate_size[1],
+                    out_features=emb_base_size,
+                    bias=use_bias,
+                ),  # B, C*F -> B, emb_base_size
+            )
+        elif aggregate == "gap":
+            self.aggregate_layer = nn.Sequential(
+                nn.AdaptiveAvgPool1d((1)),  # B, C, F -> B, C, 1
+                nn.Flatten(),  # B, C, 1 -> B, C
+                nn.Linear(
+                    in_features=emb_base_size, out_features=emb_base_size, bias=use_bias
+                ),
+            )
+        else:
+            raise ValueError(f"aggregate must be 'mlp' or 'gap', but got {aggregate}")
 
     def setup_first_layer(
         self, input_size: tuple, emb_base_size: int, use_bias: bool
@@ -207,7 +226,7 @@ class Conv2dEncoderLayer(nn.Module):
         input_size: tuple,
         emb_base_size: int,
         use_bias: bool,
-        resnet_additional_layer: str,
+        resnet_additional_layer: Literal["SEBlock", "none"],
     ) -> tuple:
         res1 = Conv2dEncoderLayer_ResNetBlock(
             input_size=input_size,
@@ -236,7 +255,7 @@ class Conv2dEncoderLayer(nn.Module):
         input_size: tuple,
         emb_base_size: int,
         use_bias: bool,
-        resnet_additional_layer: str,
+        resnet_additional_layer: Literal["SEBlock", "none"],
     ) -> tuple:
         intermediate_size = input_size
         for i, c in enumerate(
@@ -277,40 +296,5 @@ class Conv2dEncoderLayer(nn.Module):
         for l in self.layers:
             x = l(x)  # B, C, F, T
         x = torch.max(x, dim=-1).values  # B, C, F
-        x = self.bn(torch.flatten(x, start_dim=1))  # B, C*F
-        x = self.linear(x)  # B, emb_base_size
+        x = self.aggregate_layer(x)  # B, emb_base_size
         return x
-
-
-# -------------------------------------------------------------------------------- #
-
-
-class STFTEncoderLayer(nn.Module):
-    def __init__(
-        self,
-        sec: float,
-        sr: int,
-        stft_cfg: dict,
-        use_bias: bool,
-        emb_base_size: int,
-        resnet_additional_layer: str = "SEBlock",
-    ):
-        super().__init__()
-        self.stft = STFT(**stft_cfg)
-        spectrogram_size = self.stft(torch.randn(int(sec * sr))).shape
-        if min(spectrogram_size) < 36:
-            raise ValueError("input sequence or n_fft is too short")
-        self.layer = Conv2dEncoderLayer(
-            input_size=spectrogram_size,
-            use_bias=use_bias,
-            emb_base_size=emb_base_size,
-            resnet_additional_layer=resnet_additional_layer,
-        )
-
-    def forward(self, x):
-        """
-        Args
-            x: wave (B, T)
-        """
-        x = self.stft(x)
-        return self.layer(x)

@@ -1,9 +1,8 @@
 import logging
-from typing import List
+from typing import List, Literal
 
 from torch import nn
 
-from asdit.models.audio_feature.stft import FFT
 from asdit.models.modules import SEBlock, calc_filtered_size_1d
 
 logger = logging.getLogger(__name__)
@@ -12,34 +11,34 @@ logger = logging.getLogger(__name__)
 class Conv1dEncoderLayer(nn.Module):
     def __init__(
         self,
-        in_channel: int,
-        length: int,
-        use_bias: bool = False,
-        emb_base_size: int = 128,
+        input_size: int,
+        use_bias: bool,
+        emb_base_size: int,
         conv_param_list: List[dict] = [
             {"k": 256, "s": 64},
             {"k": 64, "s": 32},
             {"k": 16, "s": 4},
         ],
+        aggregate: Literal["mlp", "gap"] = "mlp",
     ):
         super().__init__()
         assert len(conv_param_list) == 3
 
         logger.info("===Conv1dEncoderLayer==========")
         for i, param_dict in enumerate(conv_param_list):
-            length = calc_filtered_size_1d(
-                input_length=length,
+            input_size = calc_filtered_size_1d(
+                input_length=input_size,
                 p=0,
                 k=param_dict["k"],
                 s=param_dict["s"],
                 d=param_dict.get("d", 1),
             )
-            logger.info(f"{i}th: [{length}]")
+            logger.info(f"{i}th: [{input_size}]")
         logger.info("===============================")
 
-        self.layer = nn.Sequential(
+        self.conv1d_layer = nn.Sequential(
             nn.Conv1d(
-                in_channels=in_channel,
+                in_channels=1,
                 out_channels=emb_base_size,
                 kernel_size=conv_param_list[0]["k"],
                 stride=conv_param_list[0]["s"],
@@ -68,10 +67,29 @@ class Conv1dEncoderLayer(nn.Module):
             ),
             nn.ReLU(),
             SEBlock(num_channels=emb_base_size, ratio=16),
-            nn.Flatten(),
-            nn.Linear(length * emb_base_size, emb_base_size, bias=use_bias),
-            nn.BatchNorm1d(emb_base_size, affine=use_bias),
-            nn.ReLU(),
+        )
+
+        if aggregate == "mlp":
+            self.aggregate_layer = nn.Sequential(
+                nn.Flatten(),
+                nn.Linear(input_size * emb_base_size, emb_base_size, bias=use_bias),
+                nn.BatchNorm1d(emb_base_size, affine=use_bias),
+                nn.ReLU(),
+            )
+        elif aggregate == "gap":
+            self.aggregate_layer = nn.Sequential(
+                nn.AdaptiveAvgPool1d((1)),
+                nn.Flatten(),
+                nn.Linear(emb_base_size, emb_base_size, bias=use_bias),
+                nn.BatchNorm1d(emb_base_size, affine=use_bias),
+                nn.ReLU(),
+            )
+        else:
+            raise NotImplementedError(
+                f"aggregate should be mlp or gap, but got {aggregate}"
+            )
+
+        self.last_layer = nn.Sequential(
             nn.Linear(emb_base_size, emb_base_size, bias=use_bias),
             nn.BatchNorm1d(emb_base_size, affine=use_bias),
             nn.ReLU(),
@@ -91,26 +109,7 @@ class Conv1dEncoderLayer(nn.Module):
         """
         x: (B, C, L)
         """
-        x = self.layer(x)
+        x = self.conv1d_layer(x)
+        x = self.aggregate_layer(x)
+        x = self.last_layer(x)
         return x
-
-
-class FFTEncoderLayer(nn.Module):
-    def __init__(
-        self, sec: float, sr: int, use_bias: bool = False, emb_base_size: int = 128
-    ):
-        super().__init__()
-        fft_len = int(sec * sr) // 2 + 1
-        conv_param_list = [{"k": 256, "s": 64}, {"k": 64, "s": 32}, {"k": 16, "s": 4}]
-        self.layer = Conv1dEncoderLayer(
-            1, fft_len, use_bias, emb_base_size, conv_param_list
-        )
-        self.fft = FFT()
-
-    def forward(self, x):
-        """
-        x: (B, L)
-        """
-        x = self.fft(x)
-        x = x.unsqueeze(1)
-        return self.layer(x)

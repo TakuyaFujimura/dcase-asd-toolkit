@@ -3,8 +3,47 @@ from typing import List
 import torch
 from torch import nn
 
-from .fft_encoder import FFTEncoderLayer
-from .stft_encoder import STFTEncoderLayer
+from asdit.models.audio_feature import FFT
+from asdit.models.audio_feature.stft import STFT
+from asdit.utils.common import instantiate_tgt
+
+
+class STFTEncoderLayer(nn.Module):
+    def __init__(
+        self,
+        sec: float,
+        sr: int,
+        stft_cfg: dict,
+        network_cfg: dict,
+    ):
+        super().__init__()
+        self.stft = STFT(**stft_cfg)
+        spectrogram_size = self.stft(torch.randn(int(sec * sr))).shape
+        self.layer = instantiate_tgt({**network_cfg, "input_size": spectrogram_size})
+
+    def forward(self, x):
+        """
+        Args
+            x: wave (B, T)
+        """
+        x = self.stft(x)
+        return self.layer(x)
+
+
+class FFTEncoderLayer(nn.Module):
+    def __init__(self, sec: float, sr: int, network_cfg: dict):
+        super().__init__()
+        fft_len = int(sec * sr) // 2 + 1
+        self.layer = instantiate_tgt({**network_cfg, "input_size": fft_len})
+        self.fft = FFT()
+
+    def forward(self, x):
+        """
+        x: wave (B, L)
+        """
+        x = self.fft(x)
+        x = x.unsqueeze(1)
+        return self.layer(x)
 
 
 class MultiResNet(nn.Module):
@@ -14,15 +53,20 @@ class MultiResNet(nn.Module):
         sr: int,
         use_fft: bool,
         stft_cfg_list: List[dict],
+        fft_network_cfg: dict,
+        stft_network_cfg: dict,
         use_bias: bool = False,
         emb_base_size: int = 128,
-        resnet_additional_layer: str = "SEBlock",
     ):
         super().__init__()
+        fft_network_cfg["use_bias"] = use_bias
+        fft_network_cfg["emb_base_size"] = emb_base_size
+        stft_network_cfg["use_bias"] = use_bias
+        stft_network_cfg["emb_base_size"] = emb_base_size
 
         if use_fft:
             self.fft_layer = FFTEncoderLayer(
-                sec=sec, sr=sr, use_bias=use_bias, emb_base_size=emb_base_size
+                sec=sec, sr=sr, network_cfg=fft_network_cfg
             )
         else:
             self.fft_layer = None
@@ -33,9 +77,7 @@ class MultiResNet(nn.Module):
                 sec=sec,
                 sr=sr,
                 stft_cfg=stft_cfg,
-                use_bias=use_bias,
-                emb_base_size=emb_base_size,
-                resnet_additional_layer=resnet_additional_layer,
+                network_cfg=stft_network_cfg,
             )
             self.stft_layer_list.append(stft_encoder)
         if use_fft:
