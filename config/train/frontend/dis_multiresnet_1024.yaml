@@ -27,6 +27,13 @@ model_cfg:
         temporal_norm: false
     use_bias: false
     emb_base_size: 128
+    fft_network_cfg:
+      tgt_class: asdit.models.multiresnet.fft_encoder_networks.Conv1dEncoderLayer
+      aggregate: "mlp"
+    stft_network_cfg:
+      tgt_class: asdit.models.multiresnet.stft_encoder_networks.Conv2dEncoderLayer
+      resnet_additional_layer: "SEBlock"
+      aggregate: "mlp"
   loss_cfg: {}
   label_to_lossratio_dict:
     main_label: 1
