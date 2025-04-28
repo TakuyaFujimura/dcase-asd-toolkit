@@ -5,7 +5,7 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-from scipy.stats import hmean, mean
+from scipy.stats import hmean
 from sklearn.metrics import roc_auc_score
 
 from asdit.utils.dcase_utils import get_dcase_idx
@@ -161,9 +161,7 @@ def add_hmean(
                 f"Skipped {hmean_name} because {hmean_cols} is not available."
             )
         if dcase == "dcase2020":
-            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
-                lambda x: mean(x), axis=1
-            )
+            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(np.mean, axis=1)
         else:
             evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
                 lambda x: hmean(x), axis=1
