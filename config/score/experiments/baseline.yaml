@@ -15,27 +15,3 @@ backend:
     smote_ratio: 0.05
     smote_neighbors: 5
     metric: cosine
-  - tgt_class: asdit.backends.Knn
-    n_neighbors_so: 8
-    n_neighbors_ta: 1
-    smote_ratio: 0.05
-    smote_neighbors: 5
-    metric: cosine
-  - tgt_class: asdit.backends.Knn
-    n_neighbors_so: 4
-    n_neighbors_ta: 1
-    smote_ratio: 0.05
-    smote_neighbors: 8
-    metric: cosine
-  - tgt_class: asdit.backends.Knn
-    n_neighbors_so: 4
-    n_neighbors_ta: 1
-    smote_ratio: 0.03
-    smote_neighbors: 5
-    metric: cosine
-  - tgt_class: asdit.backends.Knn
-    n_neighbors_so: 4
-    n_neighbors_ta: 1
-    smote_ratio: 0.1
-    smote_neighbors: 8
-    metric: cosine
