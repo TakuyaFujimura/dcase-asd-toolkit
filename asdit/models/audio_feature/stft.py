@@ -21,6 +21,7 @@ class STFT(nn.Module):
         n_mels: Optional[int] = None,
         use_log: bool = False,
         temporal_norm: bool = False,
+        pad_mode: str = "reflect",
     ):
         super().__init__()
 
@@ -47,7 +48,7 @@ class STFT(nn.Module):
                 power=power,
                 normalized=True,
                 center=True,
-                pad_mode="reflect",
+                pad_mode=pad_mode,
                 # onesided=True, # onesided has been deprecated
             )
             self.device = self.stft.spectrogram.window.device
@@ -60,7 +61,7 @@ class STFT(nn.Module):
                 power=power,
                 normalized=True,
                 center=True,
-                pad_mode="reflect",
+                pad_mode=pad_mode,
                 onesided=True,
             )
             self.device = self.stft.window.device
