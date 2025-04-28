@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 from torch import nn
 
-from ..modules import add_lora
+from ..modules import AttnStatPool, add_lora
 from .tools import resume
 
 
@@ -25,7 +25,12 @@ class BEATsLoRA(nn.Module):
         self.embed_size = embed_size
         self.last_layer = last_layer
         if self.last_layer == "linear":
-            self.network = nn.Linear(768, self.embed_size, bias=True)
+            self.network = nn.Linear(768, self.embed_size)
+        elif self.last_layer == "attn_stat_pool":
+            self.network = nn.Sequential(
+                AttnStatPool(embed_size=768), nn.Linear(768, self.embed_size)
+            )
+
         else:
             raise NotImplementedError(f"last_layer={self.last_layer} is not supported.")
 
@@ -34,11 +39,13 @@ class BEATsLoRA(nn.Module):
         Args
             x_time: (B, L)
         """
-        z = self.model.extract_features(x_time)[0]  # (B, L, C)
+        z = self.model.extract_features(x_time)[0]  # (B, L, 768)
 
         if self.last_layer == "linear":
-            z = self.network(z)  # (B, L, emb_base_size)
-            z = torch.mean(z, dim=1)  # (B, C)
+            z = self.network(z)  # (B, L, D)
+            z = torch.mean(z, dim=1)  # (B, D)
+        elif self.last_layer == "attn_stat_pool":
+            z = self.network(z)  # (B, D)
         else:
             raise NotImplementedError(f"last_layer={self.last_layer} is not supported.")
 

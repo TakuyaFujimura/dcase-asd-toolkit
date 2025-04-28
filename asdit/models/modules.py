@@ -69,6 +69,48 @@ class SEBlock(nn.Module):
         return w * x
 
 
+class AttnStatPool(nn.Module):
+    def __init__(self, embed_size: int, hidden_ratio: int = 16):
+        super().__init__()
+        hidden_size = embed_size // hidden_ratio
+        self.attention = nn.Sequential(
+            nn.Conv1d(embed_size * 3, hidden_size, kernel_size=1),
+            nn.ReLU(),
+            nn.BatchNorm1d(hidden_size),
+            nn.Tanh(),
+            nn.Conv1d(hidden_size, embed_size, kernel_size=1),
+            nn.Softmax(dim=2),
+        )
+        self.last_layer = nn.Sequential(
+            nn.BatchNorm1d(embed_size * 2),
+            nn.Linear(embed_size * 2, embed_size),
+            nn.BatchNorm1d(embed_size),
+        )
+
+    def forward(self, x):
+        # x (B, L, C)
+        # return (B, C)
+        x = x.permute(0, 2, 1)  # B, C, L
+
+        t = x.size()[-1]
+        global_x = torch.cat(
+            (
+                x,
+                torch.mean(x, dim=2, keepdim=True).repeat(1, 1, t),
+                torch.sqrt(torch.var(x, dim=2, keepdim=True).clamp(min=1e-4)).repeat(
+                    1, 1, t
+                ),
+            ),
+            dim=1,
+        )  # B, C*3, L
+        w = self.attention(global_x)  # B, C, L
+        mu = torch.sum(x * w, dim=2)  # B, C
+        sg = torch.sqrt((torch.sum((x**2) * w, dim=2) - mu**2).clamp(min=1e-4))  # B, C
+        x = torch.cat((mu, sg), 1)  # B, C*2
+        x = self.last_layer(x)  # B, C
+        return x
+
+
 # class SE3DBlock(nn.Module):
 #     def __init__(self, feat_size, ratio=4):
 #         super().__init__()
