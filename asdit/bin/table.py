@@ -85,12 +85,19 @@ def get_table_df(
             return None
 
         # get hmean
-        df_list += [evaluate_df[hmean_cols].apply(lambda x: hmean(x), axis=1)]
+        if dcase == "dcase2020":
+            df_list += [evaluate_df[hmean_cols].apply(np.mean, axis=1)]
+        else:
+            df_list += [evaluate_df[hmean_cols].apply(lambda x: hmean(x), axis=1)]
 
     # get table
     table_df = pd.concat(df_list, axis=1)
     table_df.columns = machinelist
-    table_df["hmean"] = table_df.apply(lambda x: hmean(x), axis=1)
+
+    if dcase == "dcase2020":
+        table_df["hmean"] = table_df.apply(np.mean, axis=1)
+    else:
+        table_df["hmean"] = table_df.apply(lambda x: hmean(x), axis=1)
     table_df.index = backend_list  # type: ignore
     table_df = table_df.reset_index().rename(columns={"index": "backend"})
     return table_df

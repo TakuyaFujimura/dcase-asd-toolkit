@@ -160,8 +160,10 @@ def add_hmean(
             logger.warning(
                 f"Skipped {hmean_name} because {hmean_cols} is not available."
             )
-
-        evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
-            lambda x: hmean(x), axis=1
-        )
+        if dcase == "dcase2020":
+            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(np.mean, axis=1)
+        else:
+            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
+                lambda x: hmean(x), axis=1
+            )
     return evaluate_df
