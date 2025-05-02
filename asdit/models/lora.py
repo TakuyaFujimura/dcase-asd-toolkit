@@ -27,7 +27,6 @@ class BaseLoRA(nn.Module, ABC):
                 AttnStatPool(embed_size=feature_dim),
                 nn.Linear(feature_dim, self.embed_size),
             )
-
         else:
             raise NotImplementedError(f"last_layer={self.last_layer} is not supported.")
 

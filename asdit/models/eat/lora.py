@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import torch
 import torchaudio.compliance.kaldi as ta_kaldi
+
 from fairseq.checkpoint_utils import load_model_ensemble_and_task
 from fairseq.utils import import_user_module
 
@@ -82,3 +83,24 @@ class EATLoRA(BaseLoRA):
         )
         feats = feats["x"][:, :1]  # (B, 1, D)
         return feats
+
+    # def _load_from_state_dict(
+    #     self,
+    #     state_dict: dict,
+    #     prefix: str,
+    #     local_metadata: dict,
+    #     strict: bool,
+    #     missing_keys: list,
+    #     unexpected_keys: list,
+    #     error_msgs: list,
+    # ):
+    #     # new_state_dict = state_dict
+    #     super()._load_from_state_dict(
+    #         state_dict,
+    #         prefix="",
+    #         local_metadata=local_metadata,
+    #         strict=strict,
+    #         missing_keys=missing_keys,
+    #         unexpected_keys=unexpected_keys,
+    #         error_msgs=error_msgs,
+    #     )
