@@ -18,7 +18,8 @@ model_cfg:
       target_modules: ["qkv"]
     embed_size: 256
     last_layer: "linear"
-    model_cfg: {}
+    model_cfg:
+      specaug: true
   loss_cfg: {}
   label_to_lossratio_dict:
     main_label: 1

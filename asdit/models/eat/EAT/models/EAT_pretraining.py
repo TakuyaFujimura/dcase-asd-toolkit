@@ -386,7 +386,7 @@ class Data2VecMultiModel(BaseFairseqModel):
             state[prefix + "_ema"] = self.ema.fp32_params
 
         return state
-
+    """
     def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
         if (
             "extractor.model.base_model.model.blocks.0.attn.qkv.lora_A.default.weight"
@@ -403,17 +403,18 @@ class Data2VecMultiModel(BaseFairseqModel):
                 del state_dict[k]
 
             return super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
+    """
 
-    #def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
-    #    k = prefix + "_ema"
-    #    if self.ema is not None:
-    #        assert k in state_dict
-    #        self.ema.restore(state_dict[k], True)
-    #        del state_dict[k]
-    #    elif k in state_dict:
-    #        del state_dict[k]
-    #
-    #    return super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
+    def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
+        k = prefix + "_ema"
+        if self.ema is not None:
+            assert k in state_dict
+            self.ema.restore(state_dict[k], True)
+            del state_dict[k]
+        elif k in state_dict:
+            del state_dict[k]
+    
+        return super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
 
     @classmethod
     def build_model(cls, cfg: Data2VecMultiConfig, task=None):
