@@ -167,7 +167,10 @@ class EATLoRA(BaseLoRA):
         model.load_state_dict(state["model"], strict=True)
         model.remove_pretraining_modules(modality="image")
 
-        return model, 768
+        if ckpt_path.split("/")[-1].startswith("EAT-base_"):
+            return model, 768
+        elif ckpt_path.split("/")[-1].startswith("EAT-large_"):
+            return model, 1024
 
     def preprocess(self, source: torch.Tensor) -> torch.Tensor:
         """
