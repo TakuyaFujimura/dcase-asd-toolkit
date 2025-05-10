@@ -21,9 +21,7 @@ frontend:
   model_cfg:
     extractor_cfg:
       ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
-      split10sec: false
-      model_cfg:
-        sec: ${datamodule.sec}
+      split10sec: true
     loss_cfg:
       tgt_class: asdit.losses.AdaCos
       dynamic: false

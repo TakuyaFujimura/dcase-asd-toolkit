@@ -11,7 +11,7 @@ label_dict_path:
 model_ver: "all"
 
 trainer:
-  max_epochs: 25
+  max_epochs: 10
   # accumulate_grad_batches: 8
 
 datamodule:
@@ -34,8 +34,8 @@ frontend:
     lr: 1.0e-4
   scheduler_cfg:
     tgt_class: timm.scheduler.CosineLRScheduler
-    t_initial: 50000
+    t_initial: 20000
     lr_min: 1e-7
-    warmup_t: 5000
+    warmup_t: 2000
     warmup_lr_init: 0
   partially_saved_param_list: ["lora"]

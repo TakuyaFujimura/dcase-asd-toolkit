@@ -16,7 +16,6 @@ trainer:
 
 datamodule:
   batch_size: 8
-  sec: 10
 
 frontend:
   model_cfg:

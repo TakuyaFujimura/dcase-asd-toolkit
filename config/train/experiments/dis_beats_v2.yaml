@@ -1,7 +1,7 @@
 # @package _global_
 defaults:
     - override /datamodule: basic
-    - override /frontend: dis_eat
+    - override /frontend: dis_beats
     - override /trainer: default
 
 
@@ -20,10 +20,14 @@ datamodule:
 frontend:
   model_cfg:
     extractor_cfg:
-      ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
-      split10sec: false
+      ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+      split10sec: true
       model_cfg:
-        sec: ${datamodule.sec}
+        update_cfg:
+          dropout_input: 0.0
+          dropout: 0.0
+          attention_dropout: 0.0
+        specaug: true
     loss_cfg:
       tgt_class: asdit.losses.AdaCos
       dynamic: false
