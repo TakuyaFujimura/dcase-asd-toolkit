@@ -3,7 +3,6 @@ from typing import Literal, Optional, Tuple
 
 import numpy as np
 import torch
-import torchaudio
 import torchaudio.compliance.kaldi as ta_kaldi
 from omegaconf import open_dict
 
@@ -12,8 +11,6 @@ from fairseq.utils import import_user_module
 
 from ..lora import BaseLoRA, spectrogram_augment
 from .EAT.models.mae import interpolate_pos_embed
-
-# from fairseq.checkpoint_utils import load_model_ensemble_and_task
 
 
 @dataclass
@@ -29,6 +26,7 @@ class EATLoRA(BaseLoRA):
         embed_size: int = 128,
         last_layer: str = "linear",
         model_cfg: dict = {},
+        split10sec: bool = False,
     ):
         super().__init__(
             ckpt_path=ckpt_path,
@@ -36,6 +34,7 @@ class EATLoRA(BaseLoRA):
             embed_size=embed_size,
             last_layer=last_layer,
             model_cfg=model_cfg,
+            split10sec=split10sec,
         )
         self.norm_mean = -4.268
         self.norm_std = 4.569
@@ -45,6 +44,7 @@ class EATLoRA(BaseLoRA):
     def construct_model(  # type: ignore
         self,
         ckpt_path: str,
+        sec: Optional[float] = None,
         prediction_mode: Literal["cls", "seq"] = "cls",
         drop_path_rate: float = 0.1,
         norm_eps: Optional[float] = None,
@@ -57,11 +57,19 @@ class EATLoRA(BaseLoRA):
         layerdrop: float = 0.0,
         prenet_layerdrop: float = 0.0,
         prenet_dropout: float = 0.0,
-        target_length: int = 1024,
         specaug: bool = False,
         specaug_freqm: int = 80,
         specaug_timem: int = 80,
     ) -> Tuple[torch.nn.Module, int]:
+        self.fbank_params = {
+            "htk_compat": True,
+            "sample_frequency": 16000,
+            "use_energy": False,
+            "window_type": "hanning",
+            "num_mel_bins": 128,
+            "dither": 0.0,
+            "frame_shift": 10,
+        }
         self.prediction_mode = prediction_mode
         import_user_module(UserDirModule("/".join(__file__.split("/")[:-1] + ["EAT"])))
         self.specaug = specaug
@@ -69,7 +77,15 @@ class EATLoRA(BaseLoRA):
             self.specaug_freqm = specaug_freqm
             self.specaug_timem = specaug_timem
 
-        self.target_length = target_length
+        if self.split10sec:  # super().__init__() set self.split10sec
+            sec = 10
+        if sec is None:
+            raise ValueError("sec must be specified for EATLoRA")
+        else:
+            self.target_length = ta_kaldi.fbank(
+                torch.zeros(1, int(sec * 16000)), **self.fbank_params
+            ).shape[0]
+            self.target_length = int(np.ceil(self.target_length / 32) * 32)
 
         # adjust pre-training config into fine-tuning
         state = checkpoint_utils.load_checkpoint_to_cpu(ckpt_path, {})
@@ -124,7 +140,7 @@ class EATLoRA(BaseLoRA):
 
                 pretrained_args.model["modalities"]["image"][
                     "target_length"
-                ] = target_length
+                ] = self.target_length
         else:
             # not d2v multi
             with open_dict(pretrained_args):
@@ -153,11 +169,6 @@ class EATLoRA(BaseLoRA):
 
         return model, 768
 
-        # model, cfg, task = load_model_ensemble_and_task([ckpt_path])
-        # return model[0], 768
-
-        # specaug
-
     def preprocess(self, source: torch.Tensor) -> torch.Tensor:
         """
         Args:
@@ -170,16 +181,7 @@ class EATLoRA(BaseLoRA):
         source = source - source.mean(dim=-1, keepdim=True)  # (B, L)
         for waveform in source:
             waveform = waveform.unsqueeze(0)  # (1, L)
-            fbank = ta_kaldi.fbank(
-                waveform,
-                htk_compat=True,
-                sample_frequency=16000,
-                use_energy=False,
-                window_type="hanning",
-                num_mel_bins=128,
-                dither=0.0,
-                frame_shift=10,
-            )
+            fbank = ta_kaldi.fbank(waveform, **self.fbank_params)
             fbanks.append(fbank)
         fbank = torch.stack(fbanks, dim=0).unsqueeze(1)  # (B, 1, H, W)
 
@@ -204,7 +206,9 @@ class EATLoRA(BaseLoRA):
         x = self.preprocess(x)
         if self.training and self.specaug:
             x = spectrogram_augment(
-                x, specaug_freqm=self.specaug_freqm, specaug_timem=self.specaug_timem
+                x,
+                specaug_freqm=self.specaug_freqm,
+                specaug_timem=self.specaug_timem,
             )
         feats = self.model.extract_features(
             x, mode="IMAGE", mask=False, remove_extra_tokens=False
@@ -218,24 +222,3 @@ class EATLoRA(BaseLoRA):
                 f"Unknown prediction mode {self.prediction_mode}, only cls and seq are supported"
             )
         return feats
-
-    # def _load_from_state_dict(
-    #     self,
-    #     state_dict: dict,
-    #     prefix: str,
-    #     local_metadata: dict,
-    #     strict: bool,
-    #     missing_keys: list,
-    #     unexpected_keys: list,
-    #     error_msgs: list,
-    # ):
-    #     # new_state_dict = state_dict
-    #     super()._load_from_state_dict(
-    #         state_dict,
-    #         prefix="",
-    #         local_metadata=local_metadata,
-    #         strict=strict,
-    #         missing_keys=missing_keys,
-    #         unexpected_keys=unexpected_keys,
-    #         error_msgs=error_msgs,
-    #     )

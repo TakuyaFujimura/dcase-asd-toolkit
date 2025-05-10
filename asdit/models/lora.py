@@ -27,8 +27,10 @@ class BaseLoRA(nn.Module, ABC):
         embed_size: int = 128,
         last_layer: str = "linear",
         model_cfg: dict = {},
+        split10sec: bool = False,
     ):
         super().__init__()
+        self.split10sec = split10sec
         model, feature_dim = self.construct_model(ckpt_path, **model_cfg)
         self.model = add_lora(model, lora_cfg)
         self.embed_size = embed_size
@@ -64,7 +66,19 @@ class BaseLoRA(nn.Module, ABC):
         Args
             x: (B, L)
         """
-        z = self.extract_features(x)
+        if self.split10sec:
+            size = 16000 * 10
+            x_list = [x[i * size : (i + 1) * size] for i in range(x.shape[-1] // size)]
+            if x.shape[-1] % size != 0:
+                x_list.append(x[-size:])
+        else:
+            x_list = [x]
+
+        z_list = []
+        for x in x_list:
+            z = self.extract_features(x)
+            z_list.append(z)
+        z = torch.stack(z_list, dim=0).mean(dim=0)
 
         if self.last_layer == "linear":
             z = self.network(z)  # (B, L, D)
