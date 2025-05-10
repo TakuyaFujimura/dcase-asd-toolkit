@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ..lora import BaseLoRA
+from ..lora import BaseLoRA, spectrogram_augment
 from .tools import resume
 
 
@@ -21,10 +21,21 @@ class BEATsLoRA(BaseLoRA):
             model_cfg=model_cfg,
         )
 
-    def construct_model(self, ckpt_path: str, sr: int = 16000, update_cfg: dict = {}):
+    def construct_model(
+        self,
+        ckpt_path: str,
+        sr: int = 16000,
+        update_cfg: dict = {},
+        specaug: bool = False,
+        specaug_freqm: int = 80,
+        specaug_timem: int = 80,
+    ):
         if sr != 16000:
             raise ValueError("The sampling rate should be 16000")
-
+        self.specaug = specaug
+        if self.specaug:
+            self.specaug_freqm = specaug_freqm
+            self.specaug_timem = specaug_timem
         model = resume(ckpt_path=Path(ckpt_path), update_cfg=update_cfg)
         return model, 768
 
@@ -33,4 +44,11 @@ class BEATsLoRA(BaseLoRA):
         Args
             x: (B, L)
         """
-        return self.model.extract_features(x)[0]
+        fbank = self.model.preprocess(x)
+        if self.training and self.specaug:
+            fbank = spectrogram_augment(
+                fbank,
+                specaug_freqm=self.specaug_freqm,
+                specaug_timem=self.specaug_timem,
+            )
+        return self.model.extract_features_from_fbank(fbank)[0]

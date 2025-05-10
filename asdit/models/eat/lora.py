@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional, Tuple
 
 import numpy as np
 import torch
@@ -10,7 +10,7 @@ from omegaconf import open_dict
 from fairseq import checkpoint_utils, tasks
 from fairseq.utils import import_user_module
 
-from ..lora import BaseLoRA
+from ..lora import BaseLoRA, spectrogram_augment
 from .EAT.models.mae import interpolate_pos_embed
 
 # from fairseq.checkpoint_utils import load_model_ensemble_and_task
@@ -39,10 +39,13 @@ class EATLoRA(BaseLoRA):
         )
         self.norm_mean = -4.268
         self.norm_std = 4.569
+        if self.last_layer == "attn_stat_pool" and self.prediction_mode == "cls":
+            raise ValueError("attn_stat_pool is not supported for cls prediction mode")
 
-    def construct_model(
+    def construct_model(  # type: ignore
         self,
         ckpt_path: str,
+        prediction_mode: Literal["cls", "seq"] = "cls",
         drop_path_rate: float = 0.1,
         norm_eps: Optional[float] = None,
         remove_alibi: bool = False,
@@ -58,9 +61,9 @@ class EATLoRA(BaseLoRA):
         specaug: bool = False,
         specaug_freqm: int = 80,
         specaug_timem: int = 80,
-    ):  # type: ignore
+    ) -> Tuple[torch.nn.Module, int]:
+        self.prediction_mode = prediction_mode
         import_user_module(UserDirModule("/".join(__file__.split("/")[:-1] + ["EAT"])))
-
         self.specaug = specaug
         if self.specaug:
             self.specaug_freqm = specaug_freqm
@@ -155,19 +158,6 @@ class EATLoRA(BaseLoRA):
 
         # specaug
 
-    def spectrogram_augment(self, spec):
-        freq_masking = torchaudio.transforms.FrequencyMasking(
-            self.specaug_freqm, iid_masks=True
-        )
-        time_masking = torchaudio.transforms.TimeMasking(
-            self.specaug_timem, iid_masks=True
-        )
-        spec_ = spec.transpose(2, 3)
-        input_with_freq_mask = freq_masking(spec_)
-        input_with_time_freq_mask = time_masking(input_with_freq_mask)
-        input_with_time_freq_mask = torch.transpose(input_with_time_freq_mask, 2, 3)
-        return input_with_time_freq_mask
-
     def preprocess(self, source: torch.Tensor) -> torch.Tensor:
         """
         Args:
@@ -203,18 +193,30 @@ class EATLoRA(BaseLoRA):
 
         return fbank
 
-    def extract_features(self, x):
+    def extract_features(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args
             x: (B, L)
+
+        Returns
+            feats: (B, 1, D) or (B, L, D)
         """
         x = self.preprocess(x)
         if self.training and self.specaug:
-            x = self.spectrogram_augment(x)
+            x = spectrogram_augment(
+                x, specaug_freqm=self.specaug_freqm, specaug_timem=self.specaug_timem
+            )
         feats = self.model.extract_features(
             x, mode="IMAGE", mask=False, remove_extra_tokens=False
         )
-        feats = feats["x"][:, :1]  # (B, 1, D)
+        if self.prediction_mode == "cls":
+            feats = feats["x"][:, :1]  # (B, 1, D)
+        elif self.prediction_mode == "seq":
+            feats = feats["x"][:, 1:]
+        else:
+            raise ValueError(
+                f"Unknown prediction mode {self.prediction_mode}, only cls and seq are supported"
+            )
         return feats
 
     # def _load_from_state_dict(
