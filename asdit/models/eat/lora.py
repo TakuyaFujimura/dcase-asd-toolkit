@@ -6,8 +6,14 @@ import torch
 import torchaudio.compliance.kaldi as ta_kaldi
 from omegaconf import open_dict
 
-from fairseq import checkpoint_utils, tasks
-from fairseq.utils import import_user_module
+try:
+    from fairseq import checkpoint_utils, tasks
+    from fairseq.utils import import_user_module
+except ImportError:
+    print("----------------------------------------------")
+    print("[Error] Please install fairseq to use EATLoRA.")
+    print("----------------------------------------------")
+
 
 from ..lora import BaseLoRA, spectrogram_augment
 from .EAT.models.mae import interpolate_pos_embed
