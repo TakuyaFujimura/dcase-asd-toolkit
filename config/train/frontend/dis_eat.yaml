@@ -19,7 +19,7 @@ model_cfg:
     embed_size: 256
     last_layer: "linear"
     model_cfg:
-      specaug: true
+      sec: ${datamodule.sec}
   loss_cfg: {}
   label_to_lossratio_dict:
     main_label: 1

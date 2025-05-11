@@ -21,6 +21,8 @@ frontend:
   model_cfg:
     extractor_cfg:
       ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+      model_cfg:
+        specaug: false
     loss_cfg:
       tgt_class: asdit.losses.AdaCos
       dynamic: false

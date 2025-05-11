@@ -26,7 +26,6 @@ class EATLoRA(BaseLoRA):
         embed_size: int = 128,
         last_layer: str = "linear",
         model_cfg: dict = {},
-        split10sec: bool = False,
     ):
         super().__init__(
             ckpt_path=ckpt_path,
@@ -34,7 +33,6 @@ class EATLoRA(BaseLoRA):
             embed_size=embed_size,
             last_layer=last_layer,
             model_cfg=model_cfg,
-            split10sec=split10sec,
         )
         self.norm_mean = -4.268
         self.norm_std = 4.569
@@ -44,7 +42,7 @@ class EATLoRA(BaseLoRA):
     def construct_model(  # type: ignore
         self,
         ckpt_path: str,
-        sec: Optional[float] = None,
+        sec: float,
         prediction_mode: Literal["cls", "seq"] = "cls",
         drop_path_rate: float = 0.1,
         norm_eps: Optional[float] = None,
@@ -77,15 +75,10 @@ class EATLoRA(BaseLoRA):
             self.specaug_freqm = specaug_freqm
             self.specaug_timem = specaug_timem
 
-        if self.split10sec:  # super().__init__() set self.split10sec
-            sec = 10
-        if sec is None:
-            raise ValueError("sec must be specified for EATLoRA")
-        else:
-            self.target_length = ta_kaldi.fbank(
-                torch.zeros(1, int(sec * 16000)), **self.fbank_params
-            ).shape[0]
-            self.target_length = int(np.ceil(self.target_length / 32) * 32)
+        self.target_length = ta_kaldi.fbank(
+            torch.zeros(1, int(sec * 16000)), **self.fbank_params
+        ).shape[0]
+        self.target_length = int(np.ceil(self.target_length / 32) * 32)
 
         # adjust pre-training config into fine-tuning
         state = checkpoint_utils.load_checkpoint_to_cpu(ckpt_path, {})
@@ -171,6 +164,10 @@ class EATLoRA(BaseLoRA):
             return model, 768
         elif ckpt_path.split("/")[-1].startswith("EAT-large_"):
             return model, 1024
+        else:
+            raise ValueError(
+                f"Unknown checkpoint {ckpt_path}, only EAT-base_* and EAT-large_* are supported"
+            )
 
     def preprocess(self, source: torch.Tensor) -> torch.Tensor:
         """

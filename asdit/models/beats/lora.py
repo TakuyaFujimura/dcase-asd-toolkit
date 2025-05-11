@@ -12,7 +12,6 @@ class BEATsLoRA(BaseLoRA):
         embed_size: int = 128,
         last_layer: str = "linear",
         model_cfg: dict = {},
-        split10sec: bool = False,
     ):
         super().__init__(
             ckpt_path=ckpt_path,
@@ -20,7 +19,6 @@ class BEATsLoRA(BaseLoRA):
             embed_size=embed_size,
             last_layer=last_layer,
             model_cfg=model_cfg,
-            split10sec=split10sec,
         )
 
     def construct_model(
