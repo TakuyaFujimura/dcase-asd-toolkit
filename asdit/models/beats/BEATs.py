@@ -177,3 +177,47 @@ class BEATs(nn.Module):
             return lprobs, padding_mask
         else:
             return x, padding_mask
+
+    def extract_features_from_fbank(
+            self,
+            fbank: torch.Tensor,
+            padding_mask: Optional[torch.Tensor] = None,
+    ):
+        if padding_mask is not None:
+            padding_mask = self.forward_padding_mask(fbank, padding_mask)
+
+        fbank = fbank.unsqueeze(1)
+        features = self.patch_embedding(fbank)
+        features = features.reshape(features.shape[0], features.shape[1], -1)
+        features = features.transpose(1, 2)
+        features = self.layer_norm(features)
+
+        if padding_mask is not None:
+            padding_mask = self.forward_padding_mask(features, padding_mask)
+
+        if self.post_extract_proj is not None:
+            features = self.post_extract_proj(features)
+
+        x = self.dropout_input(features)
+
+        x, layer_results = self.encoder(
+            x,
+            padding_mask=padding_mask,
+        )
+
+        if self.predictor is not None:
+            x = self.predictor_dropout(x)
+            logits = self.predictor(x)
+
+            if padding_mask is not None and padding_mask.any():
+                logits[padding_mask] = 0
+                logits = logits.sum(dim=1)
+                logits = logits / (~padding_mask).sum(dim=1).unsqueeze(-1).expand_as(logits)
+            else:
+                logits = logits.mean(dim=1)
+
+            lprobs = torch.sigmoid(logits)
+
+            return lprobs, padding_mask
+        else:
+            return x, padding_mask

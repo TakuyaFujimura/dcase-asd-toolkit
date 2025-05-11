@@ -1,52 +1,54 @@
 from pathlib import Path
 
-import torch
-from torch import nn
-
-from ..modules import AttnStatPool, add_lora
+from ..lora import BaseLoRA, spectrogram_augment
 from .tools import resume
 
 
-class BEATsLoRA(nn.Module):
+class BEATsLoRA(BaseLoRA):
     def __init__(
         self,
-        sr: int,
-        embed_size: int = 128,
         ckpt_path: str = "pretrained_models/beats/BEATs_iter3.pt",
         lora_cfg: dict = {"r": 64, "target_modules": ["q_proj", "v_proj"]},
+        embed_size: int = 128,
         last_layer: str = "linear",
-        update_cfg: dict = {},
+        model_cfg: dict = {},
     ):
-        super().__init__()
+        super().__init__(
+            ckpt_path=ckpt_path,
+            lora_cfg=lora_cfg,
+            embed_size=embed_size,
+            last_layer=last_layer,
+            model_cfg=model_cfg,
+        )
+
+    def construct_model(
+        self,
+        ckpt_path: str,
+        sr: int = 16000,
+        update_cfg: dict = {},
+        specaug: bool = False,
+        specaug_freqm: int = 80,
+        specaug_timem: int = 80,
+    ):
         if sr != 16000:
             raise ValueError("The sampling rate should be 16000")
+        self.specaug = specaug
+        if self.specaug:
+            self.specaug_freqm = specaug_freqm
+            self.specaug_timem = specaug_timem
         model = resume(ckpt_path=Path(ckpt_path), update_cfg=update_cfg)
-        self.model = add_lora(model, lora_cfg)
-        self.embed_size = embed_size
-        self.last_layer = last_layer
-        if self.last_layer == "linear":
-            self.network = nn.Linear(768, self.embed_size)
-        elif self.last_layer == "attn_stat_pool":
-            self.network = nn.Sequential(
-                AttnStatPool(embed_size=768), nn.Linear(768, self.embed_size)
-            )
+        return model, 768
 
-        else:
-            raise NotImplementedError(f"last_layer={self.last_layer} is not supported.")
-
-    def forward(self, x_time):
+    def extract_features(self, x):
         """
         Args
-            x_time: (B, L)
+            x: (B, L)
         """
-        z = self.model.extract_features(x_time)[0]  # (B, L, 768)
-
-        if self.last_layer == "linear":
-            z = self.network(z)  # (B, L, D)
-            z = torch.mean(z, dim=1)  # (B, D)
-        elif self.last_layer == "attn_stat_pool":
-            z = self.network(z)  # (B, D)
-        else:
-            raise NotImplementedError(f"last_layer={self.last_layer} is not supported.")
-
-        return z
+        fbank = self.model.preprocess(x)
+        if self.training and self.specaug:
+            fbank = spectrogram_augment(
+                fbank,
+                specaug_freqm=self.specaug_freqm,
+                specaug_timem=self.specaug_timem,
+            )
+        return self.model.extract_features_from_fbank(fbank)[0]
