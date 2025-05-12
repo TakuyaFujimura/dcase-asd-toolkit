@@ -45,11 +45,14 @@ class EATLoRA(BaseLoRA):
         if self.last_layer == "attn_stat_pool" and self.prediction_mode == "cls":
             raise ValueError("attn_stat_pool is not supported for cls prediction mode")
 
-    def construct_model(  # type: ignore
+    def construct_data2vec(
         self,
         ckpt_path: str,
         sec: float,
         prediction_mode: Literal["cls", "seq"] = "cls",
+        specaug: bool = False,
+        specaug_freqm: int = 80,
+        specaug_timem: int = 80,
         drop_path_rate: float = 0.1,
         norm_eps: Optional[float] = None,
         remove_alibi: bool = False,
@@ -61,10 +64,7 @@ class EATLoRA(BaseLoRA):
         layerdrop: float = 0.0,
         prenet_layerdrop: float = 0.0,
         prenet_dropout: float = 0.0,
-        specaug: bool = False,
-        specaug_freqm: int = 80,
-        specaug_timem: int = 80,
-    ) -> Tuple[torch.nn.Module, int]:
+    ):
         self.fbank_params = {
             "htk_compat": True,
             "sample_frequency": 16000,
@@ -75,7 +75,6 @@ class EATLoRA(BaseLoRA):
             "frame_shift": 10,
         }
         self.prediction_mode = prediction_mode
-        import_user_module(UserDirModule("/".join(__file__.split("/")[:-1] + ["EAT"])))
         self.specaug = specaug
         if self.specaug:
             self.specaug_freqm = specaug_freqm
@@ -85,7 +84,6 @@ class EATLoRA(BaseLoRA):
             torch.zeros(1, int(sec * 16000)), **self.fbank_params
         ).shape[0]
         self.target_length = int(np.ceil(self.target_length / 32) * 32)
-
         # adjust pre-training config into fine-tuning
         state = checkpoint_utils.load_checkpoint_to_cpu(ckpt_path, {})
         pretrained_args = state.get("cfg", None)
@@ -165,6 +163,29 @@ class EATLoRA(BaseLoRA):
             del state["model"]["modality_encoders.IMAGE.encoder_mask"]
         model.load_state_dict(state["model"], strict=True)
         model.remove_pretraining_modules(modality="image")
+        return model
+
+    def construct_model(  # type: ignore
+        self,
+        ckpt_path: str,
+        sec: float,
+        prediction_mode: Literal["cls", "seq"] = "cls",
+        specaug: bool = False,
+        specaug_freqm: int = 80,
+        specaug_timem: int = 80,
+        **kwargs,
+    ) -> Tuple[torch.nn.Module, int]:
+        import_user_module(UserDirModule("/".join(__file__.split("/")[:-1] + ["EAT"])))
+
+        model = self.construct_data2vec(
+            ckpt_path=ckpt_path,
+            sec=sec,
+            prediction_mode=prediction_mode,
+            specaug=specaug,
+            specaug_freqm=specaug_freqm,
+            specaug_timem=specaug_timem,
+            **kwargs,
+        )
 
         if ckpt_path.split("/")[-1].startswith("EAT-base_"):
             return model, 768
