@@ -115,7 +115,6 @@ class Knn(BaseBackend):
             embed = normalize_vector(embed)
 
         scores_so: np.ndarray = knn_so.kneighbors(embed)[0].mean(1)
-        scores_so /= knn_so.kneighbors(embed)[0].mean(1)
         if knn_ta is None:
             scores = scores_so
         else:
