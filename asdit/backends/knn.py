@@ -134,7 +134,7 @@ class Knn(BaseBackend):
         embed = get_embed_from_df(test_df)
         if self.metric == "cosine":
             embed = normalize_vector(embed)
-        scores = np.min(np.sort(pairwise_distances(embed, ref_embed, metric=self.metric)/ref_norm_const, axis=1)[1:self.n_neighbors_so+1].mean(axis=1), axis=1)
+        scores = np.sort(pairwise_distances(embed, ref_embed, metric=self.metric)/ref_norm_const, axis=1)[1:self.n_neighbors_so+1].mean(axis=1)
         return scores
 
     def anomaly_score(self, test_df: pd.DataFrame) -> Dict[str, np.ndarray]:
