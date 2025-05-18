@@ -1,0 +1,4 @@
+https://github.com/cwx-worst-one/EAT
+
+- EAT-base_epoch10_pt: https://drive.google.com/file/d/10pklbY_fKraQUIBizSg1kv4lJXNWxpxl/view
+- EAT-large_epoch20_pt: https://drive.google.com/file/d/1PEgriRvHsqrtLzlA478VemX7Q0ZGl889/view
