@@ -1,72 +1,87 @@
 #!/bin/bash
-########################
-name=$1
-version=$2
-dcase=$3
-seed=$4
-extract_exp=$5
-score_exp=$6
-evaluate_exp=$7
-umap_exp=$8
-table_exp=$9
-IFS=',' read -r -a ckpt_ver_list <<< "${10}"
-########################
+
+get_machines() {
+    if [ "$1" = "dcase2020" ]; then
+        machines=("fan"  "pump"  "slider"  "ToyCar"  "ToyConveyor"  "valve")
+    elif [ "$1" = "dcase2021" ]; then
+        machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
+    elif [ "$1" = "dcase2022" ]; then
+        machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")
+    elif [ "$1" = "dcase2023" ]; then
+        machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
+    elif [ "$1" = "dcase2024" ]; then
+        machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
+    else
+        machines="InvalidDCASE"
+    fi
+
+    echo "${machines[@]}"
+}
+
+collect_args() {
+    local vars=("$@")
+    local args=()
+
+    for var in "${vars[@]}"; do
+        if [[ -z $var ]]; then
+            echo "Error: $var is required but not defined"
+            exit 1
+        elif [[ $var == experiments_* ]]; then 
+            args+=("experiments=${!var}")
+        else
+            args+=("$var=${!var}")
+        fi
+    done
+
+    echo "${args[@]}"
+}
+
+asdit_train() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_train"))
+    echo "${args[@]}"
+    python -m asdit.bin.train "${args[@]}" "$@"
+}
+
+asdit_extract() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine" "experiments_extract"))
+    python -m asdit.bin.extract "${args[@]}" "$@"
+}
+
+asdit_score() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine" "experiments_score"))
+    python -m asdit.bin.score "${args[@]}" "$@"
+}
+
+asdit_evaluate() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
+    python -m asdit.bin.evaluate "${args[@]}" "$@"
+}
+
+asdit_umap() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
+    python -m asdit.bin.umap "${args[@]}" "$@"
+}
+
+
+asdit_table() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver"))
+    python -m asdit.bin.table "${args[@]}" "$@"
+}
 
 # get machines
-if [ "$dcase" = "dcase2021" ]; then
-    machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
-elif [ "$dcase" = "dcase2022" ]; then
-    machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")
-elif [ "$dcase" = "dcase2023" ]; then
-    machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
-elif [ "$dcase" = "dcase2024" ]; then
-    machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
-else
-    echo "Invalid dcase"
+machines=$(get_machines "${dcase}")
+if [ "$machines" = "InvalidDCASE" ]; then
+    echo "Error: Invalid DCASE"
     exit 1
 fi
+echo "machines: $machines"
 
+# change directory to project root
+cd ../../..
 
 # activate virtual environment
-cd ../../..
-source "venv/bin/activate"
-
-
-
-# training
-if [ "${extract_exp}" = "shared" ]; then
-    python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
-    'name='${name}'' 'version='${version}''
-elif [ "${extract_exp}" = "machinewise" ]; then
-    for machine in "${machines[@]}"; do
-        python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
-        'name='${name}'' 'version='${version}'' 'machine='${machine}''
-    done
+if [ ! -d "venv" ]; then
+    echo "venv not found in $(pwd). Did you run it from 'jobs/asd/base'?"
+    exit 1
 fi
-
-# testing
-for ckpt_ver in "${ckpt_ver_list[@]}"; do
-    for machine in "${machines[@]}"; do
-        python -m asdlib.bin.extract experiments="${extract_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
-
-        python -m asdlib.bin.score experiments="${score_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
-
-        python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}'' 'dcase='${dcase}''
-
-        python -m asdlib.bin.umap experiments="${umap_exp}" \
-        'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-        'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
-    done
-
-    python -m asdlib.bin.table experiments="${table_exp}" \
-    'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
-    'ckpt_ver='${ckpt_ver}'' dcase="${dcase}"
-done
-
-
+source "venv/bin/activate"

@@ -1,7 +1,7 @@
 # @package _global_
-data_dir: "../data" # data directory from dcase-asd-library
+data_dir: "../data" # data directory from dcase-asd-toolkit
 dcase: dcase2022
 
 labeler:
-  tgt_class: asdlib.labelers.BasicInfoLabeler
+  tgt_class: asdit.labelers.BasicInfoLabeler
   label_name: "machine_section_attr_domain"

@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+    - override /datamodule: basic
+    - override /frontend: dis_multiresnet_1024
+    - override /trainer: default
+
+
+label_dict_path:
+  main_label: "labels/${dcase}/machine_section_attr_domain.json"
+
+model_ver: "all"
+
+frontend:
+  model_cfg:
+    loss_cfg:
+      tgt_class: asdit.losses.AdaCos
+      dynamic: false
+      trainable: true

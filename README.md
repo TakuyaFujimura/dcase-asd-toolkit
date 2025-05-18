@@ -1,4 +1,4 @@
-# DCASE Anomalous Sound Detection Library
+# DCASE Anomalous Sound Detection Toolkit (ASDIT)
 
 This repository provides various recipes for the DCASE Task 2 Anomalous Sound Detection (ASD).
 
@@ -11,11 +11,11 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 **How to**
 
 ```bash
-[somewhere]$ git clone https://github.com/TakuyaFujimura/dcase-asd-library.git
-[somewhere]$ cd dcase-asd-library
-[dcase-asd-library]$ python3 -m venv venv # Requires Python 3.10+
-[dcase-asd-library]$ source venv/bin/activate
-[dcase-asd-library]$ pip install -e .
+[somewhere]$ git clone https://github.com/TakuyaFujimura/dcase-asd-toolkit.git
+[somewhere]$ cd dcase-asd-toolkit
+[dcase-asd-toolkit]$ python3 -m venv venv # Requires Python 3.10+
+[dcase-asd-toolkit]$ source venv/bin/activate
+[dcase-asd-toolkit]$ pip install -e .
 ```
 
 </details>
@@ -30,8 +30,8 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 - `dcase`: The dataset name (`dcase2021`, `dcase2022`, `dcase2023`, `dcase2024` are available)
 
 ```bash
-[dcase-asd-library]$ cd jobs/download
-[dcase-asd-library/jobs/download]$ bash run.sh
+[dcase-asd-toolkit]$ cd jobs/download
+[dcase-asd-toolkit/jobs/download]$ bash run.sh
 ```
 
 **Result**
@@ -55,8 +55,8 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 - Normal/anomalous ground truth labels for test data are added during this process.
 
 ```bash
-[dcase-asd-library]$ cd jobs/format
-[dcase-asd-library/jobs/format]$ bash run.sh
+[dcase-asd-toolkit]$ cd jobs/format
+[dcase-asd-toolkit/jobs/format]$ bash run.sh
 ```
 
 **Result**
@@ -71,6 +71,10 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
     └── ...
 ```
 
+**Note**
+
+On Windows, creating symbolic links needs to be allowed. An easy way to do this is to turn on the developer mode under ```Settings > System > For Developers```.
+
 </details>
 
 <details>
@@ -79,49 +83,50 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 
 **How to**
 - Specify `data_dir` in `config/train/config.yaml`
-- Specify `dcase` in `jobs/asd/example/?.sh`
-    - Two example scripts are provided: `dis_baseline.sh` and `ae_baseline.sh`
-- This process will automatically execute the training and testing pipeline.
-
+- Specify `dcase` and `seed` in `jobs/asd/call/?.sh`
+- This script will automatically execute the training and testing process.
 
 
 ```bash
-[dcase-asd-library]$ cd jobs/asd/example
-[dcase-asd-library/jobs/asd/example]$ bash dis_baseline.sh
+[dcase-asd-toolkit]$ cd jobs/asd/call
+[dcase-asd-toolkit/jobs/asd/call]$ bash dis_baseline.sh
 ```
 
 **Result**
 ```bash
-dcase-asd-library
-├── asdlib
+dcase-asd-toolkit
+├── asdit
 ├── ...
 └── results
     ├── ...
-    └── <name> # `example`
+    └── <name> # `recipe`
         ├── ...
-        └── <version> # `dcase2023_baseline_0`
-            ├── model
-            │   └── <model_ver> # all
-            │       ├── .hydra
-            │       ├── checkpoints
-            │       ├── events.out.tfevents.*
-            │       ├── hparams.yaml
-            │       └── train.log
-            └── output
-                └── <ckpt_ver> # `epoch_12`
-                    ├── bandsaw
-                    ├── bearing
-                    ├── ...
-                    ├── valve
-                    │   ├── hparams.yaml
-                    │   ├── test_evaluate.csv # AUC scores on test data
-                    │   ├── test_extract.csv # Extracted test data information, including embedding values
-                    │   ├── test_score.csv # Anomaly scores for test data
-                    │   ├── train_extract.csv # Extracted training data information, including embedding values
-                    │   ├── train_score.csv # Anomaly scores for training data
-                    │   └── umap # UMAP visualization
-                    │── official23-dev.csv # Summarized evaluation results
-                    └── official23-eval.csv
+        └── <dcase>
+            └── <version> # `dis_baseline`
+                ├── ...
+                └── <seed> # `0`
+                    ├── model
+                    │   └── <model_ver> # all
+                    │       ├── .hydra
+                    │       ├── checkpoints
+                    │       ├── events.out.tfevents.*
+                    │       ├── hparams.yaml
+                    │       └── train.log
+                    └── output
+                        └── <infer_ver> # `last`
+                            ├── bandsaw
+                            ├── bearing
+                            ├── ...
+                            ├── valve
+                            │   ├── hparams.yaml
+                            │   ├── test_evaluate.csv # AUC scores on test data
+                            │   ├── test_extract.csv # Extracted test data information, including embedding values
+                            │   ├── test_score.csv # Anomaly scores for test data
+                            │   ├── train_extract.csv # Extracted training data information, including embedding values
+                            │   ├── train_score.csv # Anomaly scores for training data
+                            │   └── umap # UMAP visualization
+                            │── official23-dev.csv # Summarized evaluation results
+                            └── official23-eval.csv
 ```
 
 </details>
@@ -139,12 +144,12 @@ These tools load and merge configurations from `config/<tool>/config.yaml`, `con
 
 
 <details>
-<summary>asdlib.bin.train</summary>
+<summary>asdit.bin.train</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
 'name='${name}'' 'version='${version}''
 ```
 
@@ -154,12 +159,12 @@ python -m asdlib.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
 </details>
 
 <details>
-<summary>asdlib.bin.extract</summary>
+<summary>asdit.bin.extract</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdlib.bin.extract experiments="${extract_exp}" \
+python -m asdit.bin.extract experiments="${extract_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -173,12 +178,12 @@ python -m asdlib.bin.extract experiments="${extract_exp}" \
 </details>
 
 <details>
-<summary>asdlib.bin.score</summary>
+<summary>asdit.bin.score</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdlib.bin.score experiments="${score_exp}" \
+python -m asdit.bin.score experiments="${score_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -193,12 +198,12 @@ python -m asdlib.bin.score experiments="${score_exp}" \
 
 
 <details>
-<summary>asdlib.bin.evaluate</summary>
+<summary>asdit.bin.evaluate</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
+python -m asdit.bin.evaluate experiments="${evaluate_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -210,12 +215,12 @@ python -m asdlib.bin.evaluate experiments="${evaluate_exp}" \
 </details>
 
 <details>
-<summary>asdlib.bin.umap</summary>
+<summary>asdit.bin.umap</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdlib.bin.umap experiments="${umap_exp}" \
+python -m asdit.bin.umap experiments="${umap_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -228,12 +233,12 @@ python -m asdlib.bin.umap experiments="${umap_exp}" \
 
 
 <details>
-<summary>asdlib.bin.table</summary>
+<summary>asdit.bin.table</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdlib.bin.table dcase="${dcase}" \
+python -m asdit.bin.table dcase="${dcase}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}''
 ```

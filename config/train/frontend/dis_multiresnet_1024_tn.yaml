@@ -1,0 +1,42 @@
+tgt_class: asdit.frontends.BasicDisPLModel
+
+optim_cfg:
+  tgt_class: torch.optim.AdamW
+  lr: 1.0e-3
+
+scheduler_cfg: null
+grad_cfg: {}
+
+
+model_cfg:
+  normalize: true
+  extractor_cfg:
+    tgt_class: asdit.models.multiresnet.MultiResNet
+    sec: ${datamodule.sec}
+    sr: ${datamodule.sr}
+    use_fft: true
+    stft_cfg_list:
+      -
+        sr: ${datamodule.sr}
+        n_fft: 1024
+        hop_length: 512
+        n_mels: null
+        power: 1.0
+        f_min: 200.0
+        f_max: 8000.0
+        temporal_norm: true
+    use_bias: false
+    emb_base_size: 128
+    fft_network_cfg:
+      tgt_class: asdit.models.multiresnet.fft_encoder_networks.Conv1dEncoderLayer
+      aggregate: "mlp"
+    stft_network_cfg:
+      tgt_class: asdit.models.multiresnet.stft_encoder_networks.Conv2dEncoderLayer
+      resnet_additional_layer: "SEBlock"
+      aggregate: "mlp"
+  loss_cfg: {}
+  label_to_lossratio_dict:
+    main_label: 1
+  augmentation_cfg_list:
+    - tgt_class: asdit.augmentations.Mixup
+      prob: 0.5

@@ -1,0 +1,30 @@
+tgt_class: asdit.frontends.BasicDisPLModel
+
+optim_cfg:
+  tgt_class: torch.optim.AdamW
+  lr: 1.0e-4
+
+scheduler_cfg: null
+grad_cfg: {}
+
+
+model_cfg:
+  normalize: true
+  extractor_cfg:
+    tgt_class: asdit.models.beats.BEATsLoRA
+    ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+    lora_cfg:
+      r: 64
+      target_modules: ["q_proj", "v_proj", "out_proj"]
+    embed_size: 256
+    last_layer: "attn_stat_pool"
+    model_cfg:
+      sr: ${datamodule.sr}
+      update_cfg:
+        dropout_input: 0.3
+        dropout: 0.0
+        attention_dropout: 0.0
+  loss_cfg: {}
+  label_to_lossratio_dict:
+    main_label: 1
+  augmentation_cfg_list: []

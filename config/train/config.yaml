@@ -1,18 +1,23 @@
 defaults:
     - _self_
     - datamodule: null
-    - model: null
+    - frontend: null
     - trainer: null
     - experiments: null
 
 seed: 0
+dcase: null
 name: null
 version: null
+result_dir: "./results"
+data_dir: "../data"
+
+label_dict_path: {}
+
+machine: null
+model_ver: null
 
 refresh_rate: 1
-num_workers: 4
-
-
 callback_opts:
   best:
     monitor: "train/main"
@@ -27,19 +32,9 @@ callback_opts:
     every_n_epochs: 4
     save_last: true
     auto_insert_metric_name: false
-
 every_n_epochs_valid: 1
 
-result_dir: "./results"
-
-label_dict_path: {}
-
-machine: null
-model_ver: null
-
-dcase: null
-data_dir: "../data"
 
 hydra:
     run:
-        dir: ${result_dir}/${name}/${version}_${seed}/model/${model_ver}
+        dir: ${result_dir}/${name}/${dcase}/${version}/${seed}/model/${model_ver}

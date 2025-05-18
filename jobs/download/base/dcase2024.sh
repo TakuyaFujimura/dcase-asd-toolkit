@@ -8,7 +8,7 @@ mkdir -p ${eval_dir}
 # download dev data
 cd ${dev_dir}
 for machine_type in bearing fan gearbox slider ToyCar ToyTrain valve; do
-wget "https://zenodo.org/record/10902294/files/dev_${machine_type}.zip"
+curl -L -O "https://zenodo.org/record/10902294/files/dev_${machine_type}.zip"
 unzip "dev_${machine_type}.zip"
 done
 
@@ -25,7 +25,7 @@ for machine_type in \
     RoboticArm_train_r2 \
     BrushlessMotor_train \
 ; do
-wget "https://zenodo.org/records/11259435/files/eval_data_${machine_type}.zip"
+curl -L -O "https://zenodo.org/records/11259435/files/eval_data_${machine_type}.zip"
 unzip "eval_data_${machine_type}.zip"
 done
 
@@ -40,6 +40,6 @@ for machine_type in \
     RoboticArm \
     BrushlessMotor \
 ; do
-wget "https://zenodo.org/records/11363076/files/eval_data_${machine_type}_test.zip"
+curl -L -O "https://zenodo.org/records/11363076/files/eval_data_${machine_type}_test.zip"
 unzip "eval_data_${machine_type}_test.zip"
 done
