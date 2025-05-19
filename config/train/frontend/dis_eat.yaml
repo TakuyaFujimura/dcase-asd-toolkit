@@ -23,6 +23,6 @@ model_cfg:
       sec: ${datamodule.sec}
       prediction_mode: "cls"
   loss_cfg: {}
-  label_to_lossratio_dict:
+  label_to_lossweight_dict:
     main_label: 1
   augmentation_cfg_list: []

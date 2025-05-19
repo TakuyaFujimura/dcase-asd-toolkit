@@ -19,5 +19,5 @@ frontend:
       dynamic: false
       trainable: false
     subspace_embed_size: ${frontend.model_cfg.extractor_cfg.emb_base_size}
-    featex_loss_ratio: 1.0
+    featex_loss_weight: 1.0
     featex_prob: 0.5

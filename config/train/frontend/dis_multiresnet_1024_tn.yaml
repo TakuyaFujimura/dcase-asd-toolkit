@@ -35,7 +35,7 @@ model_cfg:
       resnet_additional_layer: "SEBlock"
       aggregate: "mlp"
   loss_cfg: {}
-  label_to_lossratio_dict:
+  label_to_lossweight_dict:
     main_label: 1
   augmentation_cfg_list:
     - tgt_class: asdit.augmentations.Mixup

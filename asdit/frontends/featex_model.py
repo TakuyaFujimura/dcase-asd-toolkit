@@ -31,7 +31,7 @@ class FeatExPLModel(BasicDisPLModel):
             partially_saved_param_list=partially_saved_param_list,
         )
 
-    def set_head_dict(self, label_to_lossratio_dict: Dict[str, float]):
+    def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):
         if self.embed_size % self.subspace_embed_size != 0:
             raise ValueError(
                 f"embed_size {self.embed_size} should be divisible by subspace_embed_size {self.subspace_embed_size}"
@@ -39,7 +39,7 @@ class FeatExPLModel(BasicDisPLModel):
         embed_num = self.embed_size // self.subspace_embed_size
         self.head_dict = torch.nn.ModuleDict({})
         self.featex_head_dict = torch.nn.ModuleDict({})
-        for label_name in label_to_lossratio_dict:
+        for label_name in label_to_lossweight_dict:
             main_loss_cfg = {
                 "n_classes": self.num_class_dict[label_name],
                 "embed_size": self.embed_size,
@@ -59,23 +59,23 @@ class FeatExPLModel(BasicDisPLModel):
         normalize: bool,
         extractor_cfg: Dict[str, Any],
         loss_cfg: Dict[str, Any],
-        label_to_lossratio_dict: Dict[str, float],
+        label_to_lossweight_dict: Dict[str, float],
         augmentation_cfg_list: Optional[List[Dict[str, Any]]] = None,
         use_compile: bool = False,
         subspace_embed_size: Optional[int] = None,
-        featex_loss_ratio: float = 1.0,
+        featex_loss_weight: float = 1.0,
         featex_prob: float = 0.5,
     ) -> None:
         if subspace_embed_size is None:
             raise ValueError("subspace_embed_size is should be specified")
         self.subspace_embed_size = subspace_embed_size
-        self.featex_loss_ratio = featex_loss_ratio
+        self.featex_loss_weight = featex_loss_weight
         self.featex = FeatEx(prob=featex_prob, subspace_embed_size=subspace_embed_size)
         super().construct_model(
             normalize=normalize,
             extractor_cfg=extractor_cfg,
             loss_cfg=loss_cfg,
-            label_to_lossratio_dict=label_to_lossratio_dict,
+            label_to_lossweight_dict=label_to_lossweight_dict,
             augmentation_cfg_list=augmentation_cfg_list,
             use_compile=use_compile,
         )
@@ -86,7 +86,7 @@ class FeatExPLModel(BasicDisPLModel):
         embed_ex, batch_ex = self.featex(embed=embed, batch=batch)
         loss_dict = {"main": 0.0}
 
-        for label_name, ratio in self.label_to_lossratio_dict.items():
+        for label_name, weight in self.label_to_lossweight_dict.items():
             loss_dict[f"{label_name}_main"] = self.head_dict[label_name](
                 embed, batch[f"onehot_{label_name}"]
             )
@@ -95,8 +95,8 @@ class FeatExPLModel(BasicDisPLModel):
             )
             loss_dict[label_name] = (
                 loss_dict[f"{label_name}_main"]
-                + self.featex_loss_ratio * loss_dict[f"{label_name}_featex"]
+                + self.featex_loss_weight * loss_dict[f"{label_name}_featex"]
             )
-            loss_dict["main"] += loss_dict[label_name] * ratio
+            loss_dict["main"] += loss_dict[label_name] * weight
 
         return loss_dict

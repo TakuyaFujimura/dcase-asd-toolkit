@@ -19,4 +19,4 @@ frontend:
       dynamic: false
       trainable: false
     subspace_embed_size: ${frontend.model_cfg.extractor_cfg.emb_base_size}
-    subspace_loss_ratio: 1.0
+    subspace_loss_weight: 1.0
