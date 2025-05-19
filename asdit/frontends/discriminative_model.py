@@ -19,16 +19,17 @@ class BasicDisPLModel(BasePLFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
-        label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
-        partially_saved_param_list: List[str] = [],
+        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        label_dict_path: Optional[Dict[str, Path]] = None,
+        # given by config.label_dict_path in train.py
+        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            scheduler_cfg=scheduler_cfg,
             grad_cfg=grad_cfg,
+            scheduler_cfg=scheduler_cfg,
             label_dict_path=label_dict_path,
             partially_saved_param_list=partially_saved_param_list,
         )
@@ -66,12 +67,14 @@ class BasicDisPLModel(BasePLFrontend):
     def construct_model(
         self,
         normalize: bool,
-        extractor_cfg: Dict[str, Any] = {},
-        loss_cfg: Dict[str, Any] = {},
-        label_to_lossratio_dict: Dict[str, float] = {},
-        augmentation_cfg_list: List[Dict[str, Any]] = [],
+        extractor_cfg: Dict[str, Any],
+        loss_cfg: Dict[str, Any],
+        label_to_lossratio_dict: Dict[str, float],
+        augmentation_cfg_list: Optional[List[Dict[str, Any]]] = None,
         use_compile: bool = False,
     ) -> None:
+        if augmentation_cfg_list is None:
+            augmentation_cfg_list = []
         self.normalize = normalize
         self.extractor = instantiate_tgt(extractor_cfg)
         if use_compile:

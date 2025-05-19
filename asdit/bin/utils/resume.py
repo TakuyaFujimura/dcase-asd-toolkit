@@ -1,7 +1,7 @@
 import importlib
 import logging
 from pathlib import Path
-from typing import Any, Dict, Literal, cast
+from typing import Any, Dict, Literal, Optional, cast
 
 from omegaconf import OmegaConf
 
@@ -22,13 +22,19 @@ class ExtractDMConfigMaker:
         sec: float | Literal["all"],
         sr: int,
         machine: str,
-        dataloader_cfg: Dict[str, Any] = {},
-        collator_cfg: Dict[str, Any] = {},
-        dataset_cfg: Dict[str, Any] = {},
+        dataloader_cfg: Optional[Dict[str, Any]] = None,
+        collator_cfg: Optional[Dict[str, Any]] = None,
+        dataset_cfg: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.data_dir = data_dir
         self.dcase = dcase
         self.machine = machine
+        if dataloader_cfg is None:
+            dataloader_cfg = {}
+        if collator_cfg is None:
+            collator_cfg = {}
+        if dataset_cfg is None:
+            dataset_cfg = {}
 
         self.dataloader_cfg = {
             "batch_size": 64,
