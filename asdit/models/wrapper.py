@@ -30,9 +30,9 @@ class BasePretrainedWrapper(nn.Module, ABC):
         super().__init__()
         if model_cfg is None:
             model_cfg = {}
+        self.projection_type = projection_type
         self.model, feature_dim = self.construct_model(**model_cfg)
         self.embed_size = embed_size
-        self.projection_type = projection_type
         if self.projection_type == "linear":
             self.projection_net = nn.Linear(feature_dim, self.embed_size)
         elif self.projection_type == "attn_stat_pool":

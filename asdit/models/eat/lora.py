@@ -39,9 +39,10 @@ class EATLoRA(BaseLoRA):
         if sr != 16000:
             raise ValueError("The sampling rate should be 16000")
         if update_cfg is None:
-            update_cfg = {"sr": sr}
+            update_cfg = {"sr": sr, "sec": sec}
         else:
             update_cfg["sr"] = sr
+            update_cfg["sec"] = sec
         if self.projection_type == "attn_stat_pool" and prediction_mode == "cls":
             raise ValueError(
                 "attn_stat_pool can be used with only <seq> prediction mode"
