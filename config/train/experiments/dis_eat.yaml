@@ -20,8 +20,8 @@ datamodule:
 frontend:
   model_cfg:
     extractor_cfg:
-      ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
       model_cfg:
+        ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
         specaug: false
     loss_cfg:
       tgt_class: asdit.losses.AdaCos
