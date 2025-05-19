@@ -32,7 +32,6 @@ callback_opts:
     every_n_epochs: 4
     save_last: true
     auto_insert_metric_name: false
-every_n_epochs_valid: 1
 
 
 hydra:

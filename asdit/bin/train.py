@@ -44,7 +44,6 @@ def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
             **cfg.trainer,
             "callbacks": callback_list,
             "logger": pl_logger,
-            "check_val_every_n_epoch": cfg.every_n_epochs_valid,
         }
     )
     return trainer
