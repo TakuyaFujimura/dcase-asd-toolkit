@@ -38,7 +38,6 @@ class BasicDataset(Dataset):
     def __init__(
         self,
         path_selector_list: List[str],
-        use_cache: bool = False,
     ):
         super().__init__()
         self.path_list = []
@@ -47,13 +46,6 @@ class BasicDataset(Dataset):
         for selector in path_selector_list:
             self.path_list += parse_path_selector(selector)
         logger.info("Finished Loading Paths")
-
-        self.use_cache = use_cache
-        assert not self.use_cache
-        # if self.use_cache:
-        #     self.caches: List[dict] = []
-        #     for idx in tqdm.tqdm(range(len(self.path_list))):
-        #         self.caches.append(self.get_item(idx))
 
     def get_item(self, idx) -> dict:
         wave = torch_mono_wav_load(path=self.path_list[idx])
@@ -65,10 +57,6 @@ class BasicDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.get_item(idx)
-        # if self.use_cache:
-        #     return self.caches[idx]
-        # else:
-        #     return self.get_item(idx)
 
     def __len__(self):
         return len(self.path_list)
