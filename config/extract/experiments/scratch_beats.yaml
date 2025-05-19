@@ -5,9 +5,9 @@ infer_ver: null
 
 
 frontend_cfg:
-  tgt_class: asdit.frontends.BeatsPoolModel
-  ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
-  layer: ${infer_ver}
+  tgt_class: asdit.frontends.BEATsFrozenModel
+  model_cfg:
+    ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
 
 datamodule:
   data_dir: "../data"

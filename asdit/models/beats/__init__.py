@@ -1,2 +1,2 @@
 from .lora import BEATsLoRA
-from .tools import resume
+from .tools import restore

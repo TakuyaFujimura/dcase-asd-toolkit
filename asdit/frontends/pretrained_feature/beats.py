@@ -1,24 +1,27 @@
 import logging
-from pathlib import Path
+from typing import Optional
 
-import torch
+from torch import nn
 
-from asdit.models.beats import resume
+from asdit.models.beats import restore
 from asdit.utils.config_class.output_config import PLOutput
 
-from ..base import BaseFrontend
+from .base import BaseFrozenModel
 
 logger = logging.getLogger(__name__)
 
 
-class BeatsPoolModel(BaseFrontend):
-    def __init__(self, ckpt_path: str, layer: str = "last"):
-        self.model = resume(Path(ckpt_path))
-        self.model.eval()
-        self.device = next(self.model.parameters()).device
-        self.layer = layer
-        if self.layer != "last":
-            raise NotImplementedError("Only last layer is supported for now")
+class BEATsFrozenModel(BaseFrozenModel):
+    def __init__(self, model_cfg: Optional[dict] = None):
+        super().__init__(model_cfg=model_cfg)
+
+    def construct_model(
+        self,
+        ckpt_path: str,
+        update_cfg: Optional[dict] = None,
+    ) -> nn.Module:
+        model, _ = restore(ckpt_path=ckpt_path, update_cfg=update_cfg)
+        return model
 
     def extract(self, batch: dict) -> PLOutput:
         x = batch["wave"]
@@ -28,8 +31,7 @@ class BeatsPoolModel(BaseFrontend):
             self.device = x.device
             self.model.to(self.device)
 
-        with torch.no_grad():
-            z = self.model.extract_features(x)[0]
-            z = z.mean(1)  # (B, L, C) -> (B, C)
+        z = self.model.extract_features(x)[0]
+        z = z.mean(1)  # (B, L, D) -> (B, D)
         embed_dict = {"main": z}
         return PLOutput(embed=embed_dict)

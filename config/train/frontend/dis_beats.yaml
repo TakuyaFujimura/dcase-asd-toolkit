@@ -12,13 +12,13 @@ model_cfg:
   normalize: true
   extractor_cfg:
     tgt_class: asdit.models.beats.BEATsLoRA
-    ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
     lora_cfg:
       r: 64
       target_modules: ["q_proj", "v_proj", "out_proj"]
     embed_size: 256
-    last_layer: "attn_stat_pool"
+    projection_type: "attn_stat_pool"
     model_cfg:
+      ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
       sr: ${datamodule.sr}
       update_cfg:
         dropout_input: 0.3
