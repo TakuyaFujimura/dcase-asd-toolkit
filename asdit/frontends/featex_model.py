@@ -54,7 +54,7 @@ class FeatExPLModel(BasicDisPLModel):
             }
             self.featex_head_dict[label_name] = instantiate_tgt(featex_loss_cfg)
 
-    def construct_model(  # type: ignore
+    def construct_model(
         self,
         normalize: bool,
         extractor_cfg: Dict[str, Any],

@@ -57,7 +57,7 @@ class SubspaceLossPLModel(BasicDisPLModel):
                 ]
             )
 
-    def construct_model(  # type: ignore
+    def construct_model(
         self,
         normalize: bool,
         extractor_cfg: Dict[str, Any],

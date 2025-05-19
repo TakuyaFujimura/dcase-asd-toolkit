@@ -60,7 +60,7 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
 
         self.construct_model(**model_cfg)
 
-    def construct_model(self):
+    def construct_model(self, *args, **kwargs):
         pass
 
     def extract(self, batch: dict) -> PLOutput:
