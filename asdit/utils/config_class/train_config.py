@@ -17,7 +17,7 @@ class FrontendConfig(BaseModel):
     optim_cfg: Dict[str, Any]
     scheduler_cfg: Optional[Dict[str, Any]]
     grad_cfg: GradConfig
-    partially_saved_param_list: List[str] = Field(default_factory=list)
+    partially_saved_param_list: Optional[List[str]] = None
 
 
 class DMConfig(BaseModel):
