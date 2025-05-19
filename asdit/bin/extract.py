@@ -11,11 +11,11 @@ from omegaconf import DictConfig, OmegaConf
 
 from asdit.bin.utils.extract import loader2df
 from asdit.bin.utils.path import check_file_exists, get_output_dir
-from asdit.bin.utils.resume import (
+from asdit.bin.utils.restore import (
     ExtractDMConfigMaker,
     get_past_cfg,
-    resume_dmconfigmaker,
-    resume_plfrontend,
+    restore_dmconfigmaker,
+    restore_plfrontend,
 )
 from asdit.datasets.pl_datamodule import PLDataModule
 from asdit.frontends.base import BaseFrontend
@@ -46,31 +46,31 @@ def make_dir(cfg: MainExtractConfig) -> Path:
 def setup_frontend_dmconfigmaker(
     cfg: MainExtractConfig,
 ) -> Tuple[BaseFrontend, ExtractDMConfigMaker]:
-    if cfg.resume_or_scratch == "resume":
+    if cfg.restore_or_scratch == "restore":
         # check
         if cfg.model_ver is None:
             raise ValueError(
-                "model_ver must be specified when resume_or_scratch is resume"
+                "model_ver must be specified when restore_or_scratch is restore"
             )
         if cfg.ckpt_ver is None:
             raise ValueError(
-                "ckpt_ver must be specified when resume_or_scratch is resume"
+                "ckpt_ver must be specified when restore_or_scratch is restore"
             )
         past_cfg = get_past_cfg(cfg=cfg)
-        frontend = resume_plfrontend(cfg=cfg, past_cfg=past_cfg)
-        dmconfigmaker = resume_dmconfigmaker(cfg=cfg, past_cfg=past_cfg)
+        frontend = restore_plfrontend(cfg=cfg, past_cfg=past_cfg)
+        dmconfigmaker = restore_dmconfigmaker(cfg=cfg, past_cfg=past_cfg)
 
-    elif cfg.resume_or_scratch == "scratch":
+    elif cfg.restore_or_scratch == "scratch":
         if cfg.frontend_cfg is None:
             raise ValueError(
-                "frontend_cfg must be specified when resume_or_scratch is scratch"
+                "frontend_cfg must be specified when restore_or_scratch is scratch"
             )
         frontend = instantiate_tgt(cfg.frontend_cfg)
         dmconfigmaker = ExtractDMConfigMaker(
             dcase=cfg.dcase, machine=cfg.machine, **cfg.datamodule
         )
     else:
-        raise ValueError(f"Unexpected resume_or_scratch: {cfg.resume_or_scratch}")
+        raise ValueError(f"Unexpected restore_or_scratch: {cfg.restore_or_scratch}")
     return frontend, dmconfigmaker
 
 

@@ -10,7 +10,7 @@ dcase: null
 name: null
 version: null
 
-resume_or_scratch: null
+restore_or_scratch: null
 
 frontend_cfg: null
 model_ver: null

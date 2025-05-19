@@ -26,19 +26,19 @@ Output file `*_extract.csv` can include path, section, is_normal, is_target, and
 
 <details><summary>Configuration Items</summary>
 
-- resume_or_scratch (str): ["resume", "scratch"]
-- frontend_cfg (Dict[str, Any]): Required when resume_or_scratch is "scratch".
-- ckpt_ver (str): Required when resume_or_scratch is "resume"
-- model_ver (str): Required when resume_or_scratch is "resume"
+- restore_or_scratch (str): ["restore", "scratch"]
+- frontend_cfg (Dict[str, Any]): Required when restore_or_scratch is "scratch".
+- ckpt_ver (str): Required when restore_or_scratch is "restore"
+- model_ver (str): Required when restore_or_scratch is "restore"
 - extract_items (List[str]): A list of `re` patterns used to select extracted items. These patterns will be combined with the default items (path, section, is_normal, and is_target).
 </details>
 
 <details><summary>Extract features from pre-trained frontend</summary>
 
-The model will be resumed from the checkpoint file of `ckpt_ver` version in `<result_dir>/<name>/<dcase>/<version>/model/<model_ver>/checkpoints`.
+The model will be restored from the checkpoint file of `ckpt_ver` version in `<result_dir>/<name>/<dcase>/<version>/model/<model_ver>/checkpoints`.
 
 Configuration items:
-- resume_or_scratch (str): "resume"
+- restore_or_scratch (str): "restore"
 - ckpt_ver (str)
 - model_ver (str)
 
@@ -50,7 +50,7 @@ Configuration items:
 Training-free frontend (e.g., simple audio feature extractor) will be constructed based on the configuration of `frontend_cfg`. 
 
 Configuration items:
-- resume_or_scratch (str): "scratch"
+- restore_or_scratch (str): "scratch"
 - frontend_cfg (Dict[str, Any]): Please write the configuration of the model used for feature extraction.
 
 </details>

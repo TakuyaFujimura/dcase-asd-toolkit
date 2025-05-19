@@ -99,7 +99,7 @@ def get_ckpt_path(cfg: MainExtractConfig) -> Path:
     return ckpt_path
 
 
-def resume_plfrontend(
+def restore_plfrontend(
     cfg: MainExtractConfig, past_cfg: MainTrainConfig
 ) -> BasePLFrontend:
     ckpt_path = get_ckpt_path(cfg)
@@ -116,7 +116,7 @@ def resume_plfrontend(
     return frontend
 
 
-def resume_dmconfigmaker(
+def restore_dmconfigmaker(
     cfg: MainExtractConfig, past_cfg: MainTrainConfig
 ) -> ExtractDMConfigMaker:
     if past_cfg.datamodule.valid is not None:

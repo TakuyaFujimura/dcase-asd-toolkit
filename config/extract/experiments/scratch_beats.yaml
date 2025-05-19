@@ -1,5 +1,5 @@
 # @package _global_
-resume_or_scratch: scratch
+restore_or_scratch: scratch
 
 infer_ver: null
 
