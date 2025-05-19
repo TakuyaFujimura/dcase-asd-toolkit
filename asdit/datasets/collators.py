@@ -36,7 +36,7 @@ def wave_rand_crop(wave: torch.Tensor, crop_len: int) -> torch.Tensor:
     return wave[start_frame : start_frame + crop_len]
 
 
-class BasicCollator(object):
+class BasicCollator:
     """Wave form data's collator."""
 
     def __init__(
