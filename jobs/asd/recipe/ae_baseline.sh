@@ -12,7 +12,7 @@ infer_ver="last"
 metric="euclid"
 # ---------------------------- #
 experiments_train="${version}"
-experiments_extract="resume_machinewise"
+experiments_extract="restore_machinewise"
 experiments_score="no_backend"
 # ---------------------------- #
 source ../base/base.sh

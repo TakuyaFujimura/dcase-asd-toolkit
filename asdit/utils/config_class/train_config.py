@@ -17,7 +17,7 @@ class FrontendConfig(BaseModel):
     optim_cfg: Dict[str, Any]
     scheduler_cfg: Optional[Dict[str, Any]]
     grad_cfg: GradConfig
-    partially_saved_param_list: List[str] = Field(default_factory=list)
+    partially_saved_param_list: Optional[List[str]] = None
 
 
 class DMConfig(BaseModel):
@@ -49,7 +49,6 @@ class MainTrainConfig(BaseModel):
 
     refresh_rate: int = 1
     callback_opts: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-    every_n_epochs_valid: int = 1
 
     resume_ckpt_path: Optional[str] = None
 

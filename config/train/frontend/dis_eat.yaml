@@ -12,15 +12,18 @@ model_cfg:
   normalize: true
   extractor_cfg:
     tgt_class: asdit.models.eat.EATLoRA
-    ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
     lora_cfg:
       r: 64
       target_modules: ["qkv"]
     embed_size: 256
-    last_layer: "linear"
+    projection_type: "linear"
     model_cfg:
+      ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
+      sr: ${datamodule.sr}
       sec: ${datamodule.sec}
+      prediction_mode: "cls"
+      specaug: false
   loss_cfg: {}
-  label_to_lossratio_dict:
+  label_to_lossweight_dict:
     main_label: 1
   augmentation_cfg_list: []

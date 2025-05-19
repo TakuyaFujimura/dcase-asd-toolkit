@@ -66,7 +66,8 @@ class SCAdaCos(nn.Module):
                 theta_med = torch.median(theta_class)
                 self.s.data = max_s_logits + torch.log(B_avg)  # re-scaling trick
                 self.s.data /= (
-                    torch.cos(min(torch.tensor(np.pi / 4), theta_med)) + self.eps
+                    torch.cos(torch.minimum(torch.tensor(np.pi / 4), theta_med))
+                    + self.eps
                 )
 
         logits *= self.s

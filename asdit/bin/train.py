@@ -1,15 +1,15 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, cast
+from typing import Any, List, Optional
 
 import hydra
 import lightning.pytorch as pl
 from hydra.core.hydra_config import HydraConfig
-from lightning.pytorch.callbacks import ModelCheckpoint, TQDMProgressBar
+from lightning.pytorch.callbacks import TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils import NaNCheckCallback
+from asdit.bin.utils.callbacks import ModelCheckpoint, NaNCheckCallback
 from asdit.bin.utils.path import get_version_dir
 from asdit.datasets import PLDataModule
 from asdit.utils.common import instantiate_tgt
@@ -25,11 +25,15 @@ def hydra_to_pydantic(config: DictConfig) -> MainTrainConfig:
     return MainTrainConfig(**config_dict)
 
 
-def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
+def make_trainer(
+    cfg: MainTrainConfig, ckpt_dir: Path, resume_ckpt_path: Optional[str]
+) -> pl.Trainer:
     # Callbacks
     callback_list: List[Any] = [NaNCheckCallback()]
     for key_, cfg_ in cfg.callback_opts.items():
-        callback_list.append(ModelCheckpoint(**{**cfg_, "dirpath": ckpt_dir}))
+        callback_list.append(
+            ModelCheckpoint(**cfg_, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path)
+        )
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
@@ -44,7 +48,6 @@ def make_trainer(cfg: MainTrainConfig, ckpt_dir: Path) -> pl.Trainer:
             **cfg.trainer,
             "callbacks": callback_list,
             "logger": pl_logger,
-            "check_val_every_n_epoch": cfg.every_n_epochs_valid,
         }
     )
     return trainer
@@ -81,13 +84,13 @@ def main(hydra_cfg: DictConfig) -> None:
     # torch.autograd.set_detect_anomaly(False)
 
     ckpt_dir = get_version_dir(cfg=cfg) / "model" / cfg.model_ver / "checkpoints"
-    if ckpt_dir.exists():
+    if ckpt_dir.exists() and cfg.resume_ckpt_path is None:
         logger.warning("already done")
         return
 
     dm = setup_datamodule(cfg)
     frontend = setup_frontend(cfg)
-    trainer = make_trainer(cfg, ckpt_dir)
+    trainer = make_trainer(cfg, ckpt_dir, cfg.resume_ckpt_path)
 
     logger.info("Start Training")
     trainer.fit(

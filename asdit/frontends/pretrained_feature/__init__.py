@@ -1,1 +1,2 @@
-from .beats import BeatsPoolModel
+from .beats import BEATsFrozenModel
+from .eat import EATFrozenModel

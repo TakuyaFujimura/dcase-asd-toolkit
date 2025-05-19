@@ -15,28 +15,29 @@ class SubspaceLossPLModel(BasicDisPLModel):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
-        label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
-        partially_saved_param_list: List[str] = [],
+        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        label_dict_path: Optional[Dict[str, Path]] = None,
+        # given by config.label_dict_path in train.py
+        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            scheduler_cfg=scheduler_cfg,
             grad_cfg=grad_cfg,
+            scheduler_cfg=scheduler_cfg,
             label_dict_path=label_dict_path,
             partially_saved_param_list=partially_saved_param_list,
         )
 
-    def set_head_dict(self, label_to_lossratio_dict: Dict[str, float]):
+    def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):
         if self.embed_size % self.subspace_embed_size != 0:
             raise ValueError(
                 f"embed_size {self.embed_size} should be divisible by subspace_embed_size {self.subspace_embed_size}"
             )
         self.head_dict = torch.nn.ModuleDict({})
         self.subspace_head_dict = torch.nn.ModuleDict({})
-        for label_name in label_to_lossratio_dict:
+        for label_name in label_to_lossweight_dict:
             main_loss_cfg = {
                 "n_classes": self.num_class_dict[label_name],
                 "embed_size": self.embed_size,
@@ -56,26 +57,26 @@ class SubspaceLossPLModel(BasicDisPLModel):
                 ]
             )
 
-    def construct_model(  # type: ignore
+    def construct_model(
         self,
         normalize: bool,
-        extractor_cfg: Dict[str, Any] = {},
-        loss_cfg: Dict[str, Any] = {},
-        label_to_lossratio_dict: Dict[str, float] = {},
-        augmentation_cfg_list: List[Dict[str, Any]] = [],
+        extractor_cfg: Dict[str, Any],
+        loss_cfg: Dict[str, Any],
+        label_to_lossweight_dict: Dict[str, float],
+        augmentation_cfg_list: Optional[List[Dict[str, Any]]] = None,
         use_compile: bool = False,
         subspace_embed_size: Optional[int] = None,
-        subspace_loss_ratio: float = 1.0,
+        subspace_loss_weight: float = 1.0,
     ) -> None:
         if subspace_embed_size is None:
             raise ValueError("subspace_embed_size is should be specified")
         self.subspace_embed_size = subspace_embed_size
-        self.subspace_loss_ratio = subspace_loss_ratio
+        self.subspace_loss_weight = subspace_loss_weight
         super().construct_model(
             normalize=normalize,
             extractor_cfg=extractor_cfg,
             loss_cfg=loss_cfg,
-            label_to_lossratio_dict=label_to_lossratio_dict,
+            label_to_lossweight_dict=label_to_lossweight_dict,
             augmentation_cfg_list=augmentation_cfg_list,
             use_compile=use_compile,
         )
@@ -85,7 +86,7 @@ class SubspaceLossPLModel(BasicDisPLModel):
         assert embed.shape[1] == self.embed_size
         loss_dict = {"main": 0.0}
 
-        for label_name, ratio in self.label_to_lossratio_dict.items():
+        for label_name, weight in self.label_to_lossweight_dict.items():
             loss_dict[f"{label_name}_main"] = self.head_dict[label_name](
                 embed, batch[f"onehot_{label_name}"]
             )
@@ -100,8 +101,8 @@ class SubspaceLossPLModel(BasicDisPLModel):
                 loss_subspace += loss_dict[f"{label_name}_subspace_{i}"]
             loss_dict[label_name] = (
                 loss_dict[f"{label_name}_main"]
-                + self.subspace_loss_ratio * loss_subspace
+                + self.subspace_loss_weight * loss_subspace
             )
-            loss_dict["main"] += loss_dict[label_name] * ratio
+            loss_dict["main"] += loss_dict[label_name] * weight
 
         return loss_dict

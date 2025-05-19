@@ -4,7 +4,7 @@ from torch import nn
 
 
 def add_lora(model: nn.Module, lora_cfg: dict):
-    model = peft.get_peft_model(model, peft.LoraConfig(**lora_cfg))
+    model = peft.get_peft_model(model, peft.LoraConfig(**lora_cfg))  # type: ignore
     model.print_trainable_parameters()
     return model
 

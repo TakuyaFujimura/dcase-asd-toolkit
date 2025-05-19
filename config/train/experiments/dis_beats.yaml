@@ -20,9 +20,10 @@ datamodule:
 frontend:
   model_cfg:
     extractor_cfg:
-      ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
       model_cfg:
-        specaug: false
+        ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+        update_cfg:
+          dropout_input: 0.3
     loss_cfg:
       tgt_class: asdit.losses.AdaCos
       dynamic: false
@@ -33,8 +34,8 @@ frontend:
     lr: 1.0e-4
   scheduler_cfg:
     tgt_class: timm.scheduler.CosineLRScheduler
-    t_initial: 50000
-    lr_min: 1e-7
+    t_initial: 5001
+    lr_min: ${frontend.optim_cfg.lr}
     warmup_t: 5000
     warmup_lr_init: 0
   partially_saved_param_list: ["lora"]

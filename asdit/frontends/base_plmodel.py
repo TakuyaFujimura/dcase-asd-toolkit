@@ -33,10 +33,11 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
-        label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
-        partially_saved_param_list: List[str] = [],
+        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        label_dict_path: Optional[Dict[str, Path]] = None,
+        # given by config.label_dict_path in train.py
+        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -44,6 +45,8 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         self.scheduler_cfg = scheduler_cfg
         self.grad_cfg = grad_cfg
         self.num_class_dict: Dict[str, int] = {}
+        if label_dict_path is None:
+            label_dict_path = {}
         for key_, val_ in get_label_dict(label_dict_path).items():
             self.num_class_dict[key_] = val_.num_class
 
@@ -51,11 +54,13 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
             self.grad_clipper = instantiate_tgt(self.grad_cfg.clipper_cfg)
         else:
             self.grad_clipper = None
+        if partially_saved_param_list is None:
+            partially_saved_param_list = []
         self.partially_saved_param_list = partially_saved_param_list
 
         self.construct_model(**model_cfg)
 
-    def construct_model(self):
+    def construct_model(self, *args, **kwargs):
         pass
 
     def extract(self, batch: dict) -> PLOutput:
@@ -129,16 +134,17 @@ class BasePLAUCFrontend(BasePLFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        scheduler_cfg: Optional[Dict[str, Any]],
         grad_cfg: GradConfig,
-        label_dict_path: Dict[str, Path],  # given by config.label_dict_path in train.py
-        partially_saved_param_list: List[str] = [],
+        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        label_dict_path: Optional[Dict[str, Path]] = None,
+        # given by config.label_dict_path in train.py
+        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            scheduler_cfg=scheduler_cfg,
             grad_cfg=grad_cfg,
+            scheduler_cfg=scheduler_cfg,
             label_dict_path=label_dict_path,
             partially_saved_param_list=partially_saved_param_list,
         )
