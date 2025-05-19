@@ -37,10 +37,13 @@ class AdaProj(nn.Module):
     def calc_logits(self, x: torch.Tensor) -> torch.Tensor:
         x = F.normalize(x, p=2, dim=1)
         W = F.normalize(self.W, p=2.0, dim=2)  # num_classes x subspace_dim x emb_dim
-        logits = torch.tensordot(x, W, dims=[[1],[2]])  # batchsize x num_classes x subspace_dim
-        x_proj = (torch.unsqueeze(logits, dim=3)*torch.unsqueeze(W, dim=0)).sum(dim=2)  # batchsize x num_classes x emb_dim
+        logits = torch.tensordot(x, W, dims=[[1], [2]])  # type: ignore
+        # batchsize x num_classes x subspace_dim
+        x_proj = (torch.unsqueeze(logits, dim=3) * torch.unsqueeze(W, dim=0)).sum(dim=2)
+        # batchsize x num_classes x emb_dim
         x_proj = F.normalize(x_proj, p=2.0, dim=2)
-        logits = (torch.unsqueeze(x, dim=1)*x_proj).sum(dim=2)  # batchsize x num_classes
+        logits = (torch.unsqueeze(x, dim=1) * x_proj).sum(dim=2)
+        # batchsize x num_classes
         logits *= self.s
         prob = F.softmax(logits, dim=1)
         logits = torch.log(prob)
@@ -51,22 +54,30 @@ class AdaProj(nn.Module):
 
         x = F.normalize(x, p=2, dim=1)
         W = F.normalize(self.W, p=2.0, dim=2)  # num_classes x subspace_dim x emb_dim
-        logits = torch.tensordot(x, W, dims=[[1],[2]])  # batchsize x num_classes x subspace_dim
-        x_proj = (torch.unsqueeze(logits, dim=3)*torch.unsqueeze(W, dim=0)).sum(dim=2)  # batchsize x num_classes x emb_dim
+        logits = torch.tensordot(x, W, dims=[[1], [2]])  # type: ignore
+        # batchsize x num_classes x subspace_dim
+        x_proj = (torch.unsqueeze(logits, dim=3) * torch.unsqueeze(W, dim=0)).sum(dim=2)
+        # batchsize x num_classes x emb_dim
         x_proj = F.normalize(x_proj, p=2.0, dim=2)
-        logits = (torch.unsqueeze(x, dim=1)*x_proj).sum(dim=2)  # batchsize x num_classes
+        logits = (torch.unsqueeze(x, dim=1) * x_proj).sum(dim=2)
+        # batchsize x num_classes
         theta = torch.acos(torch.clamp(logits, -1.0 + self.eps, 1.0 - self.eps))
 
         if self.training and self.dynamic:
             with torch.no_grad():
                 max_s_logits = torch.max(self.s * logits)
-                B_avg = torch.where(y<1, torch.exp(self.s*logits-max_logits), torch.exp(torch.zeros_like(self.s*logits)-max_logits))  # re-scaling trick
+                B_avg = torch.where(
+                    y < 1,
+                    torch.exp(self.s * logits - max_s_logits),
+                    torch.exp(torch.zeros_like(self.s * logits) - max_s_logits),
+                )  # re-scaling trick
                 B_avg = torch.mean(torch.sum(B_avg, dim=1))
                 theta_class = torch.sum(y * theta, dim=1)
                 theta_med = torch.median(theta_class)
                 self.s.data = max_s_logits + torch.log(B_avg)  # re-scaling trick
                 self.s.data /= (
-                    torch.cos(min(torch.tensor(np.pi / 4), theta_med)) + self.eps
+                    torch.cos(torch.minimum(torch.tensor(np.pi / 4), theta_med))
+                    + self.eps
                 )
 
         logits *= self.s
