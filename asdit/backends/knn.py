@@ -4,8 +4,8 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 from imblearn.over_sampling import SMOTE
-from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics import pairwise_distances
+from sklearn.neighbors import NearestNeighbors
 
 from asdit.utils.common import get_embed_from_df
 
@@ -20,7 +20,7 @@ class Knn(BaseBackend):
         self,
         metric: str,
         n_neighbors_so: int,
-        n_neighbors_ta: int,
+        n_neighbors_ta: Optional[int] = None,
         smote_ratio: float = 0,
         smote_neighbors: int = 5,
         sep_section: bool = False,
@@ -36,11 +36,11 @@ class Knn(BaseBackend):
         self.sep_section = sep_section
         if k_ref_normalize == 0:
             self.k_ref_normalize = None
+            if self.n_neighbors_ta is None:
+                raise ValueError("n_neighbors_ta must be set when k_ref_normalize is 0")
         else:
             self.k_ref_normalize = k_ref_normalize
-            self.ref_dict: Dict[
-                int, Tuple[np.ndarray, np.ndarray]
-            ] = {}
+            self.ref_dict: Dict[int, Tuple[np.ndarray, np.ndarray]] = {}
 
         self.knn_dict: Dict[
             int, Tuple[NearestNeighbors, Optional[NearestNeighbors]]
@@ -57,6 +57,7 @@ class Knn(BaseBackend):
     def get_knn(
         self, train_df: pd.DataFrame
     ) -> Tuple[NearestNeighbors, Optional[NearestNeighbors]]:
+        assert self.n_neighbors_ta is not None
         is_target = np.asarray(train_df["is_target"].values)
         self.check_target(is_target)
         embed = get_embed_from_df(train_df)
@@ -81,13 +82,17 @@ class Knn(BaseBackend):
 
         return knn_so, knn_ta
 
-    def prepare_ref_set(self, train_df: pd.DataFrame) -> None:
+    def prepare_ref_set(self, train_df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
+        assert self.k_ref_normalize is not None
         is_target = np.asarray(train_df["is_target"].values)
         self.check_target(is_target)
         ref_embed = get_embed_from_df(train_df)
         if self.metric == "cosine":
             ref_embed = normalize_vector(ref_embed)
-        ref_norm_const = np.sort(pairwise_distances(ref_embed, ref_embed, metric=self.metric), axis=0)[1:self.k_ref_normalize+1].mean(axis=0, keepdims=True)
+        ref_norm_const = np.sort(
+            pairwise_distances(ref_embed, ref_embed, metric="euclidean"), axis=0
+        )[1 : self.k_ref_normalize + 1].mean(axis=0, keepdims=True)
+        # (N, N) -> (1, N)
         return ref_embed, ref_norm_const
 
     def fit(self, train_df: pd.DataFrame) -> None:
@@ -134,7 +139,11 @@ class Knn(BaseBackend):
         embed = get_embed_from_df(test_df)
         if self.metric == "cosine":
             embed = normalize_vector(embed)
-        scores = np.sort(pairwise_distances(embed, ref_embed, metric=self.metric)/ref_norm_const, axis=1)[0:self.n_neighbors_so].mean(axis=1)
+        scores = np.sort(
+            pairwise_distances(embed, ref_embed, metric="euclidean") / ref_norm_const,
+            axis=1,
+        )[:, : self.n_neighbors_so].mean(axis=1)
+        # (N_input, N_ref) -> (N_input, self.n_neighbors_so) -> (N_input,)
         return scores
 
     def anomaly_score(self, test_df: pd.DataFrame) -> Dict[str, np.ndarray]:
