@@ -24,4 +24,7 @@ def restore(
     cfg.update(update_cfg)
     model = BEATs(cfg)
     model.load_state_dict(checkpoint["model"])
+    if "finetuned" in ckpt_path.name:
+        logger.info("Removing predictor from the finetuned BEATs model")
+        model.predictor = None
     return model, 768
