@@ -1,5 +1,5 @@
 import logging
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from torch import nn
 
@@ -14,14 +14,16 @@ class Conv1dEncoderLayer(nn.Module):
         input_size: int,
         use_bias: bool,
         emb_base_size: int,
-        conv_param_list: List[dict] = [
-            {"k": 256, "s": 64},
-            {"k": 64, "s": 32},
-            {"k": 16, "s": 4},
-        ],
+        conv_param_list: Optional[List[dict]] = None,
         aggregate: Literal["mlp", "gap"] = "mlp",
     ):
         super().__init__()
+        if conv_param_list is None:
+            conv_param_list = [
+                {"k": 256, "s": 64},
+                {"k": 64, "s": 32},
+                {"k": 16, "s": 4},
+            ]
         assert len(conv_param_list) == 3
 
         logger.info("===Conv1dEncoderLayer==========")
