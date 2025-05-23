@@ -11,6 +11,7 @@ dcase2sec_dict = {
     "dcase2022": 10.0,
     "dcase2023": 18.0,
     "dcase2024": 12.0,
+    "dcase2025": 12.0,
 }
 
 

@@ -69,7 +69,7 @@ def get_official_metriclist(dcase: str) -> List[str]:
         return ["s_auc", "s_pauc"]
     elif dcase == "dcase2021":
         return ["s_auc", "t_auc", "s_pauc", "t_pauc"]
-    elif dcase in ["dcase2022", "dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2022", "dcase2023", "dcase2024", "dcase2025"]:
         return ["smix_auc", "tmix_auc", "mix_pauc"]
     else:
         raise NotImplementedError()
@@ -96,7 +96,7 @@ def get_official_sectionlist(
             return [3, 4, 5]
         else:
             raise NotImplementedError()
-    elif dcase in ["dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
         return [0]
     else:
         raise NotImplementedError()
@@ -119,7 +119,7 @@ def complete_hmean_cfg(
                     ),
                     metriclist=metriclist,
                 )
-        elif dcase in ["dcase2023", "dcase2024"]:
+        elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
             hmean_cfg_dict_new[hmean_name] = combine_section_metric(
                 sectionlist=get_official_sectionlist(dcase=dcase), metriclist=metriclist
             )

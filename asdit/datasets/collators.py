@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 def get_relative_dcase_path(path: str) -> str:
     # <data_dir>/formatted/dcase2021/raw/fan/train/hoge.wav
     path_split = path.split("/")
-    assert path_split[-2] in ["train", "test"]
+    assert path_split[-2] in ["train", "test", "supplemental"]
     assert path_split[-4] == "raw"
     assert path_split[-5].startswith("dcase202")
-    assert path_split[-6] == "formatted"
+    # assert path_split[-6] == "formatted"
     return "/".join(path_split[-5:])
 
 

@@ -8,7 +8,7 @@ def cast_str(v) -> str:
 
 
 def check_dcase(v):
-    if v in [f"dcase202{i}" for i in range(5)]:
+    if v in [f"dcase202{i}" for i in range(6)]:
         return v
     else:
         raise ValueError("Unexpected dcase type")
