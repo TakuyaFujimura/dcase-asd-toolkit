@@ -44,6 +44,6 @@ def check_file_exists(dir_path: Path, file_name: str, overwrite: bool) -> None:
         logger.warning(
             "[Skip this process] "
             f"{dir_path}/{file_name} already exists. "
-            + "Set config.overwrite=True to overwrite it."
+            + "Set asdit_cfg.overwrite=True to overwrite it."
         )
         sys.exit(1)

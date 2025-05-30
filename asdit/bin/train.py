@@ -73,7 +73,9 @@ def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
     return frontend
 
 
-@hydra.main(version_base=None, config_path="../../config/train", config_name="config")
+@hydra.main(
+    version_base=None, config_path="../../config/train", config_name="asdit_cfg"
+)
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if not cfg.trainer.get("deterministic", False):
