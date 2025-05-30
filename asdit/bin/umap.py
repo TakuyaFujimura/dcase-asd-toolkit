@@ -32,7 +32,7 @@ def hydra_to_pydantic(config: DictConfig) -> MainUmapConfig:
     return MainUmapConfig(**config_dict)
 
 
-@hydra.main(version_base=None, config_path="../../config/umap", config_name="config")
+@hydra.main(version_base=None, config_path="../../config/umap", config_name="asdit_cfg")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start umap: {HydraConfig().get().run.dir}")
@@ -43,7 +43,7 @@ def main(hydra_cfg: DictConfig) -> None:
     umap_dir.mkdir(parents=True, exist_ok=True)
 
     path_stem = f"umap_{cfg.metric}_{cfg.embed_key}"
-    
+
     check_file_exists(dir_path=umap_dir, file_name="*.png", overwrite=cfg.overwrite)
 
     # transformation
@@ -59,7 +59,7 @@ def main(hydra_cfg: DictConfig) -> None:
     else:
         logger.info(
             f"Read existing {umap_dir}/{path_stem}.csv. "
-            + "Set config.overwrite=True to overwrite it."
+            + "Set asdit_cfg.overwrite=True to overwrite it."
         )
 
     # visualization

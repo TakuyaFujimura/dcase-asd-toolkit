@@ -28,7 +28,7 @@ def hydra_to_pydantic(config: DictConfig) -> MainEvaluateConfig:
 
 
 @hydra.main(
-    version_base=None, config_path="../../config/evaluate", config_name="config"
+    version_base=None, config_path="../../config/evaluate", config_name="asdit_cfg"
 )
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)

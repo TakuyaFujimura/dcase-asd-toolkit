@@ -74,7 +74,9 @@ def setup_frontend_dmconfigmaker(
     return frontend, dmconfigmaker
 
 
-@hydra.main(version_base=None, config_path="../../config/extract", config_name="config")
+@hydra.main(
+    version_base=None, config_path="../../config/extract", config_name="asdit_cfg"
+)
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start extraction: {HydraConfig().get().run.dir}")

@@ -73,7 +73,9 @@ def get_labelinfo_dict(path_list: List[str], labeler) -> dict:
     return labelinfo_dict
 
 
-@hydra.main(version_base=None, config_path="../../config/label", config_name="config")
+@hydra.main(
+    version_base=None, config_path="../../config/label", config_name="asdit_cfg"
+)
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if cfg.save_path.exists() and not cfg.overwrite:
