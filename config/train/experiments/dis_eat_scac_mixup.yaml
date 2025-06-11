@@ -39,4 +39,3 @@ frontend:
     lr_min: ${frontend.optim_cfg.lr}
     warmup_t: 5000
     warmup_lr_init: 0
-  partially_saved_param_list: ["lora"]

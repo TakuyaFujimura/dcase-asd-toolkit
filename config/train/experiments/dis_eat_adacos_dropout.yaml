@@ -1,7 +1,7 @@
 # @package _global_
 defaults:
     - override /datamodule: basic
-    - override /frontend: dis_beats
+    - override /frontend: dis_eat
     - override /trainer: default
 
 
@@ -21,15 +21,14 @@ frontend:
   model_cfg:
     extractor_cfg:
       model_cfg:
-        ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+        ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
+        update_cfg:
+          dropout_input: 0.3
     loss_cfg:
-      tgt_class: asdit.losses.SCAdaCos
-      n_subclusters: 16
+      tgt_class: asdit.losses.AdaCos
       dynamic: false
       trainable: true
-    augmentation_cfg_list:
-      - tgt_class: asdit.augmentations.Mixup
-        prob: 0.5
+    augmentation_cfg_list: []
   optim_cfg:
     tgt_class: torch.optim.AdamW
     lr: 1.0e-4
