@@ -9,9 +9,9 @@ from lightning.pytorch.callbacks import TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.callbacks import ModelCheckpoint, NaNCheckCallback
-from asdit.bin.utils.path import get_version_dir
 from asdit.datasets import PLDataModule
+from asdit.utils.asdit_utils.callbacks import ModelCheckpoint, NaNCheckCallback
+from asdit.utils.asdit_utils.path import get_version_dir
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainTrainConfig
 from asdit.utils.dcase_utils import parse_sec_cfg
@@ -32,7 +32,9 @@ def make_trainer(
     callback_list: List[Any] = [NaNCheckCallback()]
     for _, callback_cfg in cfg.callback.items():
         callback_list.append(
-            ModelCheckpoint(**callback_cfg, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path)
+            ModelCheckpoint(
+                **callback_cfg, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path
+            )
         )
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
