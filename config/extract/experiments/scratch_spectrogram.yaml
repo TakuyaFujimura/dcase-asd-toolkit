@@ -2,7 +2,7 @@
 restore_or_scratch: scratch
 infer_ver: null
 
-frontend_cfg:
+scratch_frontend:
   tgt_class: asdit.frontends.STFTPoolModel
   stft_cfg:
     sr: ${datamodule.sr}
@@ -15,7 +15,8 @@ frontend_cfg:
     temporal_norm: false
   pool: ${infer_ver}
 
+
 datamodule:
-  data_dir: "../data"
-  sec: ${dcase}
-  sr: 16000
+  collator:
+    sec: all
+    sr: 16000

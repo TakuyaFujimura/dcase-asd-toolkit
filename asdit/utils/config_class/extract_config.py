@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+from asdit.utils.config_class import DMConfig
+
 from .cast_utils import cast_str, check_dcase
 
 
@@ -15,14 +17,16 @@ class MainExtractConfig(BaseModel):
 
     restore_or_scratch: Literal["restore", "scratch"]
 
-    frontend_cfg: Optional[Dict[str, Any]] = None
-    model_ver: Optional[str] = None
-    ckpt_ver: Optional[str] = None
+    scratch_frontend: Optional[Dict[str, Any]] = None
+    restore_model_ver: Optional[str] = None
+    restore_ckpt_ver: Optional[str] = None
 
     result_dir: Path
     infer_ver: str
 
-    datamodule: dict
+    data_dir: str
+    datamodule: DMConfig
+
     label_dict_path: Dict[str, Path] = Field(default_factory=dict)
 
     machine: str

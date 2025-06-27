@@ -1,0 +1,12 @@
+# @package _global_
+restore_or_scratch: restore
+restore_model_ver: "all"
+restore_ckpt_ver: ${infer_ver}
+infer_ver: null
+
+
+
+datamodule:
+  collator:
+    sec: ${dcase}
+    sr: 16000

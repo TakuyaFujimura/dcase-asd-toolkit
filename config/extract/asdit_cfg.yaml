@@ -12,19 +12,28 @@ version: null
 
 restore_or_scratch: null
 
-frontend_cfg: null
-model_ver: null
-ckpt_ver: null
+scratch_frontend: null
+restore_model_ver: null
+restore_ckpt_ver: null
 
 result_dir: "./results"
 infer_ver: null
 
+data_dir: "../data"
+
 datamodule:
-  dataloader_cfg:
+  dataloader:
     batch_size: 64
     num_workers: 0
-  collator_cfg: {}
-  dataset_cfg: {}
+    pin_memory: false
+    shuffle: false
+  collator:
+    tgt_class: "asdit.datasets.DCASEWaveCollator"
+    shuffle: false
+  dataset:
+    tgt_class: "asdit.datasets.WaveDataset"
+    # path_selector_list: will be automatically filled
+
 label_dict_path: {}
 
 machine: null

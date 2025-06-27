@@ -27,7 +27,7 @@ Output file `*_extract.csv` can include path, section, is_normal, is_target, and
 <details><summary>Configuration Items</summary>
 
 - restore_or_scratch (str): ["restore", "scratch"]
-- frontend_cfg (Dict[str, Any]): Required when restore_or_scratch is "scratch".
+- scratch_frontend (Dict[str, Any]): Required when restore_or_scratch is "scratch".
 - ckpt_ver (str): Required when restore_or_scratch is "restore"
 - model_ver (str): Required when restore_or_scratch is "restore"
 - extract_items (List[str]): A list of `re` patterns used to select extracted items. These patterns will be combined with the default items (path, section, is_normal, and is_target).
@@ -47,11 +47,11 @@ Configuration items:
 
 <details><summary>Extract features from training-free frontend</summary>
 
-Training-free frontend (e.g., simple audio feature extractor) will be constructed based on the configuration of `frontend_cfg`. 
+Training-free frontend (e.g., simple audio feature extractor) will be constructed based on the configuration of `scratch_frontend`. 
 
 Configuration items:
 - restore_or_scratch (str): "scratch"
-- frontend_cfg (Dict[str, Any]): Please write the configuration of the model used for feature extraction.
+- scratch_frontend (Dict[str, Any]): Please write the configuration of the model used for feature extraction.
 
 </details>
 

@@ -2,23 +2,20 @@
 
 import logging
 from pathlib import Path
-from typing import Tuple
 
 import hydra
 import lightning.pytorch as pl
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.datasets.pl_datamodule import PLDataModule
 from asdit.frontends.base import BaseFrontend
-from asdit.utils.asdit_utils.extract import loader2df
-from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
-from asdit.utils.asdit_utils.restore import (
-    ExtractDMConfigMaker,
-    get_past_cfg,
-    restore_dmconfigmaker,
-    restore_plfrontend,
+from asdit.utils.asdit_utils.extract import (
+    check_cfg_with_past_cfg,
+    get_extract_dataloader,
+    loader2df,
 )
+from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.restore import get_past_cfg, restore_plfrontend
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainExtractConfig
 from asdit.utils.dcase_utils import parse_sec_cfg
@@ -43,35 +40,30 @@ def make_dir(cfg: MainExtractConfig) -> Path:
     return output_dir
 
 
-def setup_frontend_dmconfigmaker(
-    cfg: MainExtractConfig,
-) -> Tuple[BaseFrontend, ExtractDMConfigMaker]:
+def setup_frontend(cfg: MainExtractConfig) -> BaseFrontend:
     if cfg.restore_or_scratch == "restore":
-        # check
-        if cfg.model_ver is None:
+        if cfg.restore_model_ver is None:
             raise ValueError(
-                "model_ver must be specified when restore_or_scratch is restore"
+                "restore_model_ver must be specified when restore_or_scratch is restore"
             )
-        if cfg.ckpt_ver is None:
+        if cfg.restore_ckpt_ver is None:
             raise ValueError(
-                "ckpt_ver must be specified when restore_or_scratch is restore"
+                "restore_ckpt_ver must be specified when restore_or_scratch is restore"
             )
         past_cfg = get_past_cfg(cfg=cfg)
         frontend = restore_plfrontend(cfg=cfg, past_cfg=past_cfg)
-        dmconfigmaker = restore_dmconfigmaker(cfg=cfg, past_cfg=past_cfg)
+        check_cfg_with_past_cfg(cfg=cfg, past_cfg=past_cfg)
 
     elif cfg.restore_or_scratch == "scratch":
-        if cfg.frontend_cfg is None:
+        if cfg.scratch_frontend is None:
             raise ValueError(
-                "frontend_cfg must be specified when restore_or_scratch is scratch"
+                "scratch_frontend must be specified when restore_or_scratch is scratch"
             )
-        frontend = instantiate_tgt(cfg.frontend_cfg)
-        dmconfigmaker = ExtractDMConfigMaker(
-            dcase=cfg.dcase, machine=cfg.machine, **cfg.datamodule
-        )
+        frontend = instantiate_tgt(cfg.scratch_frontend)
     else:
         raise ValueError(f"Unexpected restore_or_scratch: {cfg.restore_or_scratch}")
-    return frontend, dmconfigmaker
+
+    return frontend
 
 
 @hydra.main(
@@ -83,14 +75,11 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = make_dir(cfg=cfg)
-    frontend, dmconfigmaker = setup_frontend_dmconfigmaker(cfg=cfg)
+    frontend = setup_frontend(cfg=cfg)
 
     for split in ["train", "test"]:
         logger.info(f"Extracting {split} data now...")
-        datamoduleconfig = dmconfigmaker.get_config(split=split)
-        dataloader = PLDataModule.get_loader(
-            datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
-        )
+        dataloader = get_extract_dataloader(cfg=cfg, split=split)
         df = loader2df(
             dataloader=dataloader,
             frontend=frontend,

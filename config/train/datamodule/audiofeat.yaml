@@ -1,7 +1,6 @@
 
 batch_size: 256
 sr: 16000
-sec: ${dcase}
 num_workers: 4
 
 
@@ -36,6 +35,6 @@ valid:
     collator:
         tgt_class: asdit.datasets.DCASEWaveCollator
         sr: ${datamodule.sr}
-        sec: ${datamodule.sec}
+        sec: all
         shuffle: false
 

@@ -4,12 +4,12 @@ restore_or_scratch: scratch
 infer_ver: null
 
 
-frontend_cfg:
+scratch_frontend:
   tgt_class: asdit.frontends.BEATsFrozenModel
   model_cfg:
     ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
 
 datamodule:
-  data_dir: "../data"
-  sec: ${dcase}
-  sr: 16000
+  collator:
+    sec: all
+    sr: 16000

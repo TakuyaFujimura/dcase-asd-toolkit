@@ -10,8 +10,10 @@ import torch
 import tqdm
 from torch.utils.data import DataLoader
 
+from asdit.datasets import PLDataModule
 from asdit.frontends import BaseFrontend
 from asdit.utils.common import item_match
+from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfig
 from asdit.utils.dcase_utils import INFOLIST
 
 logger = logging.getLogger(__name__)
@@ -93,3 +95,89 @@ def loader2df(
 
     df = make_df(extract__dict_of_list)
     return df
+
+
+def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -> None:
+    if past_cfg.data_dir != cfg.data_dir:
+        logger.warning(
+            f"data_dir in cfg ({cfg.data_dir}) is different from past_cfg ({past_cfg.data_dir})."
+        )
+    if past_cfg.dcase != cfg.dcase:
+        logger.warning(
+            f"dcase in cfg ({cfg.dcase}) is different from past_cfg ({past_cfg.dcase})."
+        )
+
+    # Check args in collator
+    collator_args = ["sec", "sr", "pad_mode"]
+    is_checked = False
+    if (past_cfg.datamodule.valid is not None) and (
+        past_cfg.datamodule.valid.collator["tgt_class"]
+        == "asdit.datasets.DCASEWaveCollator"
+    ):
+        for key in collator_args:
+            if cfg.datamodule.collator[key] != past_cfg.datamodule.valid.collator[key]:
+                logger.warning(
+                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator[key]}) is different from past_cfg.valid.collator ({past_cfg.datamodule.valid.collator[key]})."
+                )
+        is_checked = True
+    if (
+        past_cfg.datamodule.train.collator["tgt_class"]
+        == "asdit.datasets.DCASEWaveCollator"
+    ):
+        for key in collator_args:
+            if cfg.datamodule.collator[key] != past_cfg.datamodule.train.collator[key]:
+                logger.warning(
+                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator[key]}) is different from past_cfg.train.collator ({past_cfg.datamodule.train.collator[key]})."
+                )
+        is_checked = True
+    if not is_checked:
+        logger.warning(
+            "collator in past_cfg is not DCASEWaveCollator, so cfg.datamodule.collator is not checked."
+        )
+
+    # check cfg values
+    value = cfg.datamodule.dataloader.get("shuffle")
+    if value is not False:
+        logger.warning(
+            f"Expected 'shuffle' in datamodule.dataloader to be False but got {value}"
+        )
+
+    value = cfg.datamodule.collator.get("tgt_class")
+    if value != "asdit.datasets.DCASEWaveCollator":
+        logger.warning(
+            f"Expected 'tgt_class' in datamodule.collator to be 'asdit.datasets.DCASEWaveCollator' but got {value}"
+        )
+
+    value = cfg.datamodule.collator.get("shuffle")
+    if value is not False:
+        logger.warning(
+            f"Expected 'shuffle' in datamodule.collator to be False but got {value}"
+        )
+
+    value = cfg.datamodule.dataset.get("tgt_class")
+    if value != "asdit.datasets.WaveDataset":
+        logger.warning(
+            f"Expected 'tgt_class' in datamodule.dataset to be 'asdit.datasets.WaveDataset' but got {value}"
+        )
+
+
+def get_extract_dataloader(cfg: MainExtractConfig, split: str) -> DataLoader:
+    path_selector_list = [
+        f"{cfg.data_dir}/formatted/{cfg.dcase}/raw/{cfg.machine}/{split}/*.wav"
+    ]
+    dataset_cfg = {
+        **cfg.datamodule.dataset,
+        "path_selector_list": path_selector_list,
+    }
+
+    datamoduleconfig = DMConfig(
+        dataloader=cfg.datamodule.dataloader,
+        dataset=dataset_cfg,
+        collator=cfg.datamodule.collator,
+        batch_sampler=None,
+    )
+    dataloader = PLDataModule.get_loader(
+        datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
+    )
+    assert dataloader is not None
+    return dataloader

@@ -1,5 +1,0 @@
-# @package _global_
-restore_or_scratch: restore
-model_ver: ${machine}
-ckpt_ver: ${infer_ver}
-infer_ver: null
