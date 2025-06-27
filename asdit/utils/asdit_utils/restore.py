@@ -44,15 +44,14 @@ class ExtractDMConfigMaker:
             "pin_memory": False,
         }
         self.collator_cfg = {
-            "tgt_class": "asdit.datasets.BasicCollator",
+            "tgt_class": "asdit.datasets.DCASEWaveCollator",
             "sec": sec,
             "sr": sr,
             **collator_cfg,
-            "need_feat": False,
             "shuffle": False,
         }
         self.dataset_cfg = {
-            "tgt_class": "asdit.datasets.BasicDataset",
+            "tgt_class": "asdit.datasets.WaveDataset",
             **dataset_cfg,
         }
 

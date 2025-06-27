@@ -1,4 +1,5 @@
 import logging
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Literal
 
@@ -21,105 +22,40 @@ def get_relative_dcase_path(path: str) -> str:
     return "/".join(path_split[-5:])
 
 
-def wave_pad(wave: torch.Tensor, crop_len: int, pad_type: str = "tile") -> torch.Tensor:
+def wave_pad_crop(
+    wave: torch.Tensor, crop_len: int, pad_mode: str = "tile", shuffle: bool = False
+) -> torch.Tensor:
+    """Pad and crop wave tensor to a fixed length."""
+    assert len(wave.shape) == 1
+    # Pad
     if len(wave) < crop_len:
-        if pad_type == "tile":
+        if pad_mode == "tile":
             wave = wave.tile(int(np.ceil(crop_len / len(wave))))
+        elif pad_mode == "zero":
+            total_pad = crop_len - len(wave)
+            if shuffle:
+                left_pad = np.random.randint(0, total_pad + 1)
+                right_pad = total_pad - left_pad
+            else:
+                left_pad = 0
+                right_pad = total_pad
+            wave = torch.nn.functional.pad(wave, (left_pad, right_pad), mode="constant")
         else:
-            raise NotImplementedError()
-    return wave
+            raise NotImplementedError(f"Unsupported pad mode: {pad_mode}")
 
-
-def wave_rand_crop(wave: torch.Tensor, crop_len: int) -> torch.Tensor:
+    # Crop
     assert len(wave) >= crop_len
-    start_frame = np.random.randint(0, max(1, len(wave) - crop_len))
+    if shuffle:
+        start_frame = np.random.randint(0, len(wave) - crop_len + 1)
+    else:
+        start_frame = 0
+
     return wave[start_frame : start_frame + crop_len]
 
 
-class BasicCollator:
-    """Wave form data's collator."""
-
-    def __init__(
-        self,
-        label_dict_path: Dict[str, Path],
-        sec: float | str,
-        sr: int,
-        need_feat: bool = False,
-        shuffle: bool = True,
-    ):
+class BaseDCASECollator(ABC):
+    def __init__(self, label_dict_path: Dict[str, Path]):
         self.label_dict: Dict[str, LabelInfo] = get_label_dict(label_dict_path)
-        self.shuffle = shuffle
-        self.crop_len: int | Literal["all", "none"]
-
-        if sr != 16000:
-            raise ValueError("Unexpected sampling rate")
-
-        if sec == "all":
-            self.crop_len = "all"
-        elif sec == "none":
-            self.crop_len = "none"
-            logging.info(
-                "`wave` in batch will be ignored. If you need it, set `sec` parameter."
-            )
-        elif isinstance(sec, str):
-            raise ValueError(f"Unexpected sec: {sec}")
-        else:
-            self.crop_len = int(sr * sec)
-
-        self.need_wave: bool = self.crop_len != "none"
-        self.need_feat = need_feat
-        if self.need_feat and self.need_wave:
-            raise ValueError("Cannot use both wave and feat at the same time.")
-        # If we use only `feat`, `sec` will not be used and
-        # meaningless `sec` parameters will appear in hparams.yaml.
-        # This is a source of confusion and the ValuerError is to prevent it.
-        # Using `feat` and `wave` at the same time itself can be easily realized
-        # but I didn't do that to simply avoid confusion.
-        # (I think there is another better way...)
-
-    def crop_wave(self, wave: torch.Tensor) -> torch.Tensor:
-        assert len(wave.shape) == 1
-        assert self.crop_len != "none"
-        if self.crop_len == "all":
-            return wave
-        else:
-            wave = wave_pad(wave, self.crop_len, "tile")
-            if self.shuffle:
-                wave = wave_rand_crop(wave, self.crop_len)
-            else:
-                wave = wave[: self.crop_len]
-            return wave
-
-    def format_batch(self, batch: List[Dict[str, Any]]) -> Dict[str, list]:
-        list_items: Dict[str, list] = {
-            "path": [],
-            "machine": [],
-            "section": [],
-            "attr": [],
-            "is_normal": [],
-            "is_target": [],
-        }
-        if self.need_wave:
-            list_items["wave"] = []
-        if self.need_feat:
-            list_items["feat"] = []
-
-        for b in batch:
-            list_items["path"].append(b["path"])
-            for l in ["machine", "section", "attr", "is_normal", "is_target"]:
-                list_items[l].append(get_dcase_info(b["path"], l))
-            if self.need_wave:
-                list_items["wave"].append(self.crop_wave(b["wave"]))
-            if self.need_feat:
-                list_items["feat"].append(b["feat"])
-
-        if self.need_wave:
-            list_items["wave"] = torch.stack(list_items["wave"])  # type: ignore
-        if self.need_feat:
-            list_items["feat"] = torch.stack(list_items["feat"])  # type: ignore
-
-        # list_items["path"] = np.array(list_items["path"])
-        return list_items
 
     def add_labels(self, items: Dict[str, Any]) -> Dict[str, Any]:
         for key, label_info in self.label_dict.items():
@@ -136,8 +72,104 @@ class BasicCollator:
             items[f"onehot_{key}"] = onehot_tensor
         return items
 
+    @abstractmethod
+    def format_batch(self, batch: List[Dict[str, Any]]) -> Dict[str, list]:
+        pass
+
     def __call__(self, unformatted_batch: List[Dict[str, Any]]):
         """Convert into batch tensors."""
         batch = self.format_batch(unformatted_batch)
         batch = self.add_labels(batch)
         return batch
+
+
+class DCASEWaveCollator(BaseDCASECollator):
+    """Wave form data's collator."""
+
+    def __init__(
+        self,
+        label_dict_path: Dict[str, Path],
+        sec: float | str,
+        sr: int,
+        shuffle: bool = True,
+        pad_mode: str = "tile",
+    ):
+        super().__init__(label_dict_path=label_dict_path)
+        self.shuffle = shuffle
+        self.crop_len: int | Literal["all"]
+
+        if sr != 16000:
+            raise ValueError("Unexpected sampling rate")
+
+        if sec == "all":
+            self.crop_len = "all"
+        elif isinstance(sec, str):
+            raise ValueError(f"Unexpected sec: {sec}")
+        else:
+            self.crop_len = int(sr * sec)
+
+        self.pad_mode = pad_mode
+
+    def crop_wave(self, wave: torch.Tensor) -> torch.Tensor:
+        assert len(wave.shape) == 1
+        if self.crop_len == "all":
+            return wave
+        else:
+            wave = wave_pad_crop(
+                wave=wave,
+                crop_len=self.crop_len,
+                pad_mode=self.pad_mode,
+                shuffle=self.shuffle,
+            )
+            return wave
+
+    def format_batch(self, batch: List[Dict[str, Any]]) -> Dict[str, list]:
+        list_items: Dict[str, list] = {
+            "path": [],
+            "machine": [],
+            "section": [],
+            "attr": [],
+            "is_normal": [],
+            "is_target": [],
+            "wave": [],
+        }
+        for b in batch:
+            list_items["path"].append(b["path"])
+            for l in ["machine", "section", "attr", "is_normal", "is_target"]:
+                list_items[l].append(get_dcase_info(b["path"], l))
+            list_items["wave"].append(self.crop_wave(b["wave"]))
+
+        list_items["wave"] = torch.stack(list_items["wave"])  # type: ignore
+        return list_items
+
+
+class DCASEAudioFeatCollator(BaseDCASECollator):
+    """Wave form data's collator."""
+
+    def __init__(
+        self,
+        label_dict_path: Dict[str, Path],
+        shuffle: bool = False,
+    ):
+        super().__init__(label_dict_path=label_dict_path)
+        self.shuffle = shuffle
+
+    def format_batch(self, batch: List[Dict[str, Any]]) -> Dict[str, list]:
+        list_items: Dict[str, list] = {
+            "path": [],
+            "machine": [],
+            "section": [],
+            "attr": [],
+            "is_normal": [],
+            "is_target": [],
+            "feat": [],
+        }
+
+        for b in batch:
+            list_items["path"].append(b["path"])
+            for l in ["machine", "section", "attr", "is_normal", "is_target"]:
+                list_items[l].append(get_dcase_info(b["path"], l))
+            list_items["feat"].append(b["feat"])
+
+        list_items["feat"] = torch.stack(list_items["feat"])  # type: ignore
+        return list_items

@@ -34,7 +34,7 @@ def torch_mono_wav_load(path: str) -> torch.Tensor:
     return wave[0]
 
 
-class BasicDataset(Dataset):
+class WaveDataset(Dataset):
     def __init__(
         self,
         path_selector_list: List[str],
