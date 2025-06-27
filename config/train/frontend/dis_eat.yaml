@@ -11,7 +11,7 @@ grad_cfg: {}
 model_cfg:
   normalize: true
   extractor_cfg:
-    tgt_class: asdit.models.eat.EATLoRA
+    tgt_class: asdit.models.pretrained_models.eat.EATLoRA
     lora_cfg:
       r: 64
       target_modules: ["qkv"]

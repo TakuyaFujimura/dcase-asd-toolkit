@@ -21,7 +21,7 @@ class STFT(nn.Module):
         n_mels: Optional[int] = None,
         use_log: bool = False,
         temporal_norm: bool = False,
-        pad_mode: str = "reflect",
+        pad_mode: str = "constant",
     ):
         super().__init__()
 

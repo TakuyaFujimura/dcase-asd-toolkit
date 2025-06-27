@@ -11,7 +11,7 @@ grad_cfg: {}
 model_cfg:
   normalize: true
   extractor_cfg:
-    tgt_class: asdit.models.beats.BEATsLoRA
+    tgt_class: asdit.models.pretrained_models.beats.BEATsLoRA
     lora_cfg:
       r: 64
       target_modules: ["q_proj", "v_proj"]

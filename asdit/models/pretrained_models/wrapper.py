@@ -5,7 +5,7 @@ import torch
 import torchaudio
 from torch import nn
 
-from .modules import AttnStatPool, add_lora
+from ..modules import AttnStatPool, add_lora
 
 
 def spectrogram_augment(

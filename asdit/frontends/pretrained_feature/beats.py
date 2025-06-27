@@ -3,7 +3,7 @@ from typing import Optional
 
 from torch import nn
 
-from asdit.models.beats import restore
+from asdit.models.pretrained_models.beats import restore
 from asdit.utils.config_class.output_config import FrontendOutput
 
 from .base import BaseFrozenModel

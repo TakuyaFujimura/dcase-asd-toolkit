@@ -3,7 +3,7 @@ from typing import Literal, Optional
 
 from torch import nn
 
-from asdit.models.eat import calc_target_length, preprocess, restore
+from asdit.models.pretrained_models.eat import calc_target_length, preprocess, restore
 from asdit.utils.config_class.output_config import FrontendOutput
 
 from .base import BaseFrozenModel
