@@ -17,18 +17,16 @@ class FeatExPLModel(BasicDisPLModel):
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
         grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
         # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
 
     def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):

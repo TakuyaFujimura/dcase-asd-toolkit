@@ -15,9 +15,8 @@ class FrontendConfig(BaseModel):
     tgt_class: str
     model_cfg: Dict[str, Any]
     optim_cfg: Dict[str, Any]
-    scheduler_cfg: Optional[Dict[str, Any]]
+    scheduler_cfg: Optional[Dict[str, Any]] = None
     grad_cfg: GradConfig
-    partially_saved_param_list: Optional[List[str]] = None
 
 
 class DMConfig(BaseModel):

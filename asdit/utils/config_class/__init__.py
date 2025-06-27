@@ -2,7 +2,7 @@ from .evaluate_config import MainEvaluateConfig
 from .extract_config import MainExtractConfig
 from .label import LabelInfo
 from .nparray_class import Np1DArray
-from .output_config import PLOutput
+from .output_config import FrontendOutput
 from .score_config import MainScoreConfig
 from .table_config import MainTableConfig
 from .tensor_class import TorchTensor

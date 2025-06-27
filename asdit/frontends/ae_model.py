@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import torch
 from torch import Tensor
 
 from asdit.models.audio_feature.base import BaseAudioFeature
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig, PLOutput
+from asdit.utils.config_class import FrontendOutput, GradConfig
 
 from .base_plmodel import BasePLAUCFrontend
 
@@ -17,18 +17,16 @@ class AEPLModel(BasePLAUCFrontend):
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
         grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
         # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
 
     def construct_model(
@@ -66,7 +64,7 @@ class AEPLModel(BasePLAUCFrontend):
         recon_loss = self.loss(x_est, x_ref).view(n_sample, -1).mean(dim=1)
         return {"recon": recon_loss}
 
-    def forward(self, batch: dict) -> PLOutput:
+    def forward(self, batch: dict) -> FrontendOutput:
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
         x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
@@ -78,7 +76,7 @@ class AEPLModel(BasePLAUCFrontend):
         anomaly_score_dict = self.net2as(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)
         )
-        return PLOutput(embed=embed_dict, AS=anomaly_score_dict)
+        return FrontendOutput(embed=embed_dict, AS=anomaly_score_dict)
 
     def training_step(self, batch, batch_idx):
         x_ref = batch["feat"]

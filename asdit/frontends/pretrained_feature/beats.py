@@ -4,7 +4,7 @@ from typing import Optional
 from torch import nn
 
 from asdit.models.beats import restore
-from asdit.utils.config_class.output_config import PLOutput
+from asdit.utils.config_class.output_config import FrontendOutput
 
 from .base import BaseFrozenModel
 
@@ -23,7 +23,7 @@ class BEATsFrozenModel(BaseFrozenModel):
         model, _ = restore(ckpt_path=ckpt_path, update_cfg=update_cfg)
         return model
 
-    def extract(self, batch: dict) -> PLOutput:
+    def extract(self, batch: dict) -> FrontendOutput:
         x = batch["wave"]
 
         if self.device != x.device:
@@ -34,4 +34,4 @@ class BEATsFrozenModel(BaseFrozenModel):
         z = self.model.extract_features(x)[0]
         z = z.mean(1)  # (B, L, D) -> (B, D)
         embed_dict = {"main": z}
-        return PLOutput(embed=embed_dict)
+        return FrontendOutput(embed=embed_dict)

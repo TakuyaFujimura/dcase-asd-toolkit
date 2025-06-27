@@ -4,7 +4,7 @@ from typing import Optional
 
 from torch import nn
 
-from asdit.utils.config_class.output_config import PLOutput
+from asdit.utils.config_class.output_config import FrontendOutput
 
 from ..base import BaseFrontend
 
@@ -26,5 +26,5 @@ class BaseFrozenModel(BaseFrontend):
         pass
 
     @abstractmethod
-    def extract(self, batch: dict) -> PLOutput:
+    def extract(self, batch: dict) -> FrontendOutput:
         pass

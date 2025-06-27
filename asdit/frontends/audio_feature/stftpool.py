@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict
 
 from asdit.models.audio_feature.stft import STFT
-from asdit.utils.config_class.output_config import PLOutput
+from asdit.utils.config_class.output_config import FrontendOutput
 
 from ..base import BaseFrontend
 
@@ -29,7 +29,7 @@ class STFTPoolModel(BaseFrontend):
 
         self.stft = STFT(**stft_cfg)
 
-    def extract(self, batch: dict) -> PLOutput:
+    def extract(self, batch: dict) -> FrontendOutput:
         spectrogram = self.stft(batch["wave"])  # B, F, T
         if self.agg == "mean":
             embed = spectrogram.mean(dim=self.axis)
@@ -37,4 +37,4 @@ class STFTPoolModel(BaseFrontend):
             embed = spectrogram.max(dim=self.axis).values
 
         embed_dict = {"main": embed}
-        return PLOutput(embed=embed_dict)
+        return FrontendOutput(embed=embed_dict)

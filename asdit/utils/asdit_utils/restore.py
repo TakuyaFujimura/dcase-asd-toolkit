@@ -106,10 +106,9 @@ def restore_plfrontend(
     logger.info(f"Loading model from {ckpt_path}")
     module_name = ".".join(past_cfg.frontend.tgt_class.split(".")[:-1])
     class_name = past_cfg.frontend.tgt_class.split(".")[-1]
-    strict = not getattr(past_cfg.frontend, "partially_saved_param_list", False)
     module = importlib.import_module(module_name)
     frontend_cls = getattr(module, class_name)
-    frontend = frontend_cls.load_from_checkpoint(ckpt_path, strict=strict)
+    frontend = frontend_cls.load_from_checkpoint(ckpt_path, strict=True)
     frontend.to(cfg.device)
     frontend.eval()
     logger.info("Model was successfully loaded from the ckpt_path")

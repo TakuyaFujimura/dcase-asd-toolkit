@@ -8,7 +8,7 @@ import torch
 
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig
-from asdit.utils.config_class.output_config import PLOutput
+from asdit.utils.config_class.output_config import FrontendOutput
 from asdit.utils.dcase_utils import get_label_dict
 from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
@@ -34,15 +34,14 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
         grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
         # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__()
         self.save_hyperparameters()
         self.optim_cfg = optim_cfg
-        self.scheduler_cfg = scheduler_cfg
+        self.lrscheduler_cfg = lrscheduler_cfg
         self.grad_cfg = grad_cfg
         self.num_class_dict: Dict[str, int] = {}
         if label_dict_path is None:
@@ -54,16 +53,13 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
             self.grad_clipper = instantiate_tgt(self.grad_cfg.clipper_cfg)
         else:
             self.grad_clipper = None
-        if partially_saved_param_list is None:
-            partially_saved_param_list = []
-        self.partially_saved_param_list = partially_saved_param_list
 
         self.construct_model(**model_cfg)
 
     def construct_model(self, *args, **kwargs):
         pass
 
-    def extract(self, batch: dict) -> PLOutput:
+    def extract(self, batch: dict) -> FrontendOutput:
         return self(batch)
 
     def log_loss(self, loss: Any, log_name: str, batch_size: int):
@@ -103,8 +99,10 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
 
     def configure_optimizers(self):
         optimizer = instantiate_tgt({"params": self.parameters(), **self.optim_cfg})
-        if self.scheduler_cfg is not None:
-            scheduler = instantiate_tgt({"optimizer": optimizer, **self.scheduler_cfg})
+        if self.lrscheduler_cfg is not None:
+            scheduler = instantiate_tgt(
+                {"optimizer": optimizer, **self.lrscheduler_cfg}
+            )
             lr_scheduler = {"scheduler": scheduler, "interval": "step"}
             return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
         else:
@@ -116,18 +114,6 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         else:
             super().lr_scheduler_step(scheduler=scheduler, metric=metric)
 
-    def state_dict(self):
-        full_state = super().state_dict()
-        if not self.partially_saved_param_list:
-            return full_state
-        else:
-            partial_state = {
-                name: param
-                for name, param in full_state.items()
-                if any(key in name for key in self.partially_saved_param_list)
-            }
-            return partial_state
-
 
 class BasePLAUCFrontend(BasePLFrontend):
     def __init__(
@@ -135,18 +121,16 @@ class BasePLAUCFrontend(BasePLFrontend):
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
         grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
         # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
         self.anomaly_score_name: Optional[List[str]] = None
 

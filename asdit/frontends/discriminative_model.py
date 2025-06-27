@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig, PLOutput
+from asdit.utils.config_class import FrontendOutput, GradConfig
 
 from .base_plmodel import BasePLFrontend
 
@@ -20,18 +20,16 @@ class BasicDisPLModel(BasePLFrontend):
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
         grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
         # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
 
     def check_loss_cfg(self, loss_cfg: Dict[str, Any]):
@@ -86,7 +84,7 @@ class BasicDisPLModel(BasePLFrontend):
         self.set_head_dict(self.label_to_lossweight_dict)
         self.set_augmentations(augmentation_cfg_list)
 
-    def forward(self, batch: dict) -> PLOutput:
+    def forward(self, batch: dict) -> FrontendOutput:
         logit_dict: Dict[str, Tensor] = {}
         embed = self.extractor(batch["wave"])  # (B, D)
 
@@ -99,7 +97,7 @@ class BasicDisPLModel(BasePLFrontend):
         else:
             embed_dict = {"main": embed}
 
-        return PLOutput(embed=embed_dict, logits=logit_dict)
+        return FrontendOutput(embed=embed_dict, logits=logit_dict)
 
     def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
         embed = self.extractor(wave)
