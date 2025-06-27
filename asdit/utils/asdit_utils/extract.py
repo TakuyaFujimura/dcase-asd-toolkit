@@ -115,9 +115,11 @@ def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -
         == "asdit.datasets.DCASEWaveCollator"
     ):
         for key in collator_args:
-            if cfg.datamodule.collator[key] != past_cfg.datamodule.valid.collator[key]:
+            if cfg.datamodule.collator.get(
+                key
+            ) != past_cfg.datamodule.valid.collator.get(key):
                 logger.warning(
-                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator[key]}) is different from past_cfg.valid.collator ({past_cfg.datamodule.valid.collator[key]})."
+                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator.get(key)}) is different from past_cfg.valid.collator ({past_cfg.datamodule.valid.collator.get(key)})."
                 )
         is_checked = True
     if (
@@ -125,9 +127,11 @@ def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -
         == "asdit.datasets.DCASEWaveCollator"
     ):
         for key in collator_args:
-            if cfg.datamodule.collator[key] != past_cfg.datamodule.train.collator[key]:
+            if cfg.datamodule.collator.get(
+                key
+            ) != past_cfg.datamodule.train.collator.get(key):
                 logger.warning(
-                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator[key]}) is different from past_cfg.train.collator ({past_cfg.datamodule.train.collator[key]})."
+                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator.get(key)}) is different from past_cfg.train.collator ({past_cfg.datamodule.train.collator.get(key)})."
                 )
         is_checked = True
     if not is_checked:
