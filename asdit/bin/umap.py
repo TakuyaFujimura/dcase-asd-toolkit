@@ -10,8 +10,8 @@ import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.path import check_file_exists, get_output_dir
-from asdit.bin.utils.umap import trans_umap, visualize_umap
+from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.umap import trans_umap, visualize_umap
 from asdit.utils.config_class import MainUmapConfig
 
 logger = logging.getLogger(__name__)

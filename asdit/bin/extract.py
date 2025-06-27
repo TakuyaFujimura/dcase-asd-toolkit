@@ -9,16 +9,16 @@ import lightning.pytorch as pl
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.extract import loader2df
-from asdit.bin.utils.path import check_file_exists, get_output_dir
-from asdit.bin.utils.restore import (
+from asdit.datasets.pl_datamodule import PLDataModule
+from asdit.frontends.base import BaseFrontend
+from asdit.utils.asdit_utils.extract import loader2df
+from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.restore import (
     ExtractDMConfigMaker,
     get_past_cfg,
     restore_dmconfigmaker,
     restore_plfrontend,
 )
-from asdit.datasets.pl_datamodule import PLDataModule
-from asdit.frontends.base import BaseFrontend
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainExtractConfig
 from asdit.utils.dcase_utils import parse_sec_cfg

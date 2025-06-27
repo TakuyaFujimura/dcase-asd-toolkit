@@ -8,8 +8,8 @@ import lightning.pytorch as pl
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.path import check_file_exists, get_output_dir
-from asdit.bin.utils.score import add_score, get_dicts
+from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.score import add_score, get_dicts
 from asdit.utils.config_class import MainScoreConfig
 
 logger = logging.getLogger(__name__)

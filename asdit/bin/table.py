@@ -13,13 +13,13 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from scipy.stats import hmean
 
-from asdit.bin.utils.evaluate import (
+from asdit.utils.asdit_utils.evaluate import (
     combine_section_metric,
     get_official_metriclist,
     get_official_sectionlist,
     hmean_is_available,
 )
-from asdit.bin.utils.path import check_file_exists, get_version_dir
+from asdit.utils.asdit_utils.path import check_file_exists, get_version_dir
 from asdit.utils.config_class import MainTableConfig
 from asdit.utils.dcase_utils import MACHINE_DICT
 

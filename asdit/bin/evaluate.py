@@ -9,13 +9,13 @@ import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.evaluate import (
+from asdit.utils.asdit_utils.evaluate import (
     add_hmean,
     dcase_auc,
     get_as_name,
     get_auc_type_list,
 )
-from asdit.bin.utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
 from asdit.utils.config_class import MainEvaluateConfig
 
 logger = logging.getLogger(__name__)
