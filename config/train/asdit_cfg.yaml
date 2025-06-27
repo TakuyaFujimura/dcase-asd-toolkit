@@ -18,7 +18,7 @@ machine: null
 model_ver: null
 
 refresh_rate: 1
-callback_opts:
+callback:
   best:
     monitor: "train/main"
     filename: "epoch={epoch}-loss={train/main:.9f}"

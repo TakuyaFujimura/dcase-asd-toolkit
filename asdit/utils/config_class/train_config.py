@@ -48,7 +48,7 @@ class MainTrainConfig(BaseModel):
     model_ver: str
 
     refresh_rate: int = 1
-    callback_opts: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    callback: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
     resume_ckpt_path: Optional[str] = None
 

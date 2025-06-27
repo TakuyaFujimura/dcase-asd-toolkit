@@ -6,7 +6,7 @@ defaults:
 
 label_dict_path: {}
 
-callback_opts:
+callback:
   interval:
     every_n_epochs: 10
 

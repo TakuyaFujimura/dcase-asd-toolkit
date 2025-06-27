@@ -30,9 +30,9 @@ def make_trainer(
 ) -> pl.Trainer:
     # Callbacks
     callback_list: List[Any] = [NaNCheckCallback()]
-    for key_, cfg_ in cfg.callback_opts.items():
+    for _, callback_cfg in cfg.callback.items():
         callback_list.append(
-            ModelCheckpoint(**cfg_, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path)
+            ModelCheckpoint(**callback_cfg, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path)
         )
     callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
     # Logger
@@ -79,7 +79,7 @@ def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if not cfg.trainer.get("deterministic", False):
-        raise ValueError("Not deterministic!!!")
+        logger.warning("Not deterministic!")
     logger.info(f"Start experiment: {HydraConfig().get().run.dir}")
     logger.info(f"version: {cfg.version}/{cfg.seed}")
     pl.seed_everything(cfg.seed, workers=True)
@@ -87,7 +87,7 @@ def main(hydra_cfg: DictConfig) -> None:
 
     ckpt_dir = get_version_dir(cfg=cfg) / "model" / cfg.model_ver / "checkpoints"
     if ckpt_dir.exists() and cfg.resume_ckpt_path is None:
-        logger.warning("already done")
+        logger.warning("Already done. Skipping training...")
         return
 
     dm = setup_datamodule(cfg)
