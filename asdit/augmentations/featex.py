@@ -79,7 +79,6 @@ class FeatEx(nn.Module):
         # process labels
         for key in batch:
             if re_match_any(patterns=self.target_keys, string=key):
-                print(f"Processing key: {key} with FeatEx")  # TODO: remove print
                 new_batch[key] = self.process_label(perm_list, dec, batch[key])
             else:
                 new_batch[key] = batch[key]

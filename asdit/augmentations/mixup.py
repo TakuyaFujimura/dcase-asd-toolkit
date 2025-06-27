@@ -40,7 +40,6 @@ class Mixup(nn.Module):
 
         for key in batch:
             if re_match_any(patterns=self.target_keys, string=key):
-                print(f"Processing key: {key} with Mixup")  # TODO: remove print
                 new_batch[key] = self.process(lam, perm, dec, batch[key])
             else:
                 new_batch[key] = batch[key]

@@ -15,7 +15,7 @@ class FrontendConfig(BaseModel):
     tgt_class: str
     model_cfg: Dict[str, Any]
     optim_cfg: Dict[str, Any]
-    scheduler_cfg: Optional[Dict[str, Any]] = None
+    lrscheduler_cfg: Optional[Dict[str, Any]] = None
     grad_cfg: GradConfig
 
 
