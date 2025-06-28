@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from asdit.frontends.base_plmodel import BasePLFrontend
 from asdit.utils.asdit_utils.path import get_version_dir
 from asdit.utils.common import get_best_path, get_path_glob
-from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfig
+from asdit.utils.config_class import MainExtractConfig, MainTrainConfig
 from asdit.utils.dcase_utils.parse_sec import parse_sec_cfg
 
 logger = logging.getLogger(__name__)

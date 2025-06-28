@@ -1,10 +1,9 @@
 import logging
-from typing import Literal, Optional
+from typing import Any, Dict, Literal, Optional
 
 from torch import nn
 
 from asdit.models.pretrained_models.eat import calc_target_length, preprocess, restore
-from asdit.utils.config_class.output_config import FrontendOutput
 
 from .base import BaseFrozenModel
 
@@ -34,7 +33,7 @@ class EATFrozenModel(BaseFrozenModel):
         model, _ = restore(ckpt_path=ckpt_path, update_cfg=update_cfg)
         return model
 
-    def extract(self, batch: dict) -> FrontendOutput:
+    def extract(self, batch: dict) -> Dict[str, Any]:
         x = batch["wave"]
 
         if self.device != x.device:
@@ -54,5 +53,4 @@ class EATFrozenModel(BaseFrozenModel):
             raise ValueError(
                 f"Unknown prediction mode {self.prediction_mode}, only cls and seq are supported"
             )
-        embed_dict = {"main": z}
-        return FrontendOutput(embed=embed_dict)
+        return {"embed": z}

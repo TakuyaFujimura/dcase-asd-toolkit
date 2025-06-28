@@ -6,7 +6,7 @@ from torch import Tensor
 
 from asdit.models.audio_feature.base import BaseAudioFeature
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import FrontendOutput, GradConfig
+from asdit.utils.config_class import GradConfig
 
 from .base_plmodel import BasePLAUCFrontend
 
@@ -60,11 +60,11 @@ class AEPLModel(BasePLAUCFrontend):
 
     def net2as(
         self, x_ref: torch.Tensor, x_est: torch.Tensor, z: torch.Tensor, n_sample: int
-    ) -> Dict[str, torch.Tensor]:
+    ) -> torch.Tensor:
         recon_loss = self.loss(x_est, x_ref).view(n_sample, -1).mean(dim=1)
-        return {"recon": recon_loss}
+        return recon_loss
 
-    def forward(self, batch: dict) -> FrontendOutput:
+    def forward(self, batch: dict) -> Dict[str, Any]:
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
         x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
@@ -72,11 +72,10 @@ class AEPLModel(BasePLAUCFrontend):
         z = z.view(len(wave), -1, z.shape[-1]).mean(dim=1)
         # (B, n_frames, z_dim) -> (B, z_dim), time average
 
-        embed_dict = {"main": z}
-        anomaly_score_dict = self.net2as(
+        anomaly_score_recon = self.net2as(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)
         )
-        return FrontendOutput(embed=embed_dict, AS=anomaly_score_dict)
+        return {"embed": z, "AS-recon": anomaly_score_recon}
 
     def training_step(self, batch, batch_idx):
         x_ref = batch["feat"]

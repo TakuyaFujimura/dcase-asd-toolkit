@@ -2,99 +2,87 @@
 
 import logging
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
-import pandas as pd
 import torch
 import tqdm
 from torch.utils.data import DataLoader
 
 from asdit.datasets import PLDataModule
-from asdit.frontends import BaseFrontend
-from asdit.utils.common import re_match_any
+from asdit.frontends.base import BaseFrontend
+from asdit.utils.asdit_utils.restore import get_past_cfg, restore_plfrontend
+from asdit.utils.common import instantiate_tgt, re_match_any
 from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfig
-from asdit.utils.dcase_utils import INFOLIST
 
 logger = logging.getLogger(__name__)
 
-
-def sorted_cols(df: pd.DataFrame) -> pd.DataFrame:
-    col_list = df.columns.tolist()
-    embed_cols = [col for col in col_list if col.startswith("e_")]
-    logits_cols = [col for col in col_list if col.startswith("l_")]
-    col_list = list(set(col_list) - set(embed_cols) - set(logits_cols) - set(INFOLIST))
-    col_list = INFOLIST + sorted(col_list) + logits_cols + embed_cols
-    return df[col_list]
-
-
-def make_df(info__dict_of_list: Dict[str, list]) -> pd.DataFrame:
-    df_list = []
-    for key, values_list in info__dict_of_list.items():
-        values_np = np.concatenate(values_list, axis=0)
-        if key.startswith("embed-"):
-            key_tmp = key[len("embed-") :]
-            embed_cols = [f"e_{key_tmp}_{i}" for i in range(values_np.shape[-1])]
-            df = pd.DataFrame(columns=embed_cols, data=values_np)
-        elif key.startswith("logits-"):
-            key_tmp = key[len("logits-") :]
-            logits_cols = [f"l_{key_tmp}_{i}" for i in range(values_np.shape[-1])]
-            df = pd.DataFrame(columns=logits_cols, data=values_np)
-        elif values_np.ndim == 2 and values_np.shape[1] == 1:
-            df = pd.DataFrame(columns=[key], data=values_np[:, 0])
-        elif values_np.ndim == 1:
-            df = pd.DataFrame(columns=[key], data=values_np)
-        else:
-            raise NotImplementedError(f"Unexpected shape: {values_np.shape}")
-        df_list.append(df)
-    df = pd.concat(df_list, axis=1)
-    df = sorted_cols(df)
-    return df
+# TODO: remove
+# def sorted_cols(df: pd.DataFrame) -> pd.DataFrame:
+#     col_list = df.columns.tolist()
+#     embed_cols = [col for col in col_list if col.startswith("e_")]
+#     logits_cols = [col for col in col_list if col.startswith("l_")]
+#     col_list = list(set(col_list) - set(embed_cols) - set(logits_cols) - set(INFOLIST))
+#     col_list = INFOLIST + sorted(col_list) + logits_cols + embed_cols
+#     return df[col_list]
 
 
-def loader2df(
-    dataloader: Optional[DataLoader],
+def setup_frontend(cfg: MainExtractConfig) -> BaseFrontend:
+    if cfg.restore_or_scratch == "restore":
+        if cfg.restore_model_ver is None:
+            raise ValueError(
+                "restore_model_ver must be specified when restore_or_scratch is restore"
+            )
+        if cfg.restore_ckpt_ver is None:
+            raise ValueError(
+                "restore_ckpt_ver must be specified when restore_or_scratch is restore"
+            )
+        past_cfg = get_past_cfg(cfg=cfg)
+        frontend = restore_plfrontend(cfg=cfg, past_cfg=past_cfg)
+        check_cfg_with_past_cfg(cfg=cfg, past_cfg=past_cfg)
+
+    elif cfg.restore_or_scratch == "scratch":
+        if cfg.scratch_frontend is None:
+            raise ValueError(
+                "scratch_frontend must be specified when restore_or_scratch is scratch"
+            )
+        frontend = instantiate_tgt(cfg.scratch_frontend)
+    else:
+        raise ValueError(f"Unexpected restore_or_scratch: {cfg.restore_or_scratch}")
+
+    return frontend
+
+
+def loader2dict(
+    dataloader: DataLoader,
     frontend: BaseFrontend,
     device: str,
     extract_items: List[str],
-) -> pd.DataFrame:
+) -> Dict[str, np.ndarray]:
 
-    if dataloader is None:
-        logger.info("No dataloader is given")
-        return pd.DataFrame()
-
-    logger.info("Start extract_loader")
-    extract__dict_of_list = defaultdict(list)
-    extract_items = list(set(INFOLIST + extract_items))
+    extract_dict = defaultdict(list)
 
     for batch in tqdm.tqdm(dataloader):
-
         batch = {
             k: v.to(device) if isinstance(v, torch.Tensor) else v
             for k, v in batch.items()
         }
-
         with torch.no_grad():
-            pl_output = frontend.extract(batch)
-            for key1 in ["embed", "logits", "AS"]:
-                for key2, value in getattr(pl_output, key1).items():
-                    key = f"{key1}-{key2}"
-                    if re_match_any(patterns=extract_items, string=key):
-                        extract__dict_of_list[key].append(value.cpu().numpy())
-
-            for key, value in batch.items():
+            output_dict = frontend.extract(batch)
+            output_dict.update(batch)
+            for key, value in output_dict.items():
                 if not re_match_any(patterns=extract_items, string=key):
                     continue
-
-                if isinstance(value, torch.Tensor):
-                    extract__dict_of_list[key].append(batch[key].cpu().numpy())
-                elif isinstance(value, list):
-                    extract__dict_of_list[key].append(value)
+                elif isinstance(value, torch.Tensor):
+                    extract_dict[key].append(value.detach().cpu().numpy())
                 else:
-                    raise NotImplementedError(f"Unexpected type: {type(value)}")
+                    extract_dict[key].append(np.asarray(value))
 
-    df = make_df(extract__dict_of_list)
-    return df
+    extract_np_dict = {
+        key: np.concatenate(list_of_array)
+        for key, list_of_array in extract_dict.items()
+    }
+    return extract_np_dict
 
 
 def get_extract_dataloader(cfg: MainExtractConfig, split: str) -> DataLoader:

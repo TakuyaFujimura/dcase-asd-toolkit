@@ -8,7 +8,6 @@ import torch
 
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import GradConfig
-from asdit.utils.config_class.output_config import FrontendOutput
 from asdit.utils.dcase_utils import get_label_dict
 from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
@@ -59,7 +58,7 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
     def construct_model(self, *args, **kwargs):
         pass
 
-    def extract(self, batch: dict) -> FrontendOutput:
+    def extract(self, batch: dict) -> Dict[str, Any]:
         return self(batch)
 
     def log_loss(self, loss: Any, log_name: str, batch_size: int):

@@ -39,6 +39,10 @@ label_dict_path: {}
 machine: null
 
 extract_items:
+  - "path"
+  - "section"
+  - "is_normal"
+  - "is_target"
   - "embed-.*"
   - "AS-.*"
 

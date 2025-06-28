@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import FrontendOutput, GradConfig
+from asdit.utils.config_class import GradConfig
 
 from .base_plmodel import BasePLFrontend
 
@@ -37,15 +37,15 @@ class BasicDisPLModel(BasePLFrontend):
         # e.g., tgt_class: asdit.models.losses.SCAdaCos
         split_loss_tgt = loss_cfg["tgt_class"].split(".")
         if "asdit.losses" != ".".join(split_loss_tgt[:-1]):
-            return 0
+            return
 
         if split_loss_tgt[-1] not in ["AdaCos", "ArcFace", "SCAdaCos", "AdaProj"]:
-            return 0
+            return
 
         if not self.normalize:
             raise ValueError("normalize is False, but loss uses normalized embedding.")
         else:
-            return 0
+            return
 
     def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):
         self.head_dict = torch.nn.ModuleDict({})
@@ -84,20 +84,13 @@ class BasicDisPLModel(BasePLFrontend):
         self.set_head_dict(self.label_to_lossweight_dict)
         self.set_augmentations(augmentation_cfg_list)
 
-    def forward(self, batch: dict) -> FrontendOutput:
-        logit_dict: Dict[str, Tensor] = {}
+    def forward(self, batch: dict) -> Dict[str, Any]:
         embed = self.extractor(batch["wave"])  # (B, D)
 
-        for label_name in self.label_to_lossweight_dict:
-            logits = self.head_dict[label_name].calc_logits(embed)  # type: ignore
-            logit_dict[label_name] = logits
-
         if self.normalize:
-            embed_dict = {"main": F.normalize(embed, p=2, dim=1)}
+            return {"embed": F.normalize(embed, p=2, dim=1)}
         else:
-            embed_dict = {"main": embed}
-
-        return FrontendOutput(embed=embed_dict, logits=logit_dict)
+            return {"embed": embed}
 
     def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
         embed = self.extractor(wave)
