@@ -38,13 +38,12 @@ def main(hydra_cfg: DictConfig) -> None:
     logger.info(f"Start umap: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = get_output_dir(cfg=cfg)
+    output_dir = get_output_dir(cfg)
     umap_dir = output_dir / "umap"
     umap_dir.mkdir(parents=True, exist_ok=True)
+    check_file_exists(dir_path=umap_dir, file_name="*.png", overwrite=cfg.overwrite)
 
     path_stem = f"umap_{cfg.metric}_{cfg.embed_key}"
-
-    check_file_exists(dir_path=umap_dir, file_name="*.png", overwrite=cfg.overwrite)
 
     # transformation
     if not (umap_dir / f"{path_stem}.csv").exists() or cfg.overwrite:

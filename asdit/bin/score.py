@@ -8,7 +8,7 @@ import lightning.pytorch as pl
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.path import make_output_dir
 from asdit.utils.asdit_utils.score import add_score, get_dicts
 from asdit.utils.config_class import MainScoreConfig
 
@@ -29,11 +29,7 @@ def main(hydra_cfg: DictConfig) -> None:
     logger.info(f"Start scoring: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = get_output_dir(cfg=cfg)
-    check_file_exists(
-        dir_path=output_dir, file_name="*_score.csv", overwrite=cfg.overwrite
-    )
-
+    output_dir = make_output_dir(cfg, "*_score.csv")
     extract_df_dict, score_df_dict = get_dicts(
         output_dir=output_dir, extract_items=cfg.extract_items
     )

@@ -14,7 +14,7 @@ from asdit.utils.asdit_utils.extract import (
     loader2dict,
     setup_frontend,
 )
-from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.path import make_output_dir
 from asdit.utils.config_class import MainExtractConfig
 from asdit.utils.dcase_utils import parse_sec_cfg
 
@@ -27,17 +27,6 @@ def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
     return MainExtractConfig(**config_dict)
 
 
-def make_dir(cfg: MainExtractConfig) -> Path:
-    output_dir = get_output_dir(cfg)
-
-    check_file_exists(
-        dir_path=output_dir, file_name="*_extract.npz", overwrite=cfg.overwrite
-    )
-    output_dir.mkdir(exist_ok=True, parents=True)
-    OmegaConf.save(cfg.model_dump(), output_dir / "hparams.yaml")
-    return output_dir
-
-
 
 @hydra.main(
     version_base=None, config_path="../../config/extract", config_name="asdit_cfg"
@@ -47,7 +36,7 @@ def main(hydra_cfg: DictConfig) -> None:
     logger.info(f"Start extraction: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = make_dir(cfg=cfg)
+    output_dir = make_output_dir(cfg, "*_extract.npz")
     frontend = setup_frontend(cfg=cfg)
 
     for split in ["train", "test"]:

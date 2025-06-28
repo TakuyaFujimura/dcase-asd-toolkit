@@ -15,7 +15,7 @@ from asdit.utils.asdit_utils.evaluate import (
     get_as_name,
     get_auc_type_list,
 )
-from asdit.utils.asdit_utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.path import make_output_dir
 from asdit.utils.config_class import MainEvaluateConfig
 
 logger = logging.getLogger(__name__)
@@ -35,10 +35,7 @@ def main(hydra_cfg: DictConfig) -> None:
     logger.info(f"Start evaluation: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = get_output_dir(cfg=cfg)
-    check_file_exists(
-        dir_path=output_dir, file_name="*_evaluate.csv", overwrite=cfg.overwrite
-    )
+    output_dir = make_output_dir(cfg, "*_evaluate.csv")
 
     score_df = pd.read_csv(output_dir / "test_score.csv")
 
