@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from .match import item_match
+from .match import re_match_any
 
 
 def get_embed_from_df(df: pd.DataFrame, embed_key: str = "e_main") -> np.ndarray:
@@ -17,6 +17,6 @@ def get_embed_from_df(df: pd.DataFrame, embed_key: str = "e_main") -> np.ndarray
 def pickup_cols(df: pd.DataFrame, extract_items: List[str]) -> pd.DataFrame:
     used_cols = []
     for col in df.columns:
-        if item_match(item=col, patterns=extract_items):
+        if re_match_any(string=col, patterns=extract_items):
             used_cols.append(col)
     return df[used_cols].copy()

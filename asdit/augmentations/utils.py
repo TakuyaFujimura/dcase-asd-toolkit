@@ -17,9 +17,3 @@ def get_dec(batch_size: int, prob: float, device: torch.device) -> torch.Tensor:
     dec = dec.float()
     return dec
 
-
-def re_match_any(patterns: list[str], string: str) -> bool:
-    """
-    Check if any pattern matches the string.
-    """
-    return any(re.fullmatch(p, string) for p in patterns)

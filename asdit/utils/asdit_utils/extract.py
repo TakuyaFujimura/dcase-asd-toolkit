@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 
 from asdit.datasets import PLDataModule
 from asdit.frontends import BaseFrontend
-from asdit.utils.common import item_match
+from asdit.utils.common import re_match_any
 from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfig
 from asdit.utils.dcase_utils import INFOLIST
 
@@ -79,11 +79,11 @@ def loader2df(
             for key1 in ["embed", "logits", "AS"]:
                 for key2, value in getattr(pl_output, key1).items():
                     key = f"{key1}-{key2}"
-                    if item_match(item=key, patterns=extract_items):
+                    if re_match_any(patterns=extract_items, string=key):
                         extract__dict_of_list[key].append(value.cpu().numpy())
 
             for key, value in batch.items():
-                if not item_match(item=key, patterns=extract_items):
+                if not re_match_any(patterns=extract_items, string=key):
                     continue
 
                 if isinstance(value, torch.Tensor):
@@ -95,6 +95,27 @@ def loader2df(
 
     df = make_df(extract__dict_of_list)
     return df
+
+
+def get_extract_dataloader(cfg: MainExtractConfig, split: str) -> DataLoader:
+    path_selector_list = [
+        f"{cfg.data_dir}/formatted/{cfg.dcase}/raw/{cfg.machine}/{split}/*.wav"
+    ]
+    dataset_cfg = {
+        **cfg.datamodule.dataset,
+        "path_selector_list": path_selector_list,
+    }
+
+    datamoduleconfig = DMConfig(
+        dataloader=cfg.datamodule.dataloader,
+        dataset=dataset_cfg,
+        collator=cfg.datamodule.collator,
+        batch_sampler=None,
+    )
+    dataloader = PLDataModule.get_loader(
+        datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
+    )
+    return dataloader  # type: ignore
 
 
 def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -> None:
@@ -139,7 +160,7 @@ def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -
             "collator in past_cfg is not DCASEWaveCollator, so cfg.datamodule.collator is not checked."
         )
 
-    # check cfg values
+    # Check cfg values
     value = cfg.datamodule.dataloader.get("shuffle")
     if value is not False:
         logger.warning(
@@ -163,25 +184,3 @@ def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -
         logger.warning(
             f"Expected 'tgt_class' in datamodule.dataset to be 'asdit.datasets.WaveDataset' but got {value}"
         )
-
-
-def get_extract_dataloader(cfg: MainExtractConfig, split: str) -> DataLoader:
-    path_selector_list = [
-        f"{cfg.data_dir}/formatted/{cfg.dcase}/raw/{cfg.machine}/{split}/*.wav"
-    ]
-    dataset_cfg = {
-        **cfg.datamodule.dataset,
-        "path_selector_list": path_selector_list,
-    }
-
-    datamoduleconfig = DMConfig(
-        dataloader=cfg.datamodule.dataloader,
-        dataset=dataset_cfg,
-        collator=cfg.datamodule.collator,
-        batch_sampler=None,
-    )
-    dataloader = PLDataModule.get_loader(
-        datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
-    )
-    assert dataloader is not None
-    return dataloader
