@@ -6,4 +6,4 @@ from .score_config import MainScoreConfig
 from .table_config import MainTableConfig
 from .tensor_class import TorchTensor
 from .train_config import *
-from .umap_config import MainUmapConfig
+from .visualize_config import MainVisualizeConfig

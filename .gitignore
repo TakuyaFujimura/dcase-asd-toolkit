@@ -7,6 +7,7 @@ labels/*/logs
 *.out
 analysis/
 jobs/asd/call_dcase_seed_loop/
+fairseq/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

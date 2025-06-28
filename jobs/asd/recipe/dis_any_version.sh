@@ -28,6 +28,6 @@ for machine in $machines; do
     asdit_extract
     asdit_score
     asdit_evaluate
-    asdit_umap metric="${metric}"
+    asdit_visualize metric="${metric}"
 done
 asdit_table

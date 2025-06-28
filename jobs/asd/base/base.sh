@@ -57,9 +57,9 @@ asdit_evaluate() {
     python -m asdit.bin.evaluate "${args[@]}" "$@"
 }
 
-asdit_umap() {
+asdit_visualize() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.umap "${args[@]}" "$@"
+    python -m asdit.bin.visualize "${args[@]}" "$@"
 }
 
 

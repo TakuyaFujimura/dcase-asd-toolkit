@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 from .cast_utils import cast_str, check_dcase
 
 
-class MainUmapConfig(BaseModel):
+class MainVisualizeConfig(BaseModel):
     seed: int
     dcase: str
     name: str
