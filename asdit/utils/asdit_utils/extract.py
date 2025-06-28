@@ -17,15 +17,6 @@ from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfi
 
 logger = logging.getLogger(__name__)
 
-# TODO: remove
-# def sorted_cols(df: pd.DataFrame) -> pd.DataFrame:
-#     col_list = df.columns.tolist()
-#     embed_cols = [col for col in col_list if col.startswith("e_")]
-#     logits_cols = [col for col in col_list if col.startswith("l_")]
-#     col_list = list(set(col_list) - set(embed_cols) - set(logits_cols) - set(INFOLIST))
-#     col_list = INFOLIST + sorted(col_list) + logits_cols + embed_cols
-#     return df[col_list]
-
 
 def setup_frontend(cfg: MainExtractConfig) -> BaseFrontend:
     if cfg.restore_or_scratch == "restore":

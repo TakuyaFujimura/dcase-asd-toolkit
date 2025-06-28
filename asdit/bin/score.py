@@ -8,8 +8,9 @@ import lightning.pytorch as pl
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
+from asdit.utils.asdit_utils.df_utils import sort_columns
 from asdit.utils.asdit_utils.path import make_output_dir
-from asdit.utils.asdit_utils.score import add_score, get_dicts
+from asdit.utils.asdit_utils.score import add_score, get_extract_score_dicts
 from asdit.utils.config_class import MainScoreConfig
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = make_output_dir(cfg, "*_score.csv")
-    extract_df_dict, score_df_dict = get_dicts(
+    extract_dict_dict, score_df_dict = get_extract_score_dicts(
         output_dir=output_dir, extract_items=cfg.extract_items
     )
 
@@ -38,12 +39,13 @@ def main(hydra_cfg: DictConfig) -> None:
     for backend_cfg in cfg.backend:
         score_df_dict = add_score(
             backend_cfg=backend_cfg,
-            extract_df_dict=extract_df_dict,
+            extract_dict_dict=extract_dict_dict,
             score_df_dict=score_df_dict,
         )
 
     # Save
     for split, score_df in score_df_dict.items():
+        score_df = sort_columns(score_df)
         score_df_path = output_dir / f"{split}_score.csv"
         score_df.to_csv(score_df_path, index=False)
         logging.info(f"Saved at {str(score_df_path)}")

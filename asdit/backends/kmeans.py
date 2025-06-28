@@ -2,10 +2,7 @@ import logging
 from typing import Dict
 
 import numpy as np
-import pandas as pd
 from sklearn.cluster import KMeans
-
-from asdit.utils.common import get_embed_from_df
 
 from .base import BaseBackend
 from .utils import normalize_vector
@@ -40,18 +37,44 @@ def min_cosine(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 
 
 class Kmeans(BaseBackend):
-    def __init__(self, n_clusters: int, metric: str, sep_section: bool = False):
+    def __init__(
+        self,
+        n_clusters: int,
+        metric: str = "cosine",
+        sep_section: bool = False,
+        embed_key="embed",
+    ):
+        """
+        Args:
+            n_clusters (int): n_clusters for KMeans
+            metric (str): Distance metric. Options are "euclid" or "cosine". Defaults to "cosine".
+            sep_section (bool, optional): Whether to separately construct a backend for each section. Defaults to False.
+            embed_key (str, optional): Key to access embeddings in the extract_dict. Defaults to "embed".
+        """
         if metric not in ["euclid", "cosine"]:
             raise ValueError(f"Unexpected metric: {metric}")
-        self.n_clusters = n_clusters
         self.metric = metric
+        self.n_clusters = n_clusters
         self.sep_section = sep_section
         self.centers_dict: Dict[int, np.ndarray] = {}
+        self.embed_key = embed_key
 
-    def get_centers(self, train_df: pd.DataFrame) -> np.ndarray:
-        is_target = np.asarray(train_df["is_target"].values)
+    def get_section(self, extract_dict: dict) -> np.ndarray:
+        section = extract_dict["section"]
+        if not self.sep_section:
+            section = np.zeros_like(section)
+        return section
+
+    def get_centers(self, embed: np.ndarray, is_target: np.ndarray) -> np.ndarray:
+        """
+        Args:
+            embed (np.ndarray): (N, D)
+            is_target (np.ndarray): (N,)
+
+        Returns:
+            centers (np.ndarray): (M, D)
+        """
         self.check_target(is_target)
-        embed = get_embed_from_df(train_df)
 
         if self.metric == "cosine":
             embed = normalize_vector(embed)
@@ -67,31 +90,39 @@ class Kmeans(BaseBackend):
         centers = np.vstack([centers_so, centers_ta])  # (M, D)
         return centers
 
-    def fit(self, train_df: pd.DataFrame):
-        section = train_df["section"].values
-        if self.sep_section:
-            for sec in np.unique(section):  # type: ignore
-                self.centers_dict[sec] = self.get_centers(train_df[section == sec])
-        else:
-            self.centers_dict[0] = self.get_centers(train_df)
+    def fit(self, train_dict: dict):
+        section = self.get_section(train_dict)
+        is_target = np.asarray(train_dict["is_target"])
+        embed = train_dict[self.embed_key]
 
-    def calc_score(self, test_df: pd.DataFrame, centers: np.ndarray) -> np.ndarray:
-        embed = get_embed_from_df(test_df)  # (N, D)
+        for sec in np.unique(section):  # type: ignore
+            idx = section == sec
+            self.centers_dict[sec] = self.get_centers(
+                embed=embed[idx], is_target=is_target[idx]
+            )
+
+    def calc_score(self, embed: np.ndarray, centers: np.ndarray) -> np.ndarray:
+        """
+        Args:
+            embed (np.ndarray): (N, D)
+            centers (np.ndarray): (M, D)
+
+        Returns:
+            scores (np.ndarray): (N,)
+        """
         if self.metric == "cosine":
             scores = min_cosine(embed, centers)  # (N,)
         else:
             scores = min_euclid(embed, centers)  # (N,)
         return scores
 
-    def anomaly_score(self, test_df: pd.DataFrame) -> Dict[str, np.ndarray]:
-        section = test_df["section"].values
-        scores = np.zeros(len(test_df))
-        if self.sep_section:
-            for sec in np.unique(section):  # type: ignore
-                scores[section == sec] = self.calc_score(
-                    test_df[section == sec], self.centers_dict[sec]
-                )
-        else:
-            scores = self.calc_score(test_df, self.centers_dict[0])
+    def anomaly_score(self, test_dict: dict) -> Dict[str, np.ndarray]:
+        section = self.get_section(test_dict)
+        embed = test_dict[self.embed_key]
+        scores = np.zeros(len(section))
 
-        return {"plain": scores}
+        for sec in np.unique(section):  # type: ignore
+            idx = section == sec
+            scores[idx] = self.calc_score(embed[idx], self.centers_dict[sec])
+
+        return {"main": scores}

@@ -18,6 +18,10 @@ machine: null
 
 
 extract_items:
+  - "path"
+  - "section"
+  - "is_normal"
+  - "is_target"
   - "AS-.*"
 
 
