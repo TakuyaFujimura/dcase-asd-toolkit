@@ -1,2 +1,2 @@
 from .kmeans import Kmeans
-from .knn import Knn
+from .knn import Knn, KnnRescale

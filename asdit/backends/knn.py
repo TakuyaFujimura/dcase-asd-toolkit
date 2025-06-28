@@ -20,19 +20,16 @@ class Knn(BaseBackend):
         metric: str = "cosine",
         smote_ratio: float = 0,
         smote_neighbors: int = 2,
-        k_ref_normalize: int = 0,
         sep_section: bool = False,
         embed_key: str = "embed",
     ):
         """
         Args:
-            n_neighbors_so (int): n_neighbors for source domain.
-            n_neighbors_ta (int): n_neighbors for target domain. When k_ref_normalize > 0, this is not used.
+            n_neighbors_so (int): Number of neighbors for source domain.
+            n_neighbors_ta (int): Number of neighbors for target domain.
             metric (str): Distance metric. Options are "euclid" or "cosine". Defaults to "cosine".
             smote_ratio (float): Ratio of SMOTE sampling applied to the target domain. Defaults to 0 (no SMOTE).
             smote_neighbors (int): Number of neighbors for SMOTE. Defaults to 5.
-            k_ref_normalize (int): Number of neighbors for score normalization method. If set to 0, no normalization is applied.
-                See: Wilkinghoff et al. (2025), Keeping the Balance: Anomaly Score Calculation for Domain Generalization.
             sep_section (bool, optional): Whether to separately construct a backend for each section. Defaults to False.
             embed_key (str, optional): Key to access embeddings in the extract_dict. Defaults to "embed".
         """
@@ -42,14 +39,9 @@ class Knn(BaseBackend):
         self.n_neighbors_so = n_neighbors_so
         self.n_neighbors_ta = n_neighbors_ta
         self.sep_section = sep_section
-        self.k_ref_normalize = k_ref_normalize
-        # Prepare dictionaries for storing reference embeddings
-        if self.k_ref_normalize > 0:
-            self.ref_dict: Dict[int, Tuple[np.ndarray, np.ndarray]] = {}
-        else:
-            self.knn_dict: Dict[
-                int, Tuple[NearestNeighbors, Optional[NearestNeighbors]]
-            ] = {}
+        self.knn_dict: Dict[
+            int, Tuple[NearestNeighbors, Optional[NearestNeighbors]]
+        ] = {}
 
         # Instantiate SMOTE
         if smote_ratio == 0:
@@ -93,18 +85,6 @@ class Knn(BaseBackend):
 
         return knn_so, knn_ta
 
-    def prepare_ref_set(
-        self, ref_embed: np.ndarray, is_target: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        assert self.k_ref_normalize > 0
-        if self.metric == "cosine":
-            ref_embed = normalize_vector(ref_embed)
-        ref_norm_const = np.sort(
-            pairwise_distances(ref_embed, ref_embed, metric="euclidean"), axis=0
-        )[1 : self.k_ref_normalize + 1].mean(axis=0, keepdims=True)
-        # (N, N) -> (1, N)
-        return ref_embed, ref_norm_const
-
     def fit(self, train_dict: dict) -> None:
         section = self.get_section(train_dict)
         is_target = np.asarray(train_dict["is_target"])
@@ -112,14 +92,9 @@ class Knn(BaseBackend):
 
         for sec in np.unique(section):
             idx = section == sec
-            if self.k_ref_normalize == 0:
-                self.knn_dict[sec] = self.get_knn(
-                    embed=embed[idx], is_target=is_target[idx]
-                )
-            else:
-                self.ref_dict[sec] = self.prepare_ref_set(
-                    ref_embed=embed[idx], is_target=is_target[idx]
-                )
+            self.knn_dict[sec] = self.get_knn(
+                embed=embed[idx], is_target=is_target[idx]
+            )
 
     def calc_score(
         self,
@@ -141,7 +116,75 @@ class Knn(BaseBackend):
             scores /= 2
         return scores
 
-    def calc_normalized_score(
+    def anomaly_score(self, test_dict: dict) -> Dict[str, np.ndarray]:
+        section = self.get_section(test_dict)
+        embed = test_dict[self.embed_key]
+        scores = np.zeros(len(section))
+
+        for sec in np.unique(section):
+            idx = section == sec
+            scores[idx] = self.calc_score(embed[idx], self.knn_dict[sec])
+
+        return {"main": scores}
+
+
+class KnnRescale(BaseBackend):
+    def __init__(
+        self,
+        n_neighbors: int,
+        k_ref_normalize: int = 16,
+        metric: str = "cosine",
+        sep_section: bool = False,
+        embed_key: str = "embed",
+    ):
+        """Wilkinghoff et al. (2025), Keeping the Balance: Anomaly Score Calculation for Domain Generalization.
+
+        Args:
+            n_neighbors (int): Number of neighbors for anomaly score calculation.
+            k_ref_normalize (int): Number of neighbors for score normalization. Defaults to 16.
+            metric (str): Distance metric. Options are "euclid" or "cosine". Defaults to "cosine".
+            sep_section (bool, optional): Whether to separately construct a backend for each section. Defaults to False.
+            embed_key (str, optional): Key to access embeddings in the extract_dict. Defaults to "embed".
+        """
+        if metric not in ["euclid", "cosine"]:
+            raise ValueError(f"Unexpected metric: {metric}")
+        self.metric = metric
+        self.n_neighbors = n_neighbors
+        self.sep_section = sep_section
+        self.k_ref_normalize = k_ref_normalize
+        self.ref_dict: Dict[int, Tuple[np.ndarray, np.ndarray]] = {}
+        self.embed_key = embed_key
+
+    def get_section(self, extract_dict: dict) -> np.ndarray:
+        section = extract_dict["section"]
+        if not self.sep_section:
+            section = np.zeros_like(section)
+        return section
+
+    def prepare_ref_set(
+        self, ref_embed: np.ndarray, is_target: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        assert self.k_ref_normalize > 0
+        if self.metric == "cosine":
+            ref_embed = normalize_vector(ref_embed)
+        ref_norm_const = np.sort(
+            pairwise_distances(ref_embed, ref_embed, metric="euclidean"), axis=0
+        )[1 : self.k_ref_normalize + 1].mean(axis=0, keepdims=True)
+        # (N, N) -> (1, N)
+        return ref_embed, ref_norm_const
+
+    def fit(self, train_dict: dict) -> None:
+        section = self.get_section(train_dict)
+        is_target = np.asarray(train_dict["is_target"])
+        embed = train_dict[self.embed_key]
+
+        for sec in np.unique(section):
+            idx = section == sec
+            self.ref_dict[sec] = self.prepare_ref_set(
+                ref_embed=embed[idx], is_target=is_target[idx]
+            )
+
+    def calc_score(
         self,
         embed: np.ndarray,
         ref_list: Tuple[np.ndarray, np.ndarray],
@@ -152,7 +195,7 @@ class Knn(BaseBackend):
         scores = np.sort(
             pairwise_distances(embed, ref_embed, metric="euclidean") / ref_norm_const,
             axis=1,
-        )[:, : self.n_neighbors_so].mean(axis=1)
+        )[:, : self.n_neighbors].mean(axis=1)
         # (N_input, N_ref) -> (N_input, self.n_neighbors_so) -> (N_input,)
         return scores
 
@@ -163,9 +206,6 @@ class Knn(BaseBackend):
 
         for sec in np.unique(section):
             idx = section == sec
-            if self.k_ref_normalize == 0:
-                scores[idx] = self.calc_score(embed[idx], self.knn_dict[sec])
-            else:
-                scores[idx] = self.calc_normalized_score(embed[idx], self.ref_dict[sec])
+            scores[idx] = self.calc_score(embed[idx], self.ref_dict[sec])
 
         return {"main": scores}
