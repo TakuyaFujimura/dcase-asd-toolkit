@@ -63,7 +63,7 @@ def setup_datamodule(cfg: MainTrainConfig) -> pl.LightningDataModule:
 
 def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
     logger.info("Create frontend")
-    frontend = instantiate_tgt(cfg.frontend.model_dump())
+    frontend = instantiate_tgt(cfg.frontend)
     return frontend
 
 

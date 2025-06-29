@@ -6,19 +6,6 @@ from pydantic import BaseModel, Field, field_validator
 from .cast_utils import cast_str, check_dcase
 
 
-class GradConfig(BaseModel):
-    log_every_n_steps: int = 25
-    clipper_cfg: Optional[Dict[str, Any]] = None
-
-
-class FrontendConfig(BaseModel):
-    tgt_class: str
-    model_cfg: Dict[str, Any]
-    optim_cfg: Dict[str, Any]
-    lrscheduler_cfg: Optional[Dict[str, Any]] = None
-    grad_cfg: GradConfig
-
-
 class DMConfig(BaseModel):
     dataloader: Dict[str, Any]
     dataset: Dict[str, Any]
@@ -39,7 +26,7 @@ class MainTrainConfig(BaseModel):
     result_dir: Path
     data_dir: str
 
-    frontend: FrontendConfig
+    frontend: Dict[str, Any]
     trainer: Dict[str, Any]
     datamodule: DMSplitConfig
 

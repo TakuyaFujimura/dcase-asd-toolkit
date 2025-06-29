@@ -7,7 +7,6 @@ import numpy as np
 import torch
 
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig
 from asdit.utils.dcase_utils import get_label_dict
 from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
@@ -32,7 +31,6 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
     ):
@@ -40,17 +38,11 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         self.save_hyperparameters()
         self.optim_cfg = optim_cfg
         self.lrscheduler_cfg = lrscheduler_cfg
-        self.grad_cfg = grad_cfg
         self.num_class_dict: Dict[str, int] = {}
         if label_dict_path is None:
             label_dict_path = {}
         for key_, val_ in get_label_dict(label_dict_path).items():
             self.num_class_dict[key_] = val_.num_class
-
-        if self.grad_cfg.clipper_cfg is not None:
-            self.grad_clipper = instantiate_tgt(self.grad_cfg.clipper_cfg)
-        else:
-            self.grad_clipper = None
 
         self.construct_model(**model_cfg)
 
@@ -75,25 +67,17 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
             raise ValueError("Loss is not a scalar tensor")
 
     def on_after_backward(self):
-        if self.grad_clipper is not None:
-            grad_norm_val, clipping_threshold = self.grad_clipper(self)
-            clipped_norm_val = min(grad_norm_val, clipping_threshold)
-        else:
-            grad_norm_val = grad_norm(self)
-            clipped_norm_val = grad_norm_val
-
-        if self.trainer.global_step % self.grad_cfg.log_every_n_steps == 0:
-            opt = self.trainer.optimizers[0]
-            current_lr = opt.state_dict()["param_groups"][0]["lr"]
-            self.logger.log_metrics(  # type: ignore
-                {
-                    "grad/norm": grad_norm_val,
-                    "grad/clipped_norm": clipped_norm_val,
-                    "grad/lr": current_lr,
-                    "grad/step_size": current_lr * clipped_norm_val,
-                },
-                step=self.trainer.global_step,
-            )
+        grad_norm_val = grad_norm(self)
+        opt = self.trainer.optimizers[0]
+        current_lr = opt.state_dict()["param_groups"][0]["lr"]
+        self.logger.log_metrics(  # type: ignore
+            {
+                "grad/norm": grad_norm_val,
+                "grad/lr": current_lr,
+                "grad/step_size": current_lr * grad_norm_val,
+            },
+            step=self.trainer.global_step,
+        )
 
     def configure_optimizers(self):
         optimizer = instantiate_tgt({"params": self.parameters(), **self.optim_cfg})
@@ -118,14 +102,12 @@ class BasePLAUCFrontend(BasePLFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            grad_cfg=grad_cfg,
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
         )

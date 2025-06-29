@@ -12,7 +12,6 @@ model_ver: "all"
 
 trainer:
   max_epochs: 25
-  # accumulate_grad_batches: 8
 
 datamodule:
   batch_size: 8

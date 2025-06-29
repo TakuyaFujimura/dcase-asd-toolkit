@@ -6,7 +6,6 @@ from torch import Tensor
 
 from asdit.models.audio_feature.base import BaseAudioFeature
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig
 
 from .base_plmodel import BasePLAUCFrontend
 
@@ -16,14 +15,12 @@ class AEPLModel(BasePLAUCFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            grad_cfg=grad_cfg,
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
         )

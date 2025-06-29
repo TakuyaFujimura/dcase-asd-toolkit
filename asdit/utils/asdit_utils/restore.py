@@ -50,8 +50,8 @@ def restore_plfrontend(
 ) -> BasePLFrontend:
     ckpt_path = get_ckpt_path(cfg)
     logger.info(f"Loading model from {ckpt_path}")
-    module_name = ".".join(past_cfg.frontend.tgt_class.split(".")[:-1])
-    class_name = past_cfg.frontend.tgt_class.split(".")[-1]
+    module_name = ".".join(past_cfg.frontend["tgt_class"].split(".")[:-1])
+    class_name = past_cfg.frontend["tgt_class"].split(".")[-1]
     module = importlib.import_module(module_name)
     frontend_cls = getattr(module, class_name)
     frontend = frontend_cls.load_from_checkpoint(ckpt_path, strict=True)
