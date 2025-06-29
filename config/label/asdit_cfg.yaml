@@ -6,16 +6,17 @@ defaults:
 
 
 
+data_dir: "../data" # data directory from dcase-asd-toolkit
 dcase: null
 
 
 # -------------------------------------------------------- #
-
-save_path: "labels/${dcase}/${labeler.label_name}.json"
+name: null
+save_path: "labels/${dcase}/${name}.json"
 path_selector_list:
   - "${data_dir}/formatted/${dcase}/raw/*/train/*.wav"
   - "${data_dir}/formatted/${dcase}/raw/*/test/*.wav"
 
 hydra:
   run:
-    dir: "labels/${dcase}/logs/${labeler.label_name}"
+    dir: "labels/${dcase}/logs/${name}"
