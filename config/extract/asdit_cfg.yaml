@@ -43,8 +43,8 @@ extract_items:
   - "section"
   - "is_normal"
   - "is_target"
-  - "embed-.*"
-  - "AS-.*"
+  - "embed.*"
+  - "AS.*"
 
 
 overwrite: false
