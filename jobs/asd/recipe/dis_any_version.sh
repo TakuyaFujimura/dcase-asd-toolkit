@@ -12,7 +12,7 @@ infer_ver="last"
 metric="cosine"
 # ---------------------------- #
 experiments_train="${version}"
-experiments_extract="restore_shared"
+experiments_extract="restore_shared_dcasesec"
 experiments_score="baseline"
 # ---------------------------- #
 source ../base/base.sh

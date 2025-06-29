@@ -3,9 +3,8 @@ from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from asdit.utils.config_class import DMConfig
-
 from .cast_utils import cast_str, check_dcase
+from .train_config import DMConfig
 
 
 class MainExtractConfig(BaseModel):

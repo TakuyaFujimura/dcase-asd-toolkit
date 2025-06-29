@@ -158,23 +158,27 @@ def plot_umap(visualize_dict: dict, save_dir, save_path_stem) -> None:
     is_normal = visualize_dict["is_normal"]
     section = visualize_dict["section"]
 
-    ulim_dict = {
+    lim_dict = {
         "xmin": umap_embed[:, 0].min(),
         "xmax": umap_embed[:, 0].max(),
         "ymin": umap_embed[:, 1].min(),
         "ymax": umap_embed[:, 1].max(),
     }
-
     plot_and_save(
         umap_embed=umap_embed,
         is_test=is_test,
         is_target=is_target,
         is_normal=is_normal,
         save_path=f"{save_dir}/{save_path_stem}_sectionall.png",
-        **ulim_dict,
+        **lim_dict,
     )
-    for sec in section.unique():
+    for sec in np.unique(section):
+        idx = section == sec
         plot_and_save(
+            umap_embed=umap_embed[idx],
+            is_test=is_test[idx],
+            is_target=is_target[idx],
+            is_normal=is_normal[idx],
             save_path=f"{save_dir}/{save_path_stem}_section{sec}.png",
-            **ulim_dict,
+            **lim_dict,
         )
