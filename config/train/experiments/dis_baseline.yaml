@@ -6,7 +6,7 @@ defaults:
 
 
 label_dict_path:
-  main_label: "labels/${dcase}/machine_section_attr_domain.json"
+  main: "labels/${dcase}/main.json"
 
 model_ver: "all"
 

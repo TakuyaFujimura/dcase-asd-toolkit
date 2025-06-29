@@ -9,7 +9,8 @@ scratch_frontend:
   model_cfg:
     ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
 
+
 datamodule:
-  collator:
-    sec: all
-    sr: 16000
+  train:
+    collator:
+      sec: all

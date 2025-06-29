@@ -19,7 +19,6 @@ class AEPLModel(BasePLAUCFrontend):
         grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -48,7 +47,7 @@ class AEPLModel(BasePLAUCFrontend):
         self.anomaly_score_name = ["recon"]
         self.setup_auc()
 
-    def feat2net(
+    def forward_network(
         self, x_ref: Tensor, batch: Dict[str, Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         if self.condition_label is None:
@@ -58,7 +57,7 @@ class AEPLModel(BasePLAUCFrontend):
         x_est, z = self.network(x_ref, condition=condition)
         return x_est, z
 
-    def net2as(
+    def calc_anomaly_score(
         self, x_ref: torch.Tensor, x_est: torch.Tensor, z: torch.Tensor, n_sample: int
     ) -> torch.Tensor:
         recon_loss = self.loss(x_est, x_ref).view(n_sample, -1).mean(dim=1)
@@ -67,19 +66,19 @@ class AEPLModel(BasePLAUCFrontend):
     def forward(self, batch: dict) -> Dict[str, Any]:
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
-        x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+        x_est, z = self.forward_network(x_ref=x_ref, batch=batch)
 
         z = z.view(len(wave), -1, z.shape[-1]).mean(dim=1)
         # (B, n_frames, z_dim) -> (B, z_dim), time average
 
-        anomaly_score_recon = self.net2as(
+        anomaly_score_recon = self.calc_anomaly_score(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)
         )
         return {"embed": z, "AS-recon": anomaly_score_recon}
 
     def training_step(self, batch, batch_idx):
         x_ref = batch["feat"]
-        x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+        x_est, z = self.forward_network(x_ref=x_ref, batch=batch)
         loss_dict = {"main": self.loss(x_est, x_ref).mean()}
 
         self.log_loss(torch.tensor(len(x_ref)).float(), "train/batch_size", 1)
@@ -90,9 +89,9 @@ class AEPLModel(BasePLAUCFrontend):
     def validation_step(self, batch, batch_idx):
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
-        x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+        x_est, z = self.forward_network(x_ref=x_ref, batch=batch)
         loss_dict = {"main": self.loss(x_est, x_ref).mean()}
-        anomaly_score_dict = self.net2as(
+        anomaly_score_dict = self.calc_anomaly_score(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)
         )
 

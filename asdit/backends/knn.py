@@ -6,8 +6,9 @@ from imblearn.over_sampling import SMOTE
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
 
+from asdit.utils.common.np_util import normalize_vector
+
 from .base import BaseBackend
-from .utils import normalize_vector
 
 logger = logging.getLogger(__name__)
 

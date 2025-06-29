@@ -4,8 +4,9 @@ from typing import Dict
 import numpy as np
 from sklearn.cluster import KMeans
 
+from asdit.utils.common.np_util import normalize_vector
+
 from .base import BaseBackend
-from .utils import normalize_vector
 
 logger = logging.getLogger(__name__)
 

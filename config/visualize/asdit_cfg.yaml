@@ -15,7 +15,7 @@ result_dir: "./results"
 machine: null
 
 
-metric: null
+metric: cosine
 embed_key: "embed"
 
 extract_items:

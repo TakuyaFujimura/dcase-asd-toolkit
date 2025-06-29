@@ -35,7 +35,6 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -122,7 +121,6 @@ class BasePLAUCFrontend(BasePLFrontend):
         grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
     ):
         super().__init__(
             model_cfg=model_cfg,

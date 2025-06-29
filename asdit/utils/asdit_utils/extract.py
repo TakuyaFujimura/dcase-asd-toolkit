@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -18,30 +18,48 @@ from asdit.utils.config_class import DMConfig, MainExtractConfig, MainTrainConfi
 logger = logging.getLogger(__name__)
 
 
-def setup_frontend(cfg: MainExtractConfig) -> BaseFrontend:
-    if cfg.restore_or_scratch == "restore":
-        if cfg.restore_model_ver is None:
-            raise ValueError(
-                "restore_model_ver must be specified when restore_or_scratch is restore"
-            )
-        if cfg.restore_ckpt_ver is None:
-            raise ValueError(
-                "restore_ckpt_ver must be specified when restore_or_scratch is restore"
-            )
-        past_cfg = get_past_cfg(cfg=cfg)
-        frontend = restore_plfrontend(cfg=cfg, past_cfg=past_cfg)
-        check_cfg_with_past_cfg(cfg=cfg, past_cfg=past_cfg)
+def extraction_setup_restore(
+    cfg: MainExtractConfig,
+) -> Tuple[BaseFrontend, Dict[str, DataLoader]]:
+    if cfg.restore_model_ver is None:
+        raise ValueError(
+            "restore_model_ver must be specified when restore_or_scratch is restore"
+        )
+    if cfg.restore_ckpt_ver is None:
+        raise ValueError(
+            "restore_ckpt_ver must be specified when restore_or_scratch is restore"
+        )
+    past_cfg = get_past_cfg(cfg)
 
-    elif cfg.restore_or_scratch == "scratch":
-        if cfg.scratch_frontend is None:
-            raise ValueError(
-                "scratch_frontend must be specified when restore_or_scratch is scratch"
-            )
-        frontend = instantiate_tgt(cfg.scratch_frontend)
-    else:
-        raise ValueError(f"Unexpected restore_or_scratch: {cfg.restore_or_scratch}")
+    # Frontend
+    frontend = restore_plfrontend(cfg=cfg, past_cfg=past_cfg)
 
-    return frontend
+    # DataLoader
+    check_cfg_with_past_cfg(cfg=cfg, past_cfg=past_cfg)
+    dataloader_dict = {
+        "train": PLDataModule.get_loader(dm_config=cfg.datamodule.train),
+        "test": PLDataModule.get_loader(dm_config=cfg.datamodule.test),
+    }
+    return frontend, dataloader_dict
+
+
+def extraction_setup_scratch(
+    cfg: MainExtractConfig,
+) -> Tuple[BaseFrontend, Dict[str, DataLoader]]:
+    if cfg.scratch_frontend is None:
+        raise ValueError(
+            "scratch_frontend must be specified when restore_or_scratch is scratch"
+        )
+
+    # Frontend
+    frontend = instantiate_tgt(cfg.scratch_frontend)
+
+    # DataLoader
+    dataloader_dict = {
+        "train": PLDataModule.get_loader(dm_config=cfg.datamodule.train),
+        "test": PLDataModule.get_loader(dm_config=cfg.datamodule.test),
+    }
+    return frontend, dataloader_dict
 
 
 def loader2dict(
@@ -76,90 +94,67 @@ def loader2dict(
     return extract_np_dict
 
 
-def get_extract_dataloader(cfg: MainExtractConfig, split: str) -> DataLoader:
-    path_selector_list = [
-        f"{cfg.data_dir}/formatted/{cfg.dcase}/raw/{cfg.machine}/{split}/*.wav"
-    ]
-    dataset_cfg = {
-        **cfg.datamodule.dataset,
-        "path_selector_list": path_selector_list,
-    }
-
-    datamoduleconfig = DMConfig(
-        dataloader=cfg.datamodule.dataloader,
-        dataset=dataset_cfg,
-        collator=cfg.datamodule.collator,
-        batch_sampler=None,
-    )
-    dataloader = PLDataModule.get_loader(
-        datamoduleconfig=datamoduleconfig, label_dict_path=cfg.label_dict_path
-    )
-    return dataloader  # type: ignore
+def check_collator_args(current_collator: dict, past_collator: dict) -> None:
+    collator_args = ["sec", "sr", "pad_mode"]
+    for key in collator_args:
+        if current_collator.get(key) != past_collator.get(key):
+            logger.warning(
+                f"cfg.datamodule.collator.{key} ({current_collator.get(key)}) is different from past_cfg.datamodule.collator.{key} ({past_collator.get(key)})."
+            )
 
 
 def check_cfg_with_past_cfg(cfg: MainExtractConfig, past_cfg: MainTrainConfig) -> None:
+    # Check data_dir and dcase
     if past_cfg.data_dir != cfg.data_dir:
         logger.warning(
-            f"data_dir in cfg ({cfg.data_dir}) is different from past_cfg ({past_cfg.data_dir})."
+            f"cfg.data_dir ({cfg.data_dir}) is different from past_cfg.data_dir ({past_cfg.data_dir})."
         )
     if past_cfg.dcase != cfg.dcase:
         logger.warning(
-            f"dcase in cfg ({cfg.dcase}) is different from past_cfg ({past_cfg.dcase})."
+            f"cfg.dcase ({cfg.dcase}) is different from past_cfg.dcase ({past_cfg.dcase})."
         )
 
-    # Check args in collator
-    collator_args = ["sec", "sr", "pad_mode"]
-    is_checked = False
-    if (past_cfg.datamodule.valid is not None) and (
-        past_cfg.datamodule.valid.collator["tgt_class"]
-        == "asdit.datasets.DCASEWaveCollator"
-    ):
-        for key in collator_args:
-            if cfg.datamodule.collator.get(
-                key
-            ) != past_cfg.datamodule.valid.collator.get(key):
-                logger.warning(
-                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator.get(key)}) is different from past_cfg.valid.collator ({past_cfg.datamodule.valid.collator.get(key)})."
+    # Check datamodule config
+    dm_config_dict = {"train": cfg.datamodule.train, "test": cfg.datamodule.test}
+    for split, dm_config in dm_config_dict.items():
+        # Dataloader
+        if dm_config.dataloader.get("shuffle") is not False:
+            logger.warning(f"datamodule.{split}.dataloader.shuffle is not False.")
+
+        # Collator
+        expected_collator = "asdit.datasets.DCASEWaveCollator"
+        if dm_config.collator["tgt_class"] != expected_collator:
+            logger.warning(
+                f"cfg.datamodule.{split}.collator['tgt_class'] is not '{expected_collator}'. Skipping checks"
+            )
+        else:
+            is_checked = False
+            if past_cfg.datamodule.train.collator["tgt_class"] == expected_collator:
+                is_checked = True
+                check_collator_args(
+                    current_collator=dm_config.collator,
+                    past_collator=past_cfg.datamodule.train.collator,
                 )
-        is_checked = True
-    if (
-        past_cfg.datamodule.train.collator["tgt_class"]
-        == "asdit.datasets.DCASEWaveCollator"
-    ):
-        for key in collator_args:
-            if cfg.datamodule.collator.get(
-                key
-            ) != past_cfg.datamodule.train.collator.get(key):
-                logger.warning(
-                    f"{key} in cfg.datamodule.collator ({cfg.datamodule.collator.get(key)}) is different from past_cfg.train.collator ({past_cfg.datamodule.train.collator.get(key)})."
+            if (
+                past_cfg.datamodule.valid is not None
+                and past_cfg.datamodule.valid.collator["tgt_class"] == expected_collator
+            ):
+                is_checked = True
+                check_collator_args(
+                    current_collator=dm_config.collator,
+                    past_collator=past_cfg.datamodule.valid.collator,
                 )
-        is_checked = True
-    if not is_checked:
-        logger.warning(
-            "collator in past_cfg is not DCASEWaveCollator, so cfg.datamodule.collator is not checked."
-        )
+            if not is_checked:
+                logger.warning(
+                    f"cfg.datamodule.{split}.collator is not checked because past_cfg.datamodule.train/valid.collator.tgt_class is not '{expected_collator}'."
+                )
 
-    # Check cfg values
-    value = cfg.datamodule.dataloader.get("shuffle")
-    if value is not False:
-        logger.warning(
-            f"Expected 'shuffle' in datamodule.dataloader to be False but got {value}"
-        )
+        if dm_config.collator.get("shuffle") is not False:
+            logger.warning(f"cfg.datamodule.{split}.collator.shuffle is not False.")
 
-    value = cfg.datamodule.collator.get("tgt_class")
-    if value != "asdit.datasets.DCASEWaveCollator":
-        logger.warning(
-            f"Expected 'tgt_class' in datamodule.collator to be 'asdit.datasets.DCASEWaveCollator' but got {value}"
-        )
-
-    value = cfg.datamodule.collator.get("shuffle")
-    if value is not False:
-        logger.warning(
-            f"Expected 'shuffle' in datamodule.collator to be False but got {value}"
-        )
-
-    value = cfg.datamodule.dataset.get("tgt_class")
-    if value != "asdit.datasets.WaveDataset":
-        logger.warning(
-            f"Expected 'tgt_class' in datamodule.dataset to be 'asdit.datasets.WaveDataset' but got {value}"
-        )
+        # Dataset
+        expected_dataset = "asdit.datasets.WaveDataset"
+        if dm_config.dataset["tgt_class"] != expected_dataset:
+            logger.warning(
+                f"cfg.datamodule.{split}.dataset['tgt_class'] is not '{expected_dataset}'."
+            )

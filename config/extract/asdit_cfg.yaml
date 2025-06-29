@@ -22,19 +22,32 @@ infer_ver: null
 data_dir: "../data"
 
 datamodule:
-  dataloader:
-    batch_size: 64
-    num_workers: 0
-    pin_memory: false
-    shuffle: false
-  collator:
-    tgt_class: "asdit.datasets.DCASEWaveCollator"
-    shuffle: false
-  dataset:
-    tgt_class: "asdit.datasets.WaveDataset"
-    # path_selector_list: will be automatically filled
+  train:
+    dataloader:
+      batch_size: 64
+      num_workers: 0
+      pin_memory: false
+      shuffle: false
+    collator:
+      tgt_class: "asdit.datasets.DCASEWaveCollator"
+      label_dict_path: {}
+      sec: null
+      sr: 16000
+      shuffle: false
+    dataset:
+      tgt_class: "asdit.datasets.WaveDataset"
+      path_selector_list:
+        - "${data_dir}/formatted/${dcase}/raw/${machine}/train/*.wav"
+    batch_sampler: null
+  test:
+    dataloader: ${datamodule.train.dataloader}
+    collator: ${datamodule.train.collator}
+    dataset:
+      tgt_class: "asdit.datasets.WaveDataset"
+      path_selector_list:
+        - "${data_dir}/formatted/${dcase}/raw/${machine}/test/*.wav"
+    batch_sampler: null
 
-label_dict_path: {}
 
 machine: null
 

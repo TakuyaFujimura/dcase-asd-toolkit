@@ -17,6 +17,6 @@ scratch_frontend:
 
 
 datamodule:
-  collator:
-    sec: all
-    sr: 16000
+  train:
+    collator:
+      sec: all

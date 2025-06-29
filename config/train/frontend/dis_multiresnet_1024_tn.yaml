@@ -7,9 +7,9 @@ optim_cfg:
 lrscheduler_cfg: null
 grad_cfg: {}
 
+label_dict_path: ${label_dict_path}
 
 model_cfg:
-  normalize: true
   extractor_cfg:
     tgt_class: asdit.models.multiresnet.MultiResNet
     sec: ${datamodule.sec}

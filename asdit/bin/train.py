@@ -57,21 +57,13 @@ def make_trainer(
 
 def setup_datamodule(cfg: MainTrainConfig) -> pl.LightningDataModule:
     logger.info("Create datamodule")
-    dm = PLDataModule(
-        dm_cfg=cfg.datamodule,
-        label_dict_path=cfg.label_dict_path,
-    )
+    dm = PLDataModule(dm_cfg=cfg.datamodule)
     return dm
 
 
 def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
     logger.info("Create frontend")
-    frontend = instantiate_tgt(
-        {
-            "label_dict_path": cfg.label_dict_path,
-            **cfg.frontend.model_dump(),
-        }
-    )
+    frontend = instantiate_tgt(cfg.frontend.model_dump())
     return frontend
 
 

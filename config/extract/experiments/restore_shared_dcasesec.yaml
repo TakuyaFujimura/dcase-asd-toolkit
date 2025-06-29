@@ -5,8 +5,7 @@ restore_ckpt_ver: ${infer_ver}
 infer_ver: null
 
 
-
 datamodule:
-  collator:
-    sec: ${dcase}
-    sr: 16000
+  train:
+    collator:
+      sec: ${dcase}

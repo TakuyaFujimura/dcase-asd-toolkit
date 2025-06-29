@@ -1,7 +1,6 @@
 # Copyright 2024 Takuya Fujimura
 
 import logging
-from pathlib import Path
 
 import hydra
 import lightning.pytorch as pl
@@ -10,9 +9,9 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from asdit.utils.asdit_utils.extract import (
-    get_extract_dataloader,
+    extraction_setup_restore,
+    extraction_setup_scratch,
     loader2dict,
-    setup_frontend,
 )
 from asdit.utils.asdit_utils.path import make_output_dir
 from asdit.utils.config_class import MainExtractConfig
@@ -27,7 +26,6 @@ def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
     return MainExtractConfig(**config_dict)
 
 
-
 @hydra.main(
     version_base=None, config_path="../../config/extract", config_name="asdit_cfg"
 )
@@ -37,13 +35,17 @@ def main(hydra_cfg: DictConfig) -> None:
     pl.seed_everything(seed=0, workers=True)
 
     output_dir = make_output_dir(cfg, "*_extract.npz")
-    frontend = setup_frontend(cfg=cfg)
+    if cfg.restore_or_scratch == "restore":
+        frontend, dataloader_dict = extraction_setup_restore(cfg)
+    elif cfg.restore_or_scratch == "scratch":
+        frontend, dataloader_dict = extraction_setup_scratch(cfg)
+    else:
+        raise ValueError(f"Unexpected restore_or_scratch: {cfg.restore_or_scratch}")
 
     for split in ["train", "test"]:
         logger.info(f"Extracting {split} data now...")
-        dataloader = get_extract_dataloader(cfg=cfg, split=split)
         extract_dict = loader2dict(
-            dataloader=dataloader,
+            dataloader=dataloader_dict[split],
             frontend=frontend,
             device=cfg.device,
             extract_items=cfg.extract_items,

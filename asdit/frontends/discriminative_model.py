@@ -22,7 +22,6 @@ class BasicDisPLModel(BasePLFrontend):
         grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -31,21 +30,6 @@ class BasicDisPLModel(BasePLFrontend):
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
         )
-
-    def check_loss_cfg(self, loss_cfg: Dict[str, Any]):
-        # If tgt_class is known loss class, this check the normalize flag.
-        # e.g., tgt_class: asdit.models.losses.SCAdaCos
-        split_loss_tgt = loss_cfg["tgt_class"].split(".")
-        if "asdit.losses" != ".".join(split_loss_tgt[:-1]):
-            return
-
-        if split_loss_tgt[-1] not in ["AdaCos", "ArcFace", "SCAdaCos", "AdaProj"]:
-            return
-
-        if not self.normalize:
-            raise ValueError("normalize is False, but loss uses normalized embedding.")
-        else:
-            return
 
     def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):
         self.head_dict = torch.nn.ModuleDict({})
@@ -64,7 +48,6 @@ class BasicDisPLModel(BasePLFrontend):
 
     def construct_model(
         self,
-        normalize: bool,
         extractor_cfg: Dict[str, Any],
         loss_cfg: Dict[str, Any],
         label_to_lossweight_dict: Dict[str, float],
@@ -73,24 +56,18 @@ class BasicDisPLModel(BasePLFrontend):
     ) -> None:
         if augmentation_cfg_list is None:
             augmentation_cfg_list = []
-        self.normalize = normalize
         self.extractor = instantiate_tgt(extractor_cfg)
         if use_compile:
             self.extractor = torch.compile(self.extractor)  # type: ignore
         self.loss_cfg = loss_cfg
         self.embed_size = self.extractor.embed_size
         self.label_to_lossweight_dict = label_to_lossweight_dict
-        self.check_loss_cfg(self.loss_cfg)
         self.set_head_dict(self.label_to_lossweight_dict)
         self.set_augmentations(augmentation_cfg_list)
 
     def forward(self, batch: dict) -> Dict[str, Any]:
         embed = self.extractor(batch["wave"])  # (B, D)
-
-        if self.normalize:
-            return {"embed": F.normalize(embed, p=2, dim=1)}
-        else:
-            return {"embed": embed}
+        return {"embed": embed}
 
     def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
         embed = self.extractor(wave)

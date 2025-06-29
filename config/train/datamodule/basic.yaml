@@ -20,4 +20,5 @@ train:
         sr: ${datamodule.sr}
         sec: ${datamodule.sec}
         shuffle: true
+        label_dict_path: ${label_dict_path}
 

@@ -18,7 +18,6 @@ class SubspaceLossPLModel(BasicDisPLModel):
         grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -57,7 +56,6 @@ class SubspaceLossPLModel(BasicDisPLModel):
 
     def construct_model(
         self,
-        normalize: bool,
         extractor_cfg: Dict[str, Any],
         loss_cfg: Dict[str, Any],
         label_to_lossweight_dict: Dict[str, float],
@@ -71,7 +69,6 @@ class SubspaceLossPLModel(BasicDisPLModel):
         self.subspace_embed_size = subspace_embed_size
         self.subspace_loss_weight = subspace_loss_weight
         super().construct_model(
-            normalize=normalize,
             extractor_cfg=extractor_cfg,
             loss_cfg=loss_cfg,
             label_to_lossweight_dict=label_to_lossweight_dict,

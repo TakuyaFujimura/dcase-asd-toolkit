@@ -22,7 +22,7 @@ extract_items:
   - "section"
   - "is_normal"
   - "is_target"
-  - "AS-.*"
+  - "AS.*"
 
 
 overwrite: false

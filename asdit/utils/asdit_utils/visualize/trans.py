@@ -6,6 +6,7 @@ import numpy as np
 import umap
 
 from asdit.utils.common.match import re_match_any
+from asdit.utils.common.np_util import normalize_vector
 
 from .utils import load_npz_dict
 
@@ -63,6 +64,8 @@ def trans_umap(
     # accept "euclid" as an alias for "euclidean"
     if metric == "euclid":
         metric = "euclidean"
+    if metric == "cosine":
+        embed = normalize_vector(embed)
 
     # UMAP transformation
     umap_model = umap.UMAP(random_state=0, metric=metric)

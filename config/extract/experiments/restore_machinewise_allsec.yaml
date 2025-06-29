@@ -6,6 +6,6 @@ infer_ver: null
 
 
 datamodule:
-  collator:
-    sec: all
-    sr: 16000
+  train:
+    collator:
+      sec: all

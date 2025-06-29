@@ -41,7 +41,6 @@ class MainTrainConfig(BaseModel):
 
     frontend: FrontendConfig
     trainer: Dict[str, Any]
-    label_dict_path: Dict[str, Path] = Field(default_factory=dict)
     datamodule: DMSplitConfig
 
     model_ver: str

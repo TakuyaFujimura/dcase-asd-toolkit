@@ -7,6 +7,11 @@ from .cast_utils import cast_str, check_dcase
 from .train_config import DMConfig
 
 
+class ExtractDMSplitConfig(BaseModel):
+    train: DMConfig
+    test: DMConfig
+
+
 class MainExtractConfig(BaseModel):
     device: str
     seed: int
@@ -24,9 +29,7 @@ class MainExtractConfig(BaseModel):
     infer_ver: str
 
     data_dir: str
-    datamodule: DMConfig
-
-    label_dict_path: Dict[str, Path] = Field(default_factory=dict)
+    datamodule: ExtractDMSplitConfig
 
     machine: str
 

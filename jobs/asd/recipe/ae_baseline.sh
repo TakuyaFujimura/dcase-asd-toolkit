@@ -9,7 +9,6 @@ seed=$2
 name="recipe"
 version="ae_baseline"
 infer_ver="last"
-metric="euclid"
 # ---------------------------- #
 experiments_train="${version}"
 experiments_extract="restore_machinewise_allsec"
@@ -22,6 +21,6 @@ for machine in $machines; do
     asdit_extract
     asdit_score
     asdit_evaluate
-    asdit_visualize metric="${metric}"
+    asdit_visualize
 done
 asdit_table

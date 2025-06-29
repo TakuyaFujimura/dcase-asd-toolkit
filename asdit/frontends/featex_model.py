@@ -19,7 +19,6 @@ class FeatExPLModel(BasicDisPLModel):
         grad_cfg: GradConfig,
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
     ):
         super().__init__(
             model_cfg=model_cfg,
@@ -54,7 +53,6 @@ class FeatExPLModel(BasicDisPLModel):
 
     def construct_model(
         self,
-        normalize: bool,
         extractor_cfg: Dict[str, Any],
         loss_cfg: Dict[str, Any],
         label_to_lossweight_dict: Dict[str, float],
@@ -70,7 +68,6 @@ class FeatExPLModel(BasicDisPLModel):
         self.featex_loss_weight = featex_loss_weight
         self.featex = FeatEx(prob=featex_prob, subspace_embed_size=subspace_embed_size)
         super().construct_model(
-            normalize=normalize,
             extractor_cfg=extractor_cfg,
             loss_cfg=loss_cfg,
             label_to_lossweight_dict=label_to_lossweight_dict,

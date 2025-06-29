@@ -10,7 +10,6 @@ seed=0
 name="recipe"
 version="beats"
 infer_ver="last"
-metric="euclid"
 # ---------------------------- #
 # experiments_train=""
 experiments_extract="scratch_${version}"
@@ -22,6 +21,6 @@ for machine in $machines; do
     asdit_extract
     asdit_score
     asdit_evaluate
-    asdit_visualize metric="${metric}"
+    asdit_visualize
 done
 asdit_table
