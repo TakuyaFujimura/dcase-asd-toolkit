@@ -1,3 +1,5 @@
+import re
+
 import torch
 
 # def get_reverse_perm(batch_size: int, device: torch.device) -> torch.Tensor:
@@ -14,3 +16,4 @@ def get_dec(batch_size: int, prob: float, device: torch.device) -> torch.Tensor:
     dec = torch.rand(batch_size, device=device) < prob
     dec = dec.float()
     return dec
+

@@ -2,5 +2,8 @@ import re
 from typing import List
 
 
-def item_match(item: str, patterns: List[str]) -> bool:
-    return any(re.fullmatch(p, item) for p in patterns)
+def re_match_any(patterns: List[str], string: str) -> bool:
+    """
+    Check if any pattern matches the string.
+    """
+    return any(re.fullmatch(p, string) for p in patterns)

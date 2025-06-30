@@ -9,25 +9,18 @@ seed=$2
 name="recipe"
 version=$3
 infer_ver="last"
-metric="cosine"
 # ---------------------------- #
 experiments_train="${version}"
-experiments_extract="restore_shared"
-experiments_score="baseline"
+experiments_extract="restore/shared_dcasesec"
+experiments_score="default"
 # ---------------------------- #
 source ../base/base.sh
 
-if [ $dcase = "dcase2020" ]; then
-    additional_args="label_dict_path.main_label=labels/${dcase}/machine_section.json"
-else
-    additional_args="label_dict_path.main_label=labels/${dcase}/machine_section_attr_domain.json"
-fi
-
-asdit_train ${additional_args}
+asdit_train experiments="${experiments_train}"
 for machine in $machines; do
-    asdit_extract
-    asdit_score
+    asdit_extract experiments="${experiments_extract}"
+    asdit_score experiments="${experiments_score}"
     asdit_evaluate
-    asdit_umap metric="${metric}"
+    asdit_visualize
 done
 asdit_table

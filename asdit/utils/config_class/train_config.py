@@ -1,23 +1,9 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
 from .cast_utils import cast_str, check_dcase
-
-
-class GradConfig(BaseModel):
-    log_every_n_steps: int = 25
-    clipper_cfg: Optional[Dict[str, Any]] = None
-
-
-class FrontendConfig(BaseModel):
-    tgt_class: str
-    model_cfg: Dict[str, Any]
-    optim_cfg: Dict[str, Any]
-    scheduler_cfg: Optional[Dict[str, Any]]
-    grad_cfg: GradConfig
-    partially_saved_param_list: Optional[List[str]] = None
 
 
 class DMConfig(BaseModel):
@@ -31,6 +17,9 @@ class DMSplitConfig(BaseModel):
     train: DMConfig
     valid: Optional[DMConfig] = None
 
+class CallbackConfig(BaseModel):
+    tqdm_refresh_rate: int = 1
+    callbacks: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
 class MainTrainConfig(BaseModel):
     seed: int
@@ -40,15 +29,14 @@ class MainTrainConfig(BaseModel):
     result_dir: Path
     data_dir: str
 
-    frontend: FrontendConfig
+    frontend: Dict[str, Any]
     trainer: Dict[str, Any]
-    label_dict_path: Dict[str, Path] = Field(default_factory=dict)
     datamodule: DMSplitConfig
 
     model_ver: str
 
     refresh_rate: int = 1
-    callback_opts: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    callback: CallbackConfig
 
     resume_ckpt_path: Optional[str] = None
 

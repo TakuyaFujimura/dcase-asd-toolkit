@@ -1,0 +1,6 @@
+# @package _global_
+dcase: dcase2022
+name: "main"
+labeler:
+  tgt_class: asdit.labelers.BasicInfoLabeler
+  label_name: "machine_section_attr_domain"

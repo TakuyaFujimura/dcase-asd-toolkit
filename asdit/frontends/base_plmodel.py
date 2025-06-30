@@ -7,8 +7,6 @@ import numpy as np
 import torch
 
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig
-from asdit.utils.config_class.output_config import PLOutput
 from asdit.utils.dcase_utils import get_label_dict
 from asdit.utils.dcase_utils.dcase_idx import get_domain_idx
 
@@ -33,37 +31,25 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__()
         self.save_hyperparameters()
         self.optim_cfg = optim_cfg
-        self.scheduler_cfg = scheduler_cfg
-        self.grad_cfg = grad_cfg
+        self.lrscheduler_cfg = lrscheduler_cfg
         self.num_class_dict: Dict[str, int] = {}
         if label_dict_path is None:
             label_dict_path = {}
         for key_, val_ in get_label_dict(label_dict_path).items():
             self.num_class_dict[key_] = val_.num_class
 
-        if self.grad_cfg.clipper_cfg is not None:
-            self.grad_clipper = instantiate_tgt(self.grad_cfg.clipper_cfg)
-        else:
-            self.grad_clipper = None
-        if partially_saved_param_list is None:
-            partially_saved_param_list = []
-        self.partially_saved_param_list = partially_saved_param_list
-
         self.construct_model(**model_cfg)
 
     def construct_model(self, *args, **kwargs):
         pass
 
-    def extract(self, batch: dict) -> PLOutput:
+    def extract(self, batch: dict) -> Dict[str, Any]:
         return self(batch)
 
     def log_loss(self, loss: Any, log_name: str, batch_size: int):
@@ -81,30 +67,24 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
             raise ValueError("Loss is not a scalar tensor")
 
     def on_after_backward(self):
-        if self.grad_clipper is not None:
-            grad_norm_val, clipping_threshold = self.grad_clipper(self)
-            clipped_norm_val = min(grad_norm_val, clipping_threshold)
-        else:
-            grad_norm_val = grad_norm(self)
-            clipped_norm_val = grad_norm_val
-
-        if self.trainer.global_step % self.grad_cfg.log_every_n_steps == 0:
-            opt = self.trainer.optimizers[0]
-            current_lr = opt.state_dict()["param_groups"][0]["lr"]
-            self.logger.log_metrics(  # type: ignore
-                {
-                    "grad/norm": grad_norm_val,
-                    "grad/clipped_norm": clipped_norm_val,
-                    "grad/lr": current_lr,
-                    "grad/step_size": current_lr * clipped_norm_val,
-                },
-                step=self.trainer.global_step,
-            )
+        grad_norm_val = grad_norm(self)
+        opt = self.trainer.optimizers[0]
+        current_lr = opt.state_dict()["param_groups"][0]["lr"]
+        self.logger.log_metrics(  # type: ignore
+            {
+                "grad/norm": grad_norm_val,
+                "grad/lr": current_lr,
+                "grad/step_size": current_lr * grad_norm_val,
+            },
+            step=self.trainer.global_step,
+        )
 
     def configure_optimizers(self):
         optimizer = instantiate_tgt({"params": self.parameters(), **self.optim_cfg})
-        if self.scheduler_cfg is not None:
-            scheduler = instantiate_tgt({"optimizer": optimizer, **self.scheduler_cfg})
+        if self.lrscheduler_cfg is not None:
+            scheduler = instantiate_tgt(
+                {"optimizer": optimizer, **self.lrscheduler_cfg}
+            )
             lr_scheduler = {"scheduler": scheduler, "interval": "step"}
             return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
         else:
@@ -116,37 +96,20 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         else:
             super().lr_scheduler_step(scheduler=scheduler, metric=metric)
 
-    def state_dict(self):
-        full_state = super().state_dict()
-        if not self.partially_saved_param_list:
-            return full_state
-        else:
-            partial_state = {
-                name: param
-                for name, param in full_state.items()
-                if any(key in name for key in self.partially_saved_param_list)
-            }
-            return partial_state
-
 
 class BasePLAUCFrontend(BasePLFrontend):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
         self.anomaly_score_name: Optional[List[str]] = None
 
@@ -155,6 +118,11 @@ class BasePLAUCFrontend(BasePLFrontend):
             raise ValueError(
                 "Please set self.anomaly_score_name before setup_auc and after __init__()"
             )
+        for as_key in self.anomaly_score_name:
+            if "/" in as_key:
+                raise ValueError(
+                    f"Anomaly score name '{as_key}' should not contain '/' character."
+                )
         self.auc_type_list = [
             "all_s_auc",  # AUC with all sections in source domain
             "all_t_auc",
@@ -165,7 +133,7 @@ class BasePLAUCFrontend(BasePLFrontend):
         self.auroc_model_dict: Dict[str, AUROC] = {}
         for auc_key in self.auc_type_list:
             for as_key in self.anomaly_score_name:
-                self.auroc_model_dict[f"{auc_key}_{as_key}"] = AUROC()
+                self.auroc_model_dict[f"{auc_key}/{as_key}"] = AUROC()
 
     def validation_step_auc(
         self, anomaly_score_dict: Dict[str, torch.Tensor], batch: dict
@@ -174,8 +142,8 @@ class BasePLAUCFrontend(BasePLFrontend):
         is_target_np = np.array(batch["is_target"])
         is_anomaly_tensor = 1 - torch.tensor(batch["is_normal"])
         for auc_model_key in self.auroc_model_dict:
-            auc_type = "_".join(auc_model_key.split("_")[:3])
-            as_key = "_".join(auc_model_key.split("_")[3:])
+            auc_type = auc_model_key.split("/")[0]
+            as_key = auc_model_key.split("/")[1]
             domain_idx_np = get_domain_idx(
                 auc_type=auc_type,
                 is_target=is_target_np,

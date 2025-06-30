@@ -6,7 +6,6 @@ from torch import Tensor
 
 from asdit.augmentations.featex import FeatEx
 from asdit.utils.common.instantiate_util import instantiate_tgt
-from asdit.utils.config_class.train_config import GradConfig
 
 from .discriminative_model import BasicDisPLModel
 
@@ -16,19 +15,14 @@ class FeatExPLModel(BasicDisPLModel):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
 
     def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):
@@ -56,7 +50,6 @@ class FeatExPLModel(BasicDisPLModel):
 
     def construct_model(
         self,
-        normalize: bool,
         extractor_cfg: Dict[str, Any],
         loss_cfg: Dict[str, Any],
         label_to_lossweight_dict: Dict[str, float],
@@ -72,7 +65,6 @@ class FeatExPLModel(BasicDisPLModel):
         self.featex_loss_weight = featex_loss_weight
         self.featex = FeatEx(prob=featex_prob, subspace_embed_size=subspace_embed_size)
         super().construct_model(
-            normalize=normalize,
             extractor_cfg=extractor_cfg,
             loss_cfg=loss_cfg,
             label_to_lossweight_dict=label_to_lossweight_dict,

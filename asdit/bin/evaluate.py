@@ -9,13 +9,13 @@ import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.evaluate import (
+from asdit.utils.asdit_utils.evaluate import (
     add_hmean,
     dcase_auc,
     get_as_name,
     get_auc_type_list,
 )
-from asdit.bin.utils.path import check_file_exists, get_output_dir
+from asdit.utils.asdit_utils.path import make_output_dir
 from asdit.utils.config_class import MainEvaluateConfig
 
 logger = logging.getLogger(__name__)
@@ -27,18 +27,13 @@ def hydra_to_pydantic(config: DictConfig) -> MainEvaluateConfig:
     return MainEvaluateConfig(**config_dict)
 
 
-@hydra.main(
-    version_base=None, config_path="../../config/evaluate", config_name="asdit_cfg"
-)
+@hydra.main(version_base=None, config_path="../../config/evaluate", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start evaluation: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = get_output_dir(cfg=cfg)
-    check_file_exists(
-        dir_path=output_dir, file_name="*_evaluate.csv", overwrite=cfg.overwrite
-    )
+    output_dir = make_output_dir(cfg, "*_evaluate.csv")
 
     score_df = pd.read_csv(output_dir / "test_score.csv")
 

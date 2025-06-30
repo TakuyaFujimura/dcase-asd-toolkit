@@ -1,0 +1,22 @@
+# @package _global_
+restore_or_scratch: scratch
+infer_ver: null
+
+scratch_frontend:
+  tgt_class: asdit.frontends.STFTPoolModel
+  stft_cfg:
+    sr: ${datamodule.train.collator.sr}
+    n_fft: 1024
+    hop_length: 512
+    n_mels: 128
+    power: 1.0
+    f_min: 0.0
+    f_max: 8000.0
+    temporal_norm: false
+  pool: ${infer_ver}
+
+
+datamodule:
+  train:
+    collator:
+      sec: all

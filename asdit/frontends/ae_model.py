@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import torch
 from torch import Tensor
 
 from asdit.models.audio_feature.base import BaseAudioFeature
 from asdit.utils.common import instantiate_tgt
-from asdit.utils.config_class import GradConfig, PLOutput
 
 from .base_plmodel import BasePLAUCFrontend
 
@@ -16,19 +15,14 @@ class AEPLModel(BasePLAUCFrontend):
         self,
         model_cfg: Dict[str, Any],
         optim_cfg: Dict[str, Any],
-        grad_cfg: GradConfig,
-        scheduler_cfg: Optional[Dict[str, Any]] = None,
+        lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
-        # given by config.label_dict_path in train.py
-        partially_saved_param_list: Optional[List[str]] = None,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
-            grad_cfg=grad_cfg,
-            scheduler_cfg=scheduler_cfg,
+            lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
-            partially_saved_param_list=partially_saved_param_list,
         )
 
     def construct_model(
@@ -47,10 +41,10 @@ class AEPLModel(BasePLAUCFrontend):
             self.network = torch.compile(self.network)  # type: ignore
         self.loss = instantiate_tgt({**loss_cfg, "reduction": "none"})
         self.condition_label = condition_label
-        self.anomaly_score_name = ["recon"]
+        self.anomaly_score_name = ["AS-recon"]
         self.setup_auc()
 
-    def feat2net(
+    def forward_network(
         self, x_ref: Tensor, batch: Dict[str, Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         if self.condition_label is None:
@@ -60,29 +54,28 @@ class AEPLModel(BasePLAUCFrontend):
         x_est, z = self.network(x_ref, condition=condition)
         return x_est, z
 
-    def net2as(
+    def calc_anomaly_score(
         self, x_ref: torch.Tensor, x_est: torch.Tensor, z: torch.Tensor, n_sample: int
     ) -> Dict[str, torch.Tensor]:
         recon_loss = self.loss(x_est, x_ref).view(n_sample, -1).mean(dim=1)
-        return {"recon": recon_loss}
+        return {"AS-recon": recon_loss}
 
-    def forward(self, batch: dict) -> PLOutput:
+    def forward(self, batch: dict) -> Dict[str, Any]:
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
-        x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+        x_est, z = self.forward_network(x_ref=x_ref, batch=batch)
 
         z = z.view(len(wave), -1, z.shape[-1]).mean(dim=1)
         # (B, n_frames, z_dim) -> (B, z_dim), time average
 
-        embed_dict = {"main": z}
-        anomaly_score_dict = self.net2as(
+        anomaly_score_dict = self.calc_anomaly_score(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)
         )
-        return PLOutput(embed=embed_dict, AS=anomaly_score_dict)
+        return {"embed": z, **anomaly_score_dict}
 
     def training_step(self, batch, batch_idx):
         x_ref = batch["feat"]
-        x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+        x_est, z = self.forward_network(x_ref=x_ref, batch=batch)
         loss_dict = {"main": self.loss(x_est, x_ref).mean()}
 
         self.log_loss(torch.tensor(len(x_ref)).float(), "train/batch_size", 1)
@@ -93,9 +86,9 @@ class AEPLModel(BasePLAUCFrontend):
     def validation_step(self, batch, batch_idx):
         wave = batch["wave"]
         x_ref = self.audio_feat(wave)
-        x_est, z = self.feat2net(x_ref=x_ref, batch=batch)
+        x_est, z = self.forward_network(x_ref=x_ref, batch=batch)
         loss_dict = {"main": self.loss(x_est, x_ref).mean()}
-        anomaly_score_dict = self.net2as(
+        anomaly_score_dict = self.calc_anomaly_score(
             x_ref=x_ref, x_est=x_est, z=z, n_sample=len(wave)
         )
 

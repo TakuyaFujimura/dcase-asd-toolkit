@@ -16,6 +16,7 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 [dcase-asd-toolkit]$ python3 -m venv venv # Requires Python 3.10+
 [dcase-asd-toolkit]$ source venv/bin/activate
 [dcase-asd-toolkit]$ pip install -e .
+[dcase-asd-toolkit]$ pip install -r requirements.txt # The full environment used in our experiments
 ```
 
 </details>
@@ -124,7 +125,7 @@ dcase-asd-toolkit
                             │   ├── test_score.csv # Anomaly scores for test data
                             │   ├── train_extract.csv # Extracted training data information, including embedding values
                             │   ├── train_score.csv # Anomaly scores for training data
-                            │   └── umap # UMAP visualization
+                            │   └── visualize # UMAP visualization
                             │── official23-dev.csv # Summarized evaluation results
                             └── official23-eval.csv
 ```
@@ -215,19 +216,19 @@ python -m asdit.bin.evaluate experiments="${evaluate_exp}" \
 </details>
 
 <details>
-<summary>asdit.bin.umap</summary>
+<summary>asdit.bin.visualize</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.umap experiments="${umap_exp}" \
+python -m asdit.bin.visualize experiments="${visualize_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
 
 - **Role**: Extracts and visualizes UMAP embeddings
 - **Arguments**: Specifies the file path for extracted information: `results/<name>/<version>/output/<ckpt_ver>/*_extract.csv`
-- **Result**: Saves results to `results/<name>/<version>/output/<ckpt_ver>/<machine>/umap`
+- **Result**: Saves results to `results/<name>/<version>/output/<ckpt_ver>/<machine>/visualize`
 
 </details>
 

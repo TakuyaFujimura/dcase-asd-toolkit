@@ -1,17 +1,22 @@
-from typing import Dict
+from typing import Dict, List, Optional
 
 import torch
 from torch import nn
+
+from asdit.utils.common import re_match_any
 
 from .utils import get_dec, get_rand_perm
 
 
 class Mixup(nn.Module):
-    def __init__(self, prob: float):
+    def __init__(self, prob: float, target_keys: Optional[List[str]] = None):
         super().__init__()
         if not (0 <= prob <= 1):
             raise ValueError(f"prob should be in [0, 1], but got {prob}.")
         self.prob = prob
+        if target_keys is None:
+            target_keys = ["onehot_.*", "wave"]
+        self.target_keys = target_keys
 
     @staticmethod
     def process(
@@ -23,12 +28,9 @@ class Mixup(nn.Module):
         result = dec * data_mix + (1 - dec) * data
         return result
 
-    def forward(
-        self,
-        batch: Dict[str, torch.Tensor],
-        is_applied: bool = True,
-    ) -> Dict[str, torch.Tensor]:
-        if not self.training or not is_applied:
+    def forward(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+
+        if not self.training:
             return batch
 
         new_batch: Dict[str, torch.Tensor] = {}
@@ -39,20 +41,9 @@ class Mixup(nn.Module):
         dec = get_dec(len(wave), self.prob, wave.device)
 
         for key in batch:
-            if isinstance(batch[key], torch.Tensor):
-                assert (
-                    key.startswith("idx_") or key.startswith("onehot_") or key == "wave"
-                )
+            if re_match_any(patterns=self.target_keys, string=key):
                 new_batch[key] = self.process(lam, perm, dec, batch[key])
             else:
-                assert key in [
-                    "path",
-                    "machine",
-                    "section",
-                    "attr",
-                    "is_normal",
-                    "is_target",
-                ]
                 new_batch[key] = batch[key]
 
         return new_batch

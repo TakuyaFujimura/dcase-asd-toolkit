@@ -13,13 +13,13 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from scipy.stats import hmean
 
-from asdit.bin.utils.evaluate import (
+from asdit.utils.asdit_utils.evaluate import (
     combine_section_metric,
     get_official_metriclist,
     get_official_sectionlist,
     hmean_is_available,
 )
-from asdit.bin.utils.path import check_file_exists, get_version_dir
+from asdit.utils.asdit_utils.path import check_file_exists, get_version_dir
 from asdit.utils.config_class import MainTableConfig
 from asdit.utils.dcase_utils import MACHINE_DICT
 
@@ -103,16 +103,13 @@ def get_table_df(
     return table_df
 
 
-@hydra.main(
-    version_base=None, config_path="../../config/table", config_name="asdit_cfg"
-)
+@hydra.main(version_base=None, config_path="../../config/table", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start making table: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = get_version_dir(cfg=cfg) / "output" / cfg.infer_ver
-
+    output_dir = get_version_dir(cfg) / "output" / cfg.infer_ver
     check_file_exists(dir_path=output_dir, file_name="*.csv", overwrite=cfg.overwrite)
 
     if any([key.startswith("official") for key in cfg.hmean_cfg_dict]):

@@ -1,0 +1,19 @@
+# @package _global_
+defaults:
+  - override /datamodule: basic
+  - override /frontend: dis_multiresnet_0256_1024_4096
+  - override /trainer: default
+
+
+label_dict_path:
+  main: "labels/${dcase}/main.json"
+
+model_ver: "all"
+
+frontend:
+  model_cfg:
+    loss_cfg:
+      tgt_class: asdit.losses.SCAdaCos
+      n_subclusters: 16
+      dynamic: false
+      trainable: true

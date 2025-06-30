@@ -1,0 +1,16 @@
+
+tqdm_refresh_rate: 1
+callbacks:
+  best:
+    monitor: "train/main"
+    filename: "epoch={epoch}-loss={train/main:.9f}"
+    save_top_k: 1
+    mode: "min"
+    auto_insert_metric_name: false
+  interval:
+    monitor: "train/main"
+    filename: "interval_epoch={epoch}-loss={train/main:.9f}"
+    save_top_k: -1
+    every_n_epochs: 4
+    save_last: true
+    auto_insert_metric_name: false

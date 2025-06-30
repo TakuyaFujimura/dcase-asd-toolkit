@@ -9,9 +9,9 @@ from lightning.pytorch.callbacks import TQDMProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 
-from asdit.bin.utils.callbacks import ModelCheckpoint, NaNCheckCallback
-from asdit.bin.utils.path import get_version_dir
 from asdit.datasets import PLDataModule
+from asdit.utils.asdit_utils.callbacks import ModelCheckpoint, NaNCheckCallback
+from asdit.utils.asdit_utils.path import get_version_dir
 from asdit.utils.common import instantiate_tgt
 from asdit.utils.config_class import MainTrainConfig
 from asdit.utils.dcase_utils import parse_sec_cfg
@@ -30,11 +30,13 @@ def make_trainer(
 ) -> pl.Trainer:
     # Callbacks
     callback_list: List[Any] = [NaNCheckCallback()]
-    for key_, cfg_ in cfg.callback_opts.items():
+    for _, callback_cfg in cfg.callback.callbacks.items():
         callback_list.append(
-            ModelCheckpoint(**cfg_, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path)
+            ModelCheckpoint(
+                **callback_cfg, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path
+            )
         )
-    callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
+    callback_list.append(TQDMProgressBar(refresh_rate=cfg.callback.tqdm_refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
         save_dir=f"{cfg.result_dir}/{cfg.name}",
@@ -55,31 +57,21 @@ def make_trainer(
 
 def setup_datamodule(cfg: MainTrainConfig) -> pl.LightningDataModule:
     logger.info("Create datamodule")
-    dm = PLDataModule(
-        dm_cfg=cfg.datamodule,
-        label_dict_path=cfg.label_dict_path,
-    )
+    dm = PLDataModule(dm_cfg=cfg.datamodule)
     return dm
 
 
 def setup_frontend(cfg: MainTrainConfig) -> pl.LightningModule:
     logger.info("Create frontend")
-    frontend = instantiate_tgt(
-        {
-            "label_dict_path": cfg.label_dict_path,
-            **cfg.frontend.model_dump(),
-        }
-    )
+    frontend = instantiate_tgt(cfg.frontend)
     return frontend
 
 
-@hydra.main(
-    version_base=None, config_path="../../config/train", config_name="asdit_cfg"
-)
+@hydra.main(version_base=None, config_path="../../config/train", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     if not cfg.trainer.get("deterministic", False):
-        raise ValueError("Not deterministic!!!")
+        logger.warning("Not deterministic!")
     logger.info(f"Start experiment: {HydraConfig().get().run.dir}")
     logger.info(f"version: {cfg.version}/{cfg.seed}")
     pl.seed_everything(cfg.seed, workers=True)
@@ -87,7 +79,7 @@ def main(hydra_cfg: DictConfig) -> None:
 
     ckpt_dir = get_version_dir(cfg=cfg) / "model" / cfg.model_ver / "checkpoints"
     if ckpt_dir.exists() and cfg.resume_ckpt_path is None:
-        logger.warning("already done")
+        logger.warning("Already done. Skipping training...")
         return
 
     dm = setup_datamodule(cfg)

@@ -1,0 +1,16 @@
+# @package _global_
+restore_or_scratch: scratch
+
+infer_ver: null
+
+
+scratch_frontend:
+  tgt_class: asdit.frontends.EATFrozenModel
+  model_cfg:
+    ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
+
+
+datamodule:
+  train:
+    collator:
+      sec: all

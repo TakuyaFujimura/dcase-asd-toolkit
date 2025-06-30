@@ -1,10 +1,8 @@
 import logging
 from abc import abstractmethod
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from torch import nn
-
-from asdit.utils.config_class.output_config import PLOutput
 
 from ..base import BaseFrontend
 
@@ -26,5 +24,5 @@ class BaseFrozenModel(BaseFrontend):
         pass
 
     @abstractmethod
-    def extract(self, batch: dict) -> PLOutput:
+    def extract(self, batch: dict) -> Dict[str, Any]:
         pass

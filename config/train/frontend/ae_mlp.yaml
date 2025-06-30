@@ -4,29 +4,28 @@ optim_cfg:
   tgt_class: torch.optim.AdamW
   lr: 1.0e-3
 
-scheduler_cfg: null
-grad_cfg: {}
+lrscheduler_cfg: null
 
-
-audio_feat_cfg:
-  tgt_class: asdit.models.audio_feature.FlattenSTFT
-  stft_cfg:
-    sr: ${datamodule.sr}
-    n_fft: 1024
-    hop_length: 512
-    n_mels: 128
-    power: 1.0
-    f_min: 0.0
-    f_max: 8000.0
-    use_log: true
-    temporal_norm: false
-  n_frames: 5
+label_dict_path: ${label_dict_path}
 
 model_cfg:
   network_cfg:
     tgt_class: asdit.models.autoencoder.AE_MLP
     z_dim: 8
     h_dim: 128
-  audio_feat_cfg: ${frontend.audio_feat_cfg}
+  audio_feat_cfg:
+    tgt_class: asdit.models.audio_feature.FlattenSTFT
+    stft_cfg:
+      sr: ${datamodule.sr}
+      n_fft: 1024
+      hop_length: 512
+      n_mels: 128
+      power: 1.0
+      f_min: 0.0
+      f_max: 8000.0
+      use_log: true
+      temporal_norm: false
+    n_frames: 5
   loss_cfg:
     tgt_class: torch.nn.MSELoss
+
