@@ -7,8 +7,9 @@ defaults:
 label_dict_path: {}
 
 callback:
-  interval:
-    every_n_epochs: 10
+  callbacks:
+    interval:
+      every_n_epochs: 10
 
 trainer:
   max_epochs: 50
