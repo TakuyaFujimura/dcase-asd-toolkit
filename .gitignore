@@ -6,7 +6,7 @@ labels/*/logs
 .d00*
 *.out
 analysis/
-jobs/asd/call_dcase_seed_loop/
+jobs/asd/dcase_workshop_2025/
 fairseq/
 
 # Byte-compiled / optimized / DLL files
