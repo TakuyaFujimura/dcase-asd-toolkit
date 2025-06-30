@@ -43,29 +43,31 @@ def dcase_auc(
         raise NotImplementedError()
     return auc_score  # type: ignore
 
-
-def get_auc_type_list(score_df: pd.DataFrame) -> List[str]:
-    auc_domain_list = []
-
-    all_section = np.unique(score_df["section"].values)  # type: ignore
+def get_auc_type_list_domain_auc(score_df: pd.DataFrame):
+    domain_auc_list = []
     all_is_target = np.unique(score_df["is_target"].values)  # type: ignore
 
     if 0 in all_is_target:
-        auc_domain_list += ["s_auc", "s_pauc"]
+        domain_auc_list += ["s_auc", "s_pauc"]
     if 1 in all_is_target:
-        auc_domain_list += ["t_auc", "t_pauc"]
+        domain_auc_list += ["t_auc", "t_pauc"]
     if 0 in all_is_target and 1 in all_is_target:
-        auc_domain_list += ["smix_auc", "tmix_auc", "mix_auc", "mix_pauc"]
+        domain_auc_list += ["smix_auc", "tmix_auc", "mix_auc", "mix_pauc"]
+    return domain_auc_list
+
+def get_auc_type_list(score_df: pd.DataFrame) -> List[str]:
+    all_section = np.unique(score_df["section"].values)  # type: ignore
+    domain_auc_list = get_auc_type_list_domain_auc(score_df)
 
     auc_type_list = []
     for section in all_section:
-        for auc_domain in auc_domain_list:
-            auc_type_list.append(f"{section}_{auc_domain}")
+        for domain_auc in domain_auc_list:
+            auc_type_list.append(f"{section}_{domain_auc}")
     return auc_type_list
 
 # ----------------------------------------------------------------------- #
 
-def get_official_auc_list(dcase: str) -> List[str]:
+def get_official_domain_auc_list(dcase: str) -> List[str]:
     if dcase == "dcase2020":
         return ["s_auc", "s_pauc"]
     elif dcase == "dcase2021":
@@ -103,7 +105,7 @@ def get_official_section_list(
         raise NotImplementedError()
 
 
-def add_official_main(evaluate_df: pd.DataFrame, dcase: str, metric_name: str, sub_auc_list: List[str], sub_section_list: List[int]) -> None:
+def mix_auc_and_section(evaluate_df: pd.DataFrame, dcase: str, metric_name: str, sub_auc_list: List[str], sub_section_list: List[int]) -> None:
     sub_metric_list = [f"{section}_{auc}" for section in sub_section_list for auc in sub_auc_list]
     if len(sub_metric_list) == 0:
         logger.warning(f"Skipped {metric_name} because sub_metric_list is empty.")
@@ -128,7 +130,7 @@ def add_official(
     machine: str,
 ) -> pd.DataFrame:
     
-    sub_auc_list = get_official_auc_list(dcase)
+    sub_auc_list = get_official_domain_auc_list(dcase)
 
     if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
         for split in ["dev", "eval"]:
@@ -136,13 +138,37 @@ def add_official(
             sub_section_list = get_official_section_list(
                 dcase=dcase, split=split, machine=machine
             )
-            add_official_main(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
+            mix_auc_and_section(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
     elif dcase in ["dcase2023", "dcase2024"]:
         metric_name = f"official{dcase[-2:]}"
         sub_section_list = get_official_section_list(dcase=dcase)
-        add_official_main(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
+        mix_auc_and_section(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
     else:
         raise NotImplementedError()
         
+
+    return evaluate_df
+
+
+
+def add_split_total(
+    evaluate_df: pd.DataFrame,
+    dcase: str,
+    machine: str,
+    domain_auc: str,
+) -> pd.DataFrame:
+    sub_auc_list = [domain_auc]
+    if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
+        for split in ["dev", "eval"]:
+            metric_name = f"{domain_auc}-{split}"
+            sub_section_list = get_official_section_list(
+                dcase=dcase, split=split, machine=machine
+            )
+            mix_auc_and_section(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
+    elif dcase in ["dcase2023", "dcase2024"]:
+        # Only one section
+        return evaluate_df
+    else:
+        raise NotImplementedError()
 
     return evaluate_df

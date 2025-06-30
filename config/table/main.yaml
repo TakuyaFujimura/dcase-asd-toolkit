@@ -14,10 +14,10 @@ result_dir: "./results"
 
 metrics:
   - official
-  # - s_auc
-  # - t_auc
-  # - mix_auc
-overwrite: true
+  - s_auc
+  - t_auc
+  - mix_auc
+overwrite: false
 
 
 

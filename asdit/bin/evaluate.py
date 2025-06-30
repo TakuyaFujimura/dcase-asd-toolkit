@@ -11,9 +11,11 @@ from omegaconf import DictConfig, OmegaConf
 
 from asdit.utils.asdit_utils.evaluate import (
     add_official,
+    add_split_total,
     dcase_auc,
     get_as_name,
     get_auc_type_list,
+    get_auc_type_list_domain_auc,
 )
 from asdit.utils.asdit_utils.path import make_output_dir
 from asdit.utils.config_class import MainEvaluateConfig
@@ -49,6 +51,14 @@ def main(hydra_cfg: DictConfig) -> None:
                 is_target=score_df["is_target"].values,  # type: ignore
                 auc_type=auc_type,
             )
+    for domain_auc in get_auc_type_list_domain_auc(score_df):
+        evaluate_df = add_split_total(
+            evaluate_df=evaluate_df,
+            dcase=cfg.dcase,
+            machine=cfg.machine,
+            domain_auc=domain_auc
+        )
+        
     evaluate_df = add_official(
         evaluate_df=evaluate_df,
         dcase=cfg.dcase,
