@@ -13,6 +13,8 @@ try:
 except ImportError:
     print("----------------------------------------------")
     print("[Error] Please install fairseq to use EAT.")
+    print("[Step 1/2] cd dcase-asd-toolkit/jobs/install")
+    print("[Step 2/2] bash install_fairseq.sh")
     print("----------------------------------------------")
 
 
