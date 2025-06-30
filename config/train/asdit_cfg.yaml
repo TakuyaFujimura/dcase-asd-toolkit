@@ -3,8 +3,9 @@ defaults:
     - datamodule: null
     - frontend: null
     - trainer: null
-    - experiments: null
     - callback: default
+    - experiments: null
+
 
 seed: null
 dcase: null

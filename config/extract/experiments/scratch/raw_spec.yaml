@@ -5,7 +5,7 @@ infer_ver: null
 scratch_frontend:
   tgt_class: asdit.frontends.STFTPoolModel
   stft_cfg:
-    sr: ${datamodule.sr}
+    sr: ${datamodule.train.collator.sr}
     n_fft: 1024
     hop_length: 512
     n_mels: 128
