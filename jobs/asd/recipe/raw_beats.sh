@@ -1,22 +1,22 @@
 #!/bin/bash
 
-# This is a recipe for a discriminative ASD system
-# Frontend models are shared for all machine types
+# This is a recipe for ASD system using BEATs features
+# This does not require training neural networks
+# https://arxiv.org/abs/2409.05035
 
 # ---------------------------- #
 dcase=$1
-seed=$2
+seed=0
 name="recipe"
-version=$3
+version="raw_beats"
 infer_ver="last"
 # ---------------------------- #
-experiments_train="${version}"
-experiments_extract="restore/shared_dcasesec"
+# experiments_train=""
+experiments_extract="scratch/${version}"
 experiments_score="default"
 # ---------------------------- #
 source ../base/base.sh
 
-asdit_train experiments="${experiments_train}"
 for machine in $machines; do
     asdit_extract experiments="${experiments_extract}"
     asdit_score experiments="${experiments_score}"

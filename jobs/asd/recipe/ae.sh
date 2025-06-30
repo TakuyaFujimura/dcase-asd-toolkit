@@ -1,23 +1,23 @@
 #!/bin/bash
 
-# This is a recipe for a discriminative ASD system
-# Frontend models are shared for all machine types
+# This is a recipe for an autoencoder-based ASD system
+# Different Frontend models are created for each machine type
 
 # ---------------------------- #
 dcase=$1
 seed=$2
 name="recipe"
-version=$3
+version="ae"
 infer_ver="last"
 # ---------------------------- #
 experiments_train="${version}"
-experiments_extract="restore/shared_dcasesec"
-experiments_score="default"
+experiments_extract="restore/machinewise_allsec"
+experiments_score="no_backend"
 # ---------------------------- #
 source ../base/base.sh
 
-asdit_train experiments="${experiments_train}"
 for machine in $machines; do
+    asdit_train machine="${machine}" experiments="${experiments_train}"
     asdit_extract experiments="${experiments_extract}"
     asdit_score experiments="${experiments_score}"
     asdit_evaluate

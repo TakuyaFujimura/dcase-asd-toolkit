@@ -118,6 +118,11 @@ class BasePLAUCFrontend(BasePLFrontend):
             raise ValueError(
                 "Please set self.anomaly_score_name before setup_auc and after __init__()"
             )
+        for as_key in self.anomaly_score_name:
+            if "/" in as_key:
+                raise ValueError(
+                    f"Anomaly score name '{as_key}' should not contain '/' character."
+                )
         self.auc_type_list = [
             "all_s_auc",  # AUC with all sections in source domain
             "all_t_auc",
@@ -128,7 +133,7 @@ class BasePLAUCFrontend(BasePLFrontend):
         self.auroc_model_dict: Dict[str, AUROC] = {}
         for auc_key in self.auc_type_list:
             for as_key in self.anomaly_score_name:
-                self.auroc_model_dict[f"{auc_key}_{as_key}"] = AUROC()
+                self.auroc_model_dict[f"{auc_key}/{as_key}"] = AUROC()
 
     def validation_step_auc(
         self, anomaly_score_dict: Dict[str, torch.Tensor], batch: dict
@@ -137,8 +142,8 @@ class BasePLAUCFrontend(BasePLFrontend):
         is_target_np = np.array(batch["is_target"])
         is_anomaly_tensor = 1 - torch.tensor(batch["is_normal"])
         for auc_model_key in self.auroc_model_dict:
-            auc_type = "_".join(auc_model_key.split("_")[:3])
-            as_key = "_".join(auc_model_key.split("_")[3:])
+            auc_type = auc_model_key.split("/")[0]
+            as_key = auc_model_key.split("/")[1]
             domain_idx_np = get_domain_idx(
                 auc_type=auc_type,
                 is_target=is_target_np,

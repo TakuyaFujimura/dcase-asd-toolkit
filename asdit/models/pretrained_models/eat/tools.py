@@ -12,7 +12,7 @@ try:
     from fairseq.utils import import_user_module
 except ImportError:
     print("----------------------------------------------")
-    print("[Error] Please install fairseq to use EATLoRA.")
+    print("[Error] Please install fairseq to use EAT.")
     print("----------------------------------------------")
 
 

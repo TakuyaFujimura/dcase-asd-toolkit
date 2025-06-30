@@ -30,13 +30,13 @@ def make_trainer(
 ) -> pl.Trainer:
     # Callbacks
     callback_list: List[Any] = [NaNCheckCallback()]
-    for _, callback_cfg in cfg.callback.items():
+    for _, callback_cfg in cfg.callback.callbacks.items():
         callback_list.append(
             ModelCheckpoint(
                 **callback_cfg, dirpath=ckpt_dir, resume_ckpt_path=resume_ckpt_path
             )
         )
-    callback_list.append(TQDMProgressBar(refresh_rate=cfg.refresh_rate))
+    callback_list.append(TQDMProgressBar(refresh_rate=cfg.callback.tqdm_refresh_rate))
     # Logger
     pl_logger = TensorBoardLogger(
         save_dir=f"{cfg.result_dir}/{cfg.name}",
