@@ -1,8 +1,8 @@
 # @package _global_
 defaults:
-    - override /datamodule: audiofeat
-    - override /frontend: ae_mlp
-    - override /trainer: default
+  - override /datamodule: audiofeat
+  - override /frontend: ae_mlp
+  - override /trainer: default
 
 label_dict_path: {}
 

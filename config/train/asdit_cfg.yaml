@@ -1,10 +1,10 @@
 defaults:
-    - _self_
-    - datamodule: null
-    - frontend: null
-    - trainer: null
-    - callback: default
-    - experiments: null
+  - _self_
+  - datamodule: null
+  - frontend: null
+  - trainer: null
+  - callback: default
+  - experiments: null
 
 
 seed: null
@@ -21,5 +21,5 @@ model_ver: null
 
 
 hydra:
-    run:
-        dir: ${result_dir}/${name}/${dcase}/${version}/${seed}/model/${model_ver}
+  run:
+    dir: ${result_dir}/${name}/${dcase}/${version}/${seed}/model/${model_ver}
