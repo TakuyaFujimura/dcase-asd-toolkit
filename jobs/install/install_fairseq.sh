@@ -12,5 +12,5 @@ pip install -e fairseq
 pip install -e .
 
 echo "Note: Dependency conflicts are expected but do not cause issues in our experiments."
-echo " [Expected Warning 1]: fairseq 0.12.2 requires hydra-core<1.1,>=1.0.7, but you have hydra-core 1.2.0."
-echo " [Expected Warning 2]: fairseq 0.12.2 requires omegaconf<2.1, but you have omegaconf 2.2.3."
+echo " [Expected Warning 1]: fairseq 0.12.2 requires hydra-core<1.1,>=1.0.7, but you have hydra-core x.x.x."
+echo " [Expected Warning 2]: fairseq 0.12.2 requires omegaconf<2.1, but you have omegaconf x.x.x."

@@ -16,6 +16,7 @@ This repository provides various recipes for the DCASE Task 2 Anomalous Sound De
 [dcase-asd-toolkit]$ python3 -m venv venv # Requires Python 3.10+
 [dcase-asd-toolkit]$ source venv/bin/activate
 [dcase-asd-toolkit]$ pip install -e .
+[dcase-asd-toolkit]$ pip install -r requirements.txt # The full environment used in our experiments
 ```
 
 </details>
