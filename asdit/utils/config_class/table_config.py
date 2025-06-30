@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -15,7 +15,7 @@ class MainTableConfig(BaseModel):
     infer_ver: str
     result_dir: Path
 
-    hmean_cfg_dict: Dict[str, List[str]] = Field(default_factory=dict)
+    metrics: List[str] = Field(default_factory=list)
     overwrite: bool = False
 
     @field_validator("name", mode="before")
