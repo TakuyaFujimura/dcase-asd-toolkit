@@ -103,9 +103,7 @@ def get_table_df(
     return table_df
 
 
-@hydra.main(
-    version_base=None, config_path="../../config/table", config_name="asdit_cfg"
-)
+@hydra.main(version_base=None, config_path="../../config/table", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start making table: {HydraConfig().get().run.dir}")

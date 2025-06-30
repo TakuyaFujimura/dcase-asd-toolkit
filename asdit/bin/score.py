@@ -22,9 +22,7 @@ def hydra_to_pydantic(config: DictConfig) -> MainScoreConfig:
     return MainScoreConfig(**config_dict)
 
 
-@hydra.main(
-    version_base=None, config_path="../../config/score", config_name="asdit_cfg"
-)
+@hydra.main(version_base=None, config_path="../../config/score", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start scoring: {HydraConfig().get().run.dir}")

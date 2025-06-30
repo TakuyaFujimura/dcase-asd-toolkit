@@ -31,7 +31,7 @@ def hydra_to_pydantic(config: DictConfig) -> MainVisualizeConfig:
     return MainVisualizeConfig(**config_dict)
 
 
-@hydra.main(version_base=None, config_path="../../config/visualize", config_name="asdit_cfg")
+@hydra.main(version_base=None, config_path="../../config/visualize", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start visualization: {HydraConfig().get().run.dir}")
@@ -56,7 +56,7 @@ def main(hydra_cfg: DictConfig) -> None:
     else:
         logger.info(
             f"Read existing {visualize_dir}/{path_stem}.npz. "
-            + "Set asdit_cfg.overwrite=True to overwrite it."
+            + "Set overwrite=True to overwrite it."
         )
 
     # visualization

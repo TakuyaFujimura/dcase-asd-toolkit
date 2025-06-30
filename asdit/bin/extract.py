@@ -26,9 +26,7 @@ def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
     return MainExtractConfig(**config_dict)
 
 
-@hydra.main(
-    version_base=None, config_path="../../config/extract", config_name="asdit_cfg"
-)
+@hydra.main(version_base=None, config_path="../../config/extract", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
     cfg = hydra_to_pydantic(hydra_cfg)
     logger.info(f"Start extraction: {HydraConfig().get().run.dir}")
