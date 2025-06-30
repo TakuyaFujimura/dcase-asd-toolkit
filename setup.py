@@ -8,11 +8,11 @@ setup(
     author_email="fujimura.takuya@g.sp.m.is.nagoya-u.ac.jp",
     packages=find_packages(),
     python_requires=">=3.10.0",
-    # install_requires=[
+    install_requires=[
+        "omegaconf>=2.1",
+        "hydra-core>=1.1",
     #     "librosa==0.10.2.post1",
-    #     "omegaconf==2.2.3",
     #     "scikit_learn==1.6.1",
-    #     "hydra-core==1.2.0",
     #     "tqdm==4.66.5",
     #     "lightning==2.4.0",
     #     "tensorboardX==2.6.2.2",
@@ -29,5 +29,5 @@ setup(
     #     "imbalanced-learn==0.13.0",
     #     "peft==0.15.1",
     #     "timm==1.0.15",
-    # ],
+    ],
 )
