@@ -63,19 +63,20 @@ def get_auc_type_list(score_df: pd.DataFrame) -> List[str]:
             auc_type_list.append(f"{section}_{auc_domain}")
     return auc_type_list
 
+# ----------------------------------------------------------------------- #
 
-def get_official_metriclist(dcase: str) -> List[str]:
+def get_official_auc_list(dcase: str) -> List[str]:
     if dcase == "dcase2020":
         return ["s_auc", "s_pauc"]
     elif dcase == "dcase2021":
         return ["s_auc", "t_auc", "s_pauc", "t_pauc"]
-    elif dcase in ["dcase2022", "dcase2023", "dcase2024", "dcase2025"]:
+    elif dcase in ["dcase2022", "dcase2023", "dcase2024"]:
         return ["smix_auc", "tmix_auc", "mix_pauc"]
     else:
         raise NotImplementedError()
 
 
-def get_official_sectionlist(
+def get_official_section_list(
     dcase: str, split: str = "", machine: str = ""
 ) -> List[int]:
 
@@ -96,74 +97,52 @@ def get_official_sectionlist(
             return [3, 4, 5]
         else:
             raise NotImplementedError()
-    elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
+    elif dcase in ["dcase2023", "dcase2024"]:
         return [0]
     else:
         raise NotImplementedError()
 
 
-def combine_section_metric(sectionlist: List[int], metriclist: List[str]) -> List[str]:
-    return [f"{section}_{metric}" for section in sectionlist for metric in metriclist]
+def add_official_main(evaluate_df: pd.DataFrame, dcase: str, metric_name: str, sub_auc_list: List[str], sub_section_list: List[int]) -> None:
+    sub_metric_list = [f"{section}_{auc}" for section in sub_section_list for auc in sub_auc_list]
+    if len(sub_metric_list) == 0:
+        logger.warning(f"Skipped {metric_name} because sub_metric_list is empty.")
+        return
+    if not set(sub_metric_list).issubset(evaluate_df.columns):
+        logger.warning(
+            f"Skipped {metric_name} because sub_metric_list {sub_metric_list} is not available in evaluate_df."
+        )
+        return
+
+    if dcase == "dcase2020":
+        evaluate_df[metric_name] = evaluate_df[sub_metric_list].apply(np.mean, axis=1)
+    else:
+        evaluate_df[metric_name] = evaluate_df[sub_metric_list].apply(
+            lambda x: hmean(x), axis=1
+        )
 
 
-def complete_hmean_cfg(
-    hmean_cfg_dict: Dict[str, List[str]], dcase: str, machine: str
-) -> Dict[str, List[str]]:
-    hmean_cfg_dict_new = {}
-    for hmean_name, metriclist in hmean_cfg_dict.items():
-        if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
-            for split in ["dev", "eval"]:
-                hmean_cfg_dict_new[f"{hmean_name}-{split}"] = combine_section_metric(
-                    sectionlist=get_official_sectionlist(
-                        dcase=dcase, split=split, machine=machine
-                    ),
-                    metriclist=metriclist,
-                )
-        elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
-            hmean_cfg_dict_new[hmean_name] = combine_section_metric(
-                sectionlist=get_official_sectionlist(dcase=dcase), metriclist=metriclist
-            )
-        else:
-            raise NotImplementedError()
-
-    return hmean_cfg_dict_new
-
-
-def hmean_is_available(
-    evaluate_df: pd.DataFrame, hmean_name: str, hmean_cols: List[str]
-) -> bool:
-    if len(hmean_cols) == 0:
-        return False
-    if not set(hmean_cols).issubset(evaluate_df.columns):
-        return False
-    return True
-
-
-def add_hmean(
+def add_official(
     evaluate_df: pd.DataFrame,
     dcase: str,
-    hmean_cfg_dict: Dict[str, List[str]],
     machine: str,
 ) -> pd.DataFrame:
+    
+    sub_auc_list = get_official_auc_list(dcase)
 
-    # added official metriclist
-    hmean_cfg_dict[f"official{dcase[-2:]}"] = get_official_metriclist(dcase=dcase)
-    # added section to metric
-    hmean_cfg_dict = complete_hmean_cfg(
-        hmean_cfg_dict=hmean_cfg_dict, dcase=dcase, machine=machine
-    )
+    if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
+        for split in ["dev", "eval"]:
+            metric_name = f"official{dcase[-2:]}-{split}"
+            sub_section_list = get_official_section_list(
+                dcase=dcase, split=split, machine=machine
+            )
+            add_official_main(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
+    elif dcase in ["dcase2023", "dcase2024"]:
+        metric_name = f"official{dcase[-2:]}"
+        sub_section_list = get_official_section_list(dcase=dcase)
+        add_official_main(evaluate_df=evaluate_df, dcase=dcase, metric_name=metric_name, sub_auc_list=sub_auc_list, sub_section_list=sub_section_list)
+    else:
+        raise NotImplementedError()
+        
 
-    for hmean_name, hmean_cols in hmean_cfg_dict.items():
-        if not hmean_is_available(
-            evaluate_df=evaluate_df, hmean_name=hmean_name, hmean_cols=hmean_cols
-        ):
-            logger.warning(
-                f"Skipped {hmean_name} because {hmean_cols} is not available."
-            )
-        if dcase == "dcase2020":
-            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(np.mean, axis=1)
-        else:
-            evaluate_df[hmean_name] = evaluate_df[hmean_cols].apply(
-                lambda x: hmean(x), axis=1
-            )
     return evaluate_df

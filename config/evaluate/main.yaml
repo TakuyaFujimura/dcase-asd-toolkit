@@ -12,8 +12,6 @@ version: null
 infer_ver: null
 result_dir: "./results"
 
-hmean_cfg_dict: {}
-
 machine: null
 
 overwrite: false

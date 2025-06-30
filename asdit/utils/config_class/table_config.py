@@ -4,7 +4,6 @@ from typing import Dict, List
 from pydantic import BaseModel, Field, field_validator
 
 from .cast_utils import cast_str, check_dcase
-from .evaluate_config import check_hmean_cfg_dict
 
 
 class MainTableConfig(BaseModel):
@@ -30,7 +29,3 @@ class MainTableConfig(BaseModel):
     @field_validator("dcase", mode="before")
     def check_dcase(cls, v):
         return check_dcase(v)
-
-    @field_validator("hmean_cfg_dict", mode="after")
-    def check_hmean_cfg_dict_(cls, v: Dict[str, List[str]]):
-        return check_hmean_cfg_dict(v)

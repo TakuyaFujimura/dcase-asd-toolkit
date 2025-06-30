@@ -10,7 +10,7 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from asdit.utils.asdit_utils.evaluate import (
-    add_hmean,
+    add_official,
     dcase_auc,
     get_as_name,
     get_auc_type_list,
@@ -49,10 +49,9 @@ def main(hydra_cfg: DictConfig) -> None:
                 is_target=score_df["is_target"].values,  # type: ignore
                 auc_type=auc_type,
             )
-    evaluate_df = add_hmean(
+    evaluate_df = add_official(
         evaluate_df=evaluate_df,
         dcase=cfg.dcase,
-        hmean_cfg_dict=cfg.hmean_cfg_dict,
         machine=cfg.machine,
     )
 
