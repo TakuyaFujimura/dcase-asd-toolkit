@@ -32,7 +32,11 @@ def get_table_df(
     evaluate_df_list = []
     machine_list = MACHINE_DICT[f"{dcase}-{split}"]
     if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
-        metric = f"{metric}-{split}"
+        metric = f"{split}_{metric}"
+    elif dcase in ["dcase2023", "dcase2024"]:
+        metric = f"0_{metric}"
+    else:
+        raise ValueError(f"Unknown dcase: {dcase}")
 
     # Loop of machines
     for i, m in enumerate(machine_list):
@@ -51,8 +55,8 @@ def get_table_df(
     backend_array = np.sort(backend_array)
     table_df_list = []
     for df in evaluate_df_list:
-        ordered_df = df[df['backend'].isin(backend_array)]
-        ordered_df = ordered_df.set_index('backend').loc[backend_array].reset_index()
+        ordered_df = df[df["backend"].isin(backend_array)]
+        ordered_df = ordered_df.set_index("backend").loc[backend_array].reset_index()
         table_df_list += [ordered_df[metric]]
     table_df = pd.concat(table_df_list, axis=1)
     table_df.columns = machine_list
@@ -88,7 +92,7 @@ def main(hydra_cfg: DictConfig) -> None:
                 metric=metric,
             )
             if table_df is not None:
-                table_df.to_csv(output_dir / f"{metric}-{split}.csv", index=False)
+                table_df.to_csv(output_dir / f"{split}_{metric}.csv", index=False)
 
 
 if __name__ == "__main__":
