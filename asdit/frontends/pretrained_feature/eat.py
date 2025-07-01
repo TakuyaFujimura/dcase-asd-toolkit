@@ -25,9 +25,10 @@ class EATFrozenModel(BaseFrozenModel):
         if sr != 16000:
             raise ValueError("The sampling rate should be 16000")
         if update_cfg is None:
-            update_cfg = {"sr": sr}
+            update_cfg = {"sr": sr, "sec": sec}
         else:
             update_cfg["sr"] = sr
+            update_cfg["sec"] = sec
         self.prediction_mode = prediction_mode
         self.target_length = calc_target_length(sec=sec, sr=sr)
         model, _ = restore(ckpt_path=ckpt_path, update_cfg=update_cfg)
