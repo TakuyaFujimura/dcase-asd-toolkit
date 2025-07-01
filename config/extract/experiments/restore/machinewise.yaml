@@ -8,4 +8,4 @@ infer_ver: null
 datamodule:
   train:
     collator:
-      sec: all
+      sec: ${dcase}

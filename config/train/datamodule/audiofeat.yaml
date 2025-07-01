@@ -36,7 +36,7 @@ valid:
   collator:
     tgt_class: asdit.datasets.DCASEWaveCollator
     sr: ${datamodule.sr}
-    sec: all
+    sec: ${dcase}
     shuffle: false
     label_dict_path: ${label_dict_path}
 

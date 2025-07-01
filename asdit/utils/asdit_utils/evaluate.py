@@ -64,7 +64,7 @@ def get_auc_type_list(score_df: pd.DataFrame) -> List[str]:
     auc_type_list = []
     for section in all_section:
         for domain_auc in domain_auc_list:
-            auc_type_list.append(f"{section}_{domain_auc}")
+            auc_type_list.append(f"{int(section)}_{domain_auc}")
     return auc_type_list
 
 

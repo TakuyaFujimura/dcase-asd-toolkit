@@ -19,4 +19,4 @@ scratch_frontend:
 datamodule:
   train:
     collator:
-      sec: all
+      sec: ${dcase}

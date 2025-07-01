@@ -11,7 +11,7 @@ version="ae"
 infer_ver="last"
 # ---------------------------- #
 experiments_train="${version}"
-experiments_extract="restore/machinewise_allsec"
+experiments_extract="restore/machinewise"
 experiments_score="no_backend"
 # ---------------------------- #
 source ../base/base.sh

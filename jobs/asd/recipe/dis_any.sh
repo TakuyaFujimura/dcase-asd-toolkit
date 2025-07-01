@@ -11,7 +11,7 @@ version=$3
 infer_ver="last"
 # ---------------------------- #
 experiments_train="${version}"
-experiments_extract="restore/shared_dcasesec"
+experiments_extract="restore/shared"
 experiments_score="default"
 # ---------------------------- #
 source ../base/base.sh
