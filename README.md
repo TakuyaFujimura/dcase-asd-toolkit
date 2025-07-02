@@ -1,4 +1,4 @@
-# DCASE Anomalous Sound Detection Toolkit (ASDIT)
+# DCASE Anomalous Sound Detection Toolkit (asdkit)
 
 This repository provides various recipes for the DCASE Task 2 Anomalous Sound Detection (ASD).
 
@@ -96,7 +96,7 @@ On Windows, creating symbolic links needs to be allowed. An easy way to do this 
 **Result**
 ```bash
 dcase-asd-toolkit
-├── asdit
+├── asdkit
 ├── ...
 └── results
     ├── ...
@@ -145,12 +145,12 @@ These tools load and merge configurations from `config/<tool>/config.yaml`, `con
 
 
 <details>
-<summary>asdit.bin.train</summary>
+<summary>asdkit.bin.train</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
+python -m asdkit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
 'name='${name}'' 'version='${version}''
 ```
 
@@ -160,12 +160,12 @@ python -m asdit.bin.train experiments="${name}/${version}" 'seed='${seed}'' \
 </details>
 
 <details>
-<summary>asdit.bin.extract</summary>
+<summary>asdkit.bin.extract</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.extract experiments="${extract_exp}" \
+python -m asdkit.bin.extract experiments="${extract_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -179,12 +179,12 @@ python -m asdit.bin.extract experiments="${extract_exp}" \
 </details>
 
 <details>
-<summary>asdit.bin.score</summary>
+<summary>asdkit.bin.score</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.score experiments="${score_exp}" \
+python -m asdkit.bin.score experiments="${score_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -199,12 +199,12 @@ python -m asdit.bin.score experiments="${score_exp}" \
 
 
 <details>
-<summary>asdit.bin.evaluate</summary>
+<summary>asdkit.bin.evaluate</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.evaluate experiments="${evaluate_exp}" \
+python -m asdkit.bin.evaluate experiments="${evaluate_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -216,12 +216,12 @@ python -m asdit.bin.evaluate experiments="${evaluate_exp}" \
 </details>
 
 <details>
-<summary>asdit.bin.visualize</summary>
+<summary>asdkit.bin.visualize</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.visualize experiments="${visualize_exp}" \
+python -m asdkit.bin.visualize experiments="${visualize_exp}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}'' 'machine='${machine}''
 ```
@@ -234,12 +234,12 @@ python -m asdit.bin.visualize experiments="${visualize_exp}" \
 
 
 <details>
-<summary>asdit.bin.table</summary>
+<summary>asdkit.bin.table</summary>
 <br>
 
 ```bash
 # jobs/asd/base/base.sh
-python -m asdit.bin.table dcase="${dcase}" \
+python -m asdkit.bin.table dcase="${dcase}" \
 'name='${name}'' 'version='${version}'' 'seed='${seed}'' \
 'ckpt_ver='${ckpt_ver}''
 ```

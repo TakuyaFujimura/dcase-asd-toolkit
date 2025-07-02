@@ -13,7 +13,7 @@ model_ver: "all"
 frontend:
   model_cfg:
     loss_cfg:
-      tgt_class: asdit.losses.AdaCos
+      tgt_class: asdkit.losses.AdaCos
       dynamic: false
       trainable: false
     augmentation_cfg_list: []

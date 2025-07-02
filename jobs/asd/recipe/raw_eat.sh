@@ -18,9 +18,9 @@ experiments_score="default"
 source ../base/base.sh
 
 for machine in $machines; do
-    asdit_extract experiments="${experiments_extract}"
-    asdit_score experiments="${experiments_score}"
-    asdit_evaluate
-    asdit_visualize
+    asdkit_extract experiments="${experiments_extract}"
+    asdkit_score experiments="${experiments_score}"
+    asdkit_evaluate
+    asdkit_visualize
 done
-asdit_table
+asdkit_table

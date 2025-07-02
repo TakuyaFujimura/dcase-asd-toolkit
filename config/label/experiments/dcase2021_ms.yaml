@@ -2,5 +2,5 @@
 dcase: dcase2021
 name: "machine_section"
 labeler:
-  tgt_class: asdit.labelers.BasicInfoLabeler
+  tgt_class: asdkit.labelers.BasicInfoLabeler
   label_name: "machine_section"

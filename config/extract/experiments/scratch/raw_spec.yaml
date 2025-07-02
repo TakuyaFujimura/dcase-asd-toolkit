@@ -3,7 +3,7 @@ restore_or_scratch: scratch
 infer_ver: null
 
 scratch_frontend:
-  tgt_class: asdit.frontends.STFTPoolModel
+  tgt_class: asdkit.frontends.STFTPoolModel
   stft_cfg:
     sr: ${datamodule.train.collator.sr}
     n_fft: 1024

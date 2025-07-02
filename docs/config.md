@@ -8,13 +8,13 @@
 - model_ver (str): Arbitrary string used to identify the model version. 
 In the ae_baseline, model_ver is set to machine type because ae_baseline constructs machine-wise ASD system. In the dis_baseline, it is set to "all" because dis_baseline constructs shared single ASD system.
 - ckpt_ver (str): String used to identify the checkpoint version. `epoch_??`, `last`, `min`, and `max` are acceptable, where `min` and `max` are the checkpoint with the minimum and maximum validation loss, respectively.
-- result_dir (Path): result directory path from `asdit`
-- data_dir (Path): data directory path from `asdit`
+- result_dir (Path): result directory path from `asdkit`
+- data_dir (Path): data directory path from `asdkit`
 - overwrite (bool): If True, the existing files will be overwritten. Otherwise, the process will be skipped.
-<!-- - model (asdit.utils.config_class.ModelConfig): Configuration of frontend -->
+<!-- - model (asdkit.utils.config_class.ModelConfig): Configuration of frontend -->
 <!-- - trainer (Dict[str, Any]): Configuration of pl.Trainer -->
 <!-- - label_dict_path (Dict[str, Path]): Label file path -->
-<!-- - datamodule (asdit.utils.config_class.DMSplitConfig): Configuration of DataModule -->
+<!-- - datamodule (asdkit.utils.config_class.DMSplitConfig): Configuration of DataModule -->
 
 ## frontend
 - hoge

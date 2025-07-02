@@ -1,4 +1,4 @@
-tgt_class: asdit.frontends.AEPLModel
+tgt_class: asdkit.frontends.AEPLModel
 
 optim_cfg:
   tgt_class: torch.optim.AdamW
@@ -10,11 +10,11 @@ label_dict_path: ${label_dict_path}
 
 model_cfg:
   network_cfg:
-    tgt_class: asdit.models.autoencoder.AE_MLP
+    tgt_class: asdkit.models.autoencoder.AE_MLP
     z_dim: 8
     h_dim: 128
   audio_feat_cfg:
-    tgt_class: asdit.models.audio_feature.FlattenSTFT
+    tgt_class: asdkit.models.audio_feature.FlattenSTFT
     stft_cfg:
       sr: ${datamodule.sr}
       n_fft: 1024

@@ -17,10 +17,10 @@ experiments_score="no_backend"
 source ../base/base.sh
 
 for machine in $machines; do
-    asdit_train machine="${machine}" experiments="${experiments_train}"
-    asdit_extract experiments="${experiments_extract}"
-    asdit_score experiments="${experiments_score}"
-    asdit_evaluate
-    asdit_visualize
+    asdkit_train machine="${machine}" experiments="${experiments_train}"
+    asdkit_extract experiments="${experiments_extract}"
+    asdkit_score experiments="${experiments_score}"
+    asdkit_evaluate
+    asdkit_visualize
 done
-asdit_table
+asdkit_table

@@ -8,7 +8,7 @@ git clone git@github.com:facebookresearch/fairseq.git
 # Install fairseq (this installs older versions of hydra-core and omegaconf)
 pip install -e fairseq
 
-# Install asdit (this upgrades hydra-core and omegaconf to newer versions)
+# Install asdkit (this upgrades hydra-core and omegaconf to newer versions)
 pip install -e .
 
 echo "---------------------------------------------------------------------------------"

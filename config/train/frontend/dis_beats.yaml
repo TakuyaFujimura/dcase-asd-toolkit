@@ -1,4 +1,4 @@
-tgt_class: asdit.frontends.BasicDisPLModel
+tgt_class: asdkit.frontends.BasicDisPLModel
 
 optim_cfg:
   tgt_class: torch.optim.AdamW
@@ -10,7 +10,7 @@ label_dict_path: ${label_dict_path}
 
 model_cfg:
   extractor_cfg:
-    tgt_class: asdit.models.pretrained_models.beats.BEATsLoRA
+    tgt_class: asdkit.models.pretrained_models.beats.BEATsLoRA
     lora_cfg:
       r: 64
       target_modules: ["q_proj", "v_proj"]

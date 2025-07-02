@@ -1,4 +1,4 @@
-tgt_class: asdit.frontends.BasicDisPLModel
+tgt_class: asdkit.frontends.BasicDisPLModel
 
 optim_cfg:
   tgt_class: torch.optim.AdamW
@@ -10,7 +10,7 @@ label_dict_path: ${label_dict_path}
 
 model_cfg:
   extractor_cfg:
-    tgt_class: asdit.models.multiresnet.MultiResNet
+    tgt_class: asdkit.models.multiresnet.MultiResNet
     sec: ${datamodule.sec}
     sr: ${datamodule.sr}
     use_fft: true
@@ -27,15 +27,15 @@ model_cfg:
     use_bias: false
     emb_base_size: 128
     fft_network_cfg:
-      tgt_class: asdit.models.multiresnet.fft_encoder_networks.Conv1dEncoderLayer
+      tgt_class: asdkit.models.multiresnet.fft_encoder_networks.Conv1dEncoderLayer
       aggregate: "mlp"
     stft_network_cfg:
-      tgt_class: asdit.models.multiresnet.stft_encoder_networks.Conv2dEncoderLayer
+      tgt_class: asdkit.models.multiresnet.stft_encoder_networks.Conv2dEncoderLayer
       resnet_additional_layer: "SEBlock"
       aggregate: "mlp"
   loss_cfg: {}
   label_to_lossweight_dict:
     main: 1
   augmentation_cfg_list:
-    - tgt_class: asdit.augmentations.Mixup
+    - tgt_class: asdkit.augmentations.Mixup
       prob: 0.5

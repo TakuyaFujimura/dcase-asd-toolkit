@@ -7,4 +7,4 @@ echo "absolute data_dir: ${absolute_data_dir}"
 
 cd ../..
 source venv/bin/activate
-python -m asdit.bin.format --data_dir="${absolute_data_dir}" --dcase="${dcase}" --link_mode="${link_mode}"
+python -m asdkit.bin.format --data_dir="${absolute_data_dir}" --dcase="${dcase}" --link_mode="${link_mode}"

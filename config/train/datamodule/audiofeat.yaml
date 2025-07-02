@@ -11,13 +11,13 @@ train:
     pin_memory: true
     shuffle: true
   dataset:
-    tgt_class: asdit.datasets.AudioFeatDataset
+    tgt_class: asdkit.datasets.AudioFeatDataset
     path_selector_list:
       - "${data_dir}/formatted/${dcase}/raw/${machine}/train/*.wav"
     audio_feat_cfg: ${frontend.model_cfg.audio_feat_cfg}
   batch_sampler: null
   collator:
-    tgt_class: asdit.datasets.DCASEAudioFeatCollator
+    tgt_class: asdkit.datasets.DCASEAudioFeatCollator
     shuffle: true
     label_dict_path: ${label_dict_path}
 
@@ -29,12 +29,12 @@ valid:
     pin_memory: true
     shuffle: false
   dataset:
-    tgt_class: asdit.datasets.WaveDataset
+    tgt_class: asdkit.datasets.WaveDataset
     path_selector_list:
       - "${data_dir}/formatted/${dcase}/raw/${machine}/test/*.wav"
   batch_sampler: null
   collator:
-    tgt_class: asdit.datasets.DCASEWaveCollator
+    tgt_class: asdkit.datasets.DCASEWaveCollator
     sr: ${datamodule.sr}
     sec: ${dcase}
     shuffle: false

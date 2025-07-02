@@ -1,21 +1,21 @@
 # @package _global_
 backend:
-  - tgt_class: asdit.backends.Kmeans
+  - tgt_class: asdkit.backends.Kmeans
     n_clusters: 16
     metric: cosine
-  - tgt_class: asdit.backends.Knn
+  - tgt_class: asdkit.backends.Knn
     n_neighbors_so: 1
     n_neighbors_ta: 1
     smote_ratio: 0.2
     smote_neighbors: 2
     metric: cosine
-  - tgt_class: asdit.backends.Knn
+  - tgt_class: asdkit.backends.Knn
     n_neighbors_so: 1
     n_neighbors_ta: 1
     smote_ratio: 0.05
     smote_neighbors: 5
     metric: cosine
-  - tgt_class: asdit.backends.KnnRescale
+  - tgt_class: asdkit.backends.KnnRescale
     n_neighbors: 1
     k_ref_normalize: 16
     metric: cosine

@@ -31,36 +31,36 @@ collect_args() {
     echo "${args[@]}"
 }
 
-asdit_train() {
+asdkit_train() {
     local args=($(collect_args "name" "version" "dcase" "seed"))
     echo "${args[@]}"
-    python -m asdit.bin.train "${args[@]}" "$@"
+    python -m asdkit.bin.train "${args[@]}" "$@"
 }
 
-asdit_extract() {
+asdkit_extract() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.extract "${args[@]}" "$@"
+    python -m asdkit.bin.extract "${args[@]}" "$@"
 }
 
-asdit_score() {
+asdkit_score() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.score "${args[@]}" "$@"
+    python -m asdkit.bin.score "${args[@]}" "$@"
 }
 
-asdit_evaluate() {
+asdkit_evaluate() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.evaluate "${args[@]}" "$@"
+    python -m asdkit.bin.evaluate "${args[@]}" "$@"
 }
 
-asdit_visualize() {
+asdkit_visualize() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.visualize "${args[@]}" "$@"
+    python -m asdkit.bin.visualize "${args[@]}" "$@"
 }
 
 
-asdit_table() {
+asdkit_table() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver"))
-    python -m asdit.bin.table "${args[@]}" "$@"
+    python -m asdkit.bin.table "${args[@]}" "$@"
 }
 
 # get machines
