@@ -133,7 +133,7 @@ class KnnRescale(BaseBackend):
     def __init__(
         self,
         n_neighbors: int,
-        k_ref_normalize: int = 16,
+        k_ref_normalize: int = 4,
         metric: str = "cosine",
         sep_section: bool = False,
         embed_key: str = "embed",
@@ -142,7 +142,7 @@ class KnnRescale(BaseBackend):
 
         Args:
             n_neighbors (int): Number of neighbors for anomaly score calculation.
-            k_ref_normalize (int): Number of neighbors for score normalization. Defaults to 16.
+            k_ref_normalize (int): Number of neighbors for score normalization. Defaults to 4.
             metric (str): Distance metric. Options are "euclid" or "cosine". Defaults to "cosine".
             sep_section (bool, optional): Whether to separately construct a backend for each section. Defaults to False.
             embed_key (str, optional): Key to access embeddings in the extract_dict. Defaults to "embed".
