@@ -51,7 +51,7 @@ class EATLoRA(BaseLoRA):
                 "attn_stat_pool can be used with only <seq> prediction mode"
             )
         self.prediction_mode = prediction_mode
-        self.tqarget_length = calc_target_length(sec=sec, sr=sr)
+        self.target_length = calc_target_length(sec=sec, sr=sr)
         self.specaug = specaug
         if self.specaug:
             self.specaug_time_width = specaug_time_width
@@ -71,7 +71,7 @@ class EATLoRA(BaseLoRA):
         """
         x = preprocess(
             source=x,
-            target_length=self.tqarget_length,
+            target_length=self.target_length,
             norm_mean=self.norm_mean,
             norm_std=self.norm_std,
         )

@@ -2,10 +2,9 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import torch
-from torch import Tensor
-
 from asdkit.models.audio_feature.base import BaseAudioFeature
 from asdkit.utils.common import instantiate_tgt
+from torch import Tensor
 
 from .base_plmodel import BasePLAUCFrontend
 
@@ -17,12 +16,14 @@ class AEPLModel(BasePLAUCFrontend):
         optim_cfg: Dict[str, Any],
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
+        save_only_trainable: bool = False,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
+            save_only_trainable=save_only_trainable,
         )
 
     def construct_model(

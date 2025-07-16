@@ -2,9 +2,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import torch
-from torch import Tensor
-
 from asdkit.utils.common.instantiate_util import instantiate_tgt
+from torch import Tensor
 
 from .discriminative_model import BasicDisPLModel
 
@@ -16,12 +15,14 @@ class SubspaceLossPLModel(BasicDisPLModel):
         optim_cfg: Dict[str, Any],
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
+        save_only_trainable: bool = False,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
+            save_only_trainable=save_only_trainable,
         )
 
     def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):

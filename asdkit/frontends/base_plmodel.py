@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional
 import lightning.pytorch as pl
 import numpy as np
 import torch
-
 from asdkit.utils.common import instantiate_tgt
 from asdkit.utils.dcase_utils import get_label_dict
 from asdkit.utils.dcase_utils.dcase_idx import get_domain_idx
@@ -33,6 +32,7 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         optim_cfg: Dict[str, Any],
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
+        save_only_trainable: bool = False,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -45,6 +45,15 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
             self.num_class_dict[key_] = val_.num_class
 
         self.construct_model(**model_cfg)
+
+        # Save only trainable parameters for LoRA
+        self.save_only_trainable = save_only_trainable
+        self.trainable_param_names = []
+        if self.save_only_trainable:
+            for name, param in self.named_parameters():
+                if param.requires_grad:
+                    self.trainable_param_names.append(name)
+        print(self.trainable_param_names)
 
     def construct_model(self, *args, **kwargs):
         pass
@@ -96,6 +105,18 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         else:
             super().lr_scheduler_step(scheduler=scheduler, metric=metric)
 
+    def state_dict(self, *args, **kwargs):
+        full_state = super().state_dict()
+        if not self.save_only_trainable:
+            return full_state
+        else:
+            partial_state = {
+                name: param
+                for name, param in full_state.items()
+                if name in self.trainable_param_names
+            }
+            return partial_state
+
 
 class BasePLAUCFrontend(BasePLFrontend):
     def __init__(
@@ -104,12 +125,14 @@ class BasePLAUCFrontend(BasePLFrontend):
         optim_cfg: Dict[str, Any],
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
+        save_only_trainable: bool = False,
     ):
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
+            save_only_trainable=save_only_trainable,
         )
         self.anomaly_score_name: Optional[List[str]] = None
 
