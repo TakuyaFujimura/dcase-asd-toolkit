@@ -14,6 +14,12 @@ class BasePretrainedWrapper(nn.Module, ABC):
         projection_type: str = "linear",
         model_cfg: Optional[dict] = None,
     ):
+        """
+        Args:
+            embed_size (int): Size of the embedding.
+            projection_type (str): Type of projection layer. Options are "linear" or "attn_stat_pool".
+            model_cfg (Dict[str, Any]): Configuration for the pre-trained model. Parameters in this dictionary are used in `self.construct_model`, which is defined in subclasses.
+        """
         super().__init__()
         if model_cfg is None:
             model_cfg = {}

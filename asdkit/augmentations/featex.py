@@ -10,6 +10,13 @@ from .utils import get_dec, get_rand_perm
 
 class FeatEx(nn.Module):
     def __init__(self, prob: float, subspace_embed_size: int):
+        """
+        K. Wilkinghoff, "Self-supervised learning for anomalous sound detection," Proc. ICASSP, 2024.
+
+        Args:
+            prob (float): Probability of applying featex.
+            subspace_embed_size (int): Size of each sub-embedding in the concatenated embedding.
+        """
         super().__init__()
         if not (0 <= prob <= 1):
             raise ValueError(f"prob should be in [0, 1], but got {prob}.")

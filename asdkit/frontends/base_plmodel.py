@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import lightning.pytorch as pl
 import numpy as np
 import torch
+
 from asdkit.utils.common import instantiate_tgt
 from asdkit.utils.dcase_utils import get_label_dict
 from asdkit.utils.dcase_utils.dcase_idx import get_domain_idx
@@ -34,6 +35,14 @@ class BasePLFrontend(pl.LightningModule, BaseFrontend):
         label_dict_path: Optional[Dict[str, Path]] = None,
         save_only_trainable: bool = False,
     ):
+        """
+        Args:
+            model_cfg (Dict[str, Any]): Configuration for the model. Parameters in this dictionary are used in `self.construct_model`, which is defined in subclasses.
+            optim_cfg (Dict[str, Any]): Configuration for the optimizer.
+            lrscheduler_cfg (Optional[Dict[str, Any]]): Configuration for the learning rate scheduler.
+            label_dict_path (Optional[Dict[str, Path]]): Dictionary for label_dict paths.
+            save_only_trainable (bool): If True, only trainable parameters are saved.
+        """
         super().__init__()
         self.save_hyperparameters()
         self.optim_cfg = optim_cfg

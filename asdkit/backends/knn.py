@@ -138,7 +138,8 @@ class KnnRescale(BaseBackend):
         sep_section: bool = False,
         embed_key: str = "embed",
     ):
-        """Wilkinghoff et al. (2025), Keeping the Balance: Anomaly Score Calculation for Domain Generalization.
+        """
+        K. Wilkinghoff et al., "Keeping the Balance: Anomaly Score Calculation for Domain Generalization," Proc. ICASSP, 2025.
 
         Args:
             n_neighbors (int): Number of neighbors for anomaly score calculation.

@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 
 class STFTPoolModel(BaseFrontend):
     def __init__(self, stft_cfg: Dict[str, Any], pool: str):
+        """
+        Args:
+            stft_cfg (Dict[str, Any]): Configuration for the STFT.
+            pool (str): Pooling method in the form of '<axis>_<agg>', where <axis> is 'freq' or 'time' and <agg> is 'mean' or 'max'.
+        """
         if len(pool.split("_")) != 2:
             raise ValueError(
                 f"Invalid pool: {pool}. Must be in the form of '<axis>_<pool>'"

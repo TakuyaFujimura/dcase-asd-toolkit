@@ -3,8 +3,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import torch
-from asdkit.utils.common import instantiate_tgt
 from torch import Tensor
+
+from asdkit.utils.common import instantiate_tgt
 
 from .base_plmodel import BasePLFrontend
 
@@ -20,6 +21,14 @@ class BasicDisPLModel(BasePLFrontend):
         label_dict_path: Optional[Dict[str, Path]] = None,
         save_only_trainable: bool = False,
     ):
+        """
+        Args:
+            model_cfg (Dict[str, Any]): Configuration for the model. Parameters in this dictionary are used in `self.construct_model`.
+            optim_cfg (Dict[str, Any]): Configuration for the optimizer.
+            lrscheduler_cfg (Optional[Dict[str, Any]]): Configuration for the learning rate scheduler.
+            label_dict_path (Optional[Dict[str, Path]]): Dictionary for label_dict paths.
+            save_only_trainable (bool): If True, only trainable parameters are saved.
+        """
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,

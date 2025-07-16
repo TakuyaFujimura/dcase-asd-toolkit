@@ -2,8 +2,9 @@ from typing import Dict, List, Optional
 
 import torch
 import torchaudio.transforms as T
-from asdkit.utils.common import re_match_any
 from torch import nn
+
+from asdkit.utils.common import re_match_any
 
 from .utils import get_dec
 
@@ -72,7 +73,7 @@ class SpecAug(nn.Module):
             stft_n_fft (int): SpecAug applies STFT with this n_fft when input is waveform.
             stft_hop_length (int, optional): SpecAug applies STFT with this hop_length when input is waveform.
             stft_window_type (str): SpecAug applies STFT with this window type when input is waveform. ('hann' or 'hamming')
-            target_keys (Optional[List[str]]): List of keys in the batch to apply SpecAugmentation. If None, defaults to ["wave"].
+            target_keys (Optional[List[str]]): List of keys in the batch to which SpecAug will be applied. If None, defaults to ["wave"].
         """
         super().__init__()
         # Target keys

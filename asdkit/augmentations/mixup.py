@@ -10,6 +10,11 @@ from .utils import get_dec, get_rand_perm
 
 class Mixup(nn.Module):
     def __init__(self, prob: float, target_keys: Optional[List[str]] = None):
+        """
+        Args:
+            prob (float): Probability of applying mixup.
+            target_keys (Optional[List[str]]): List of keys in the batch to which mixup will be applied. If None, defaults to ["onehot_.*", "wave"].
+        """
         super().__init__()
         if not (0 <= prob <= 1):
             raise ValueError(f"prob should be in [0, 1], but got {prob}.")
