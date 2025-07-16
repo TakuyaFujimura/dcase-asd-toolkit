@@ -1,8 +1,9 @@
 from typing import Literal, Optional
 
 import torch
+from asdkit.augmentations.specaug import spectrogram_augment
 
-from ..wrapper import BaseLoRA, spectrogram_augment
+from ..wrapper import BaseLoRA
 from .tools import calc_target_length, preprocess, restore
 
 
@@ -33,8 +34,10 @@ class EATLoRA(BaseLoRA):
         update_cfg: Optional[dict] = None,
         prediction_mode: Literal["cls", "seq"] = "cls",
         specaug: bool = False,
-        specaug_freqm: int = 80,
-        specaug_timem: int = 80,
+        specaug_time_prob: float = 0.5,
+        specaug_time_width: int = 80,
+        specaug_freq_prob: float = 0.5,
+        specaug_freq_width: int = 80,
     ) -> tuple[torch.nn.Module, int]:
         if sr != 16000:
             raise ValueError("The sampling rate should be 16000")
@@ -51,8 +54,10 @@ class EATLoRA(BaseLoRA):
         self.tqarget_length = calc_target_length(sec=sec, sr=sr)
         self.specaug = specaug
         if self.specaug:
-            self.specaug_freqm = specaug_freqm
-            self.specaug_timem = specaug_timem
+            self.specaug_time_width = specaug_time_width
+            self.specaug_time_prob = specaug_time_prob
+            self.specaug_freq_width = specaug_freq_width
+            self.specaug_freq_prob = specaug_freq_prob
         model, dim = restore(ckpt_path=ckpt_path, update_cfg=update_cfg)
         return model, dim
 
@@ -72,9 +77,12 @@ class EATLoRA(BaseLoRA):
         )
         if self.training and self.specaug:
             x = spectrogram_augment(
-                x,
-                specaug_freqm=self.specaug_freqm,
-                specaug_timem=self.specaug_timem,
+                X=x,
+                time_width=self.specaug_time_width,
+                time_prob=self.specaug_time_prob,
+                freq_width=self.specaug_freq_width,
+                freq_prob=self.specaug_freq_prob,
+                is_tf=True,
             )
         feats = self.model.extract_features(
             x, mode="IMAGE", mask=False, remove_extra_tokens=False

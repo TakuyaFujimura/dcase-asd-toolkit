@@ -2,22 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import torch
-import torchaudio
 from torch import nn
 
 from ..modules import AttnStatPool, add_lora
-
-
-def spectrogram_augment(
-    spec: torch.Tensor, specaug_freqm: int = 80, specaug_timem: int = 80
-) -> torch.Tensor:
-    freq_masking = torchaudio.transforms.FrequencyMasking(specaug_freqm, iid_masks=True)
-    time_masking = torchaudio.transforms.TimeMasking(specaug_timem, iid_masks=True)
-    spec_ = spec.transpose(-2, -1)
-    input_with_freq_mask = freq_masking(spec_)
-    input_with_time_freq_mask = time_masking(input_with_freq_mask)
-    input_with_time_freq_mask = torch.transpose(input_with_time_freq_mask, -2, -1)
-    return input_with_time_freq_mask
 
 
 class BasePretrainedWrapper(nn.Module, ABC):
