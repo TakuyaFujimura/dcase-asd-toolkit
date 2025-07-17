@@ -1,8 +1,9 @@
 from typing import Optional
 
+from asdkit.augmentations.specaug import spectrogram_augment
 from torch import nn
 
-from ..wrapper import BaseLoRA, spectrogram_augment
+from ..wrapper import BaseLoRA
 from .tools import restore
 
 
@@ -29,15 +30,19 @@ class BEATsLoRA(BaseLoRA):
         sr: int = 16000,
         update_cfg: Optional[dict] = None,
         specaug: bool = False,
-        specaug_freqm: int = 80,
-        specaug_timem: int = 80,
+        specaug_time_prob: float = 0.5,
+        specaug_time_width: int = 80,
+        specaug_freq_prob: float = 0.5,
+        specaug_freq_width: int = 80,
     ) -> tuple[nn.Module, int]:
         if sr != 16000:
             raise ValueError("The sampling rate should be 16000")
         self.specaug = specaug
         if self.specaug:
-            self.specaug_freqm = specaug_freqm
-            self.specaug_timem = specaug_timem
+            self.specaug_time_width = specaug_time_width
+            self.specaug_time_prob = specaug_time_prob
+            self.specaug_freq_width = specaug_freq_width
+            self.specaug_freq_prob = specaug_freq_prob
         model, dim = restore(ckpt_path=ckpt_path, update_cfg=update_cfg)
         return model, dim
 
@@ -49,8 +54,11 @@ class BEATsLoRA(BaseLoRA):
         fbank = self.model.preprocess(x)
         if self.training and self.specaug:
             fbank = spectrogram_augment(
-                fbank,
-                specaug_freqm=self.specaug_freqm,
-                specaug_timem=self.specaug_timem,
+                X=fbank,
+                time_width=self.specaug_time_width,
+                time_prob=self.specaug_time_prob,
+                freq_width=self.specaug_freq_width,
+                freq_prob=self.specaug_freq_prob,
+                is_tf=True,
             )
         return self.model.extract_features_from_fbank(fbank)[0]

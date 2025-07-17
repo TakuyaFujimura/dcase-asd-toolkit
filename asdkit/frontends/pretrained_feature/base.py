@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 class BaseFrozenModel(BaseFrontend):
     def __init__(self, model_cfg: Optional[dict] = None):
+        """
+        Args:
+            model_cfg (Dict[str, Any]): Configuration for the model. Parameters in this dictionary are used in `self.construct_model`, which is defined in subclasses.
+        """
         if model_cfg is None:
             model_cfg = {}
         self.model = self.construct_model(**model_cfg)

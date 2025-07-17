@@ -58,6 +58,19 @@ class MultiResNet(nn.Module):
         use_bias: bool = False,
         emb_base_size: int = 128,
     ):
+        """
+        T. Fujimura et al., "Improvements of discriminative feature space training for anomalous sound detection in unlabeled conditions," Proc. ICASSP, 2025.
+
+        Args:
+            sec (float): Duration of the audio signal in seconds.
+            sr (int): Sampling rate of the audio signal.
+            use_fft (bool): Whether to use FFT as one of the input features.
+            stft_cfg_list (List[dict]): List of configurations for STFT layers.
+            fft_network_cfg (dict): Configuration for the FFT network layer.
+            stft_network_cfg (dict): Configuration for the STFT network layer.
+            use_bias (bool): Whether to use bias in the network layers.
+            emb_base_size (int): Base embedding size for each input feature. The final concatenated embedding size will be `emb_base_size * M`, where `M` is the number of input features.
+        """
         super().__init__()
         fft_network_cfg["use_bias"] = use_bias
         fft_network_cfg["emb_base_size"] = emb_base_size

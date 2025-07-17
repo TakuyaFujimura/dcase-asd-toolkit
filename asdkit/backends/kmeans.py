@@ -46,6 +46,8 @@ class Kmeans(BaseBackend):
         embed_key="embed",
     ):
         """
+        K. Wilkinghoff, "Design choices for learning embeddings from auxiliary tasks for domain generalization in anomalous sound detection," Proc. ICASSP, 2023.
+
         Args:
             n_clusters (int): n_clusters for KMeans
             metric (str): Distance metric. Options are "euclid" or "cosine". Defaults to "cosine".

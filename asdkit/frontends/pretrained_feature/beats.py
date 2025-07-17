@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 
 class BEATsFrozenModel(BaseFrozenModel):
     def __init__(self, model_cfg: Optional[dict] = None):
+        """
+        Args:
+            model_cfg (Dict[str, Any]): Configuration for the model. Parameters in this dictionary are used in `self.construct_model`.
+        """
         super().__init__(model_cfg=model_cfg)
 
     def construct_model(

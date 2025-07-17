@@ -8,17 +8,15 @@
 # --------------------------------------------------------
 
 
-import torch
-import torch.nn as nn
-from torch.nn import LayerNorm
-import torchaudio.compliance.kaldi as ta_kaldi
-
-from .backbone import (
-    TransformerEncoder,
-)
-
 import logging
 from typing import Optional
+
+import torch
+import torch.nn as nn
+import torchaudio.compliance.kaldi as ta_kaldi
+from torch.nn import LayerNorm
+
+from .backbone import TransformerEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +119,14 @@ class BEATs(nn.Module):
             fbank_mean: float = 15.41663,
             fbank_std: float = 6.55582,
     ) -> torch.Tensor:
+        """
+        Args:
+            source (torch.Tensor): Input audio waveform tensor of shape (B, T).
+            fbank_mean (float): Mean value for feature normalization.
+            fbank_std (float): Standard deviation value for feature normalization.
+        Returns:
+            fbank (torch.Tensor): (B, T, F).
+        """
         fbanks = []
         for waveform in source:
             waveform = waveform.unsqueeze(0) * 2 ** 15
