@@ -83,6 +83,27 @@ Additionally, it assigns ground-truth normal/anomalous labels to the test data. 
 </details>
 
 <details>
+<summary>(Setups to use pre-trained models)</summary>
+
+To use pre-trained models, please follow the additional setup steps below.
+This setups is required for the following recipes:
+`raw_beats`, `raw_eat`, `dis_beats_scac_trainable`, and `dis_eat_scac_trainable`
+
+**For `raw_beats` and `dis_beats_scac_trainable`**
+1. Download the BEATs pre-trained model from [this URL](https://onedrive.live.com/?authkey=%21ACVDQ8YOHlNK%5Frw&id=6B83B49411CA81A7%2125969&cid=6B83B49411CA81A7&parId=root&parQt=sharedby&o=OneUp)
+2. Place the downloaded file into `dcase-asd-toolkit/pretrained_models/beats/`
+
+**For `raw_eat` and `dis_eat_scac_trainable`**
+1. Download the EAT pre-trained model from [this URL](https://drive.google.com/file/d/10pklbY_fKraQUIBizSg1kv4lJXNWxpxl/view)
+2. Place the downloaded file into `dcase-asd-toolkit/pretrained_models/eat/`
+3. Install fairseq by running the following commands:
+```bash
+cd dcase-asd-toolkit/jobs/install
+bash install_fairseq.sh
+```
+</details>
+
+<details>
 <summary>4. Execute the training and evaluation recipe</summary>
 <br>
 
@@ -134,26 +155,6 @@ dcase-asd-toolkit
 
 </details>
 
-<details>
-<summary>(5. Setups to use pre-trained models)</summary>
-
-To use pre-trained models, please follow the additional setup steps below.
-This setups is required for the following recipes:
-`raw_beats`, `raw_eat`, `dis_beats_scac_trainable`, and `dis_eat_scac_trainable`
-
-**For `raw_beats` and `dis_beats_scac_trainable`**
-1. Download the BEATs pre-trained model from [this URL](https://onedrive.live.com/?authkey=%21ACVDQ8YOHlNK%5Frw&id=6B83B49411CA81A7%2125969&cid=6B83B49411CA81A7&parId=root&parQt=sharedby&o=OneUp)
-2. Place the downloaded file into `dcase-asd-toolkit/pretrained_models/beats/`
-
-**For `raw_eat` and `dis_eat_scac_trainable`**
-1. Download the EAT pre-trained model from [this URL](https://drive.google.com/file/d/10pklbY_fKraQUIBizSg1kv4lJXNWxpxl/view)
-2. Place the downloaded file into `dcase-asd-toolkit/pretrained_models/eat/`
-3. Install fairseq by running the following commands:
-```bash
-cd dcase-asd-toolkit/jobs/install
-bash install_fairseq.sh
-```
-</details>
 
 ## 📋 Supported Experimental Conditions
 ASDKit supports the DCASE 2020-2024 conditions.
