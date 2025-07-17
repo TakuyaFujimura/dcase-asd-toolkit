@@ -3,7 +3,8 @@ cd ../..
 source venv/bin/activate
 
 # Clone fairseq
-git clone git@github.com:facebookresearch/fairseq.git
+git clone https://github.com/facebookresearch/fairseq.git
+## Our experiments used commit of d13e14a800bb588e5a77fb4e551f554ff9b24a72
 
 # Install fairseq (this installs older versions of hydra-core and omegaconf)
 pip install -e fairseq
