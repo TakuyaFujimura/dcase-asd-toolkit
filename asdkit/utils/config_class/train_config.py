@@ -17,9 +17,11 @@ class DMSplitConfig(BaseModel):
     train: DMConfig
     valid: Optional[DMConfig] = None
 
+
 class CallbackConfig(BaseModel):
     tqdm_refresh_rate: int = 1
     callbacks: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
 
 class MainTrainConfig(BaseModel):
     seed: int

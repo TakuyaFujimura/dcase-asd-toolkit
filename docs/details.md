@@ -26,10 +26,11 @@
 | `overwrite` | `bool`           | If `True`, overwrite existing files; otherwise, skip the process. |
 | `sec`       | `float \| str`   | Duration of audio in seconds. The audio will be padded or truncated to this length in the data loader. <br> If set to a string of the form `dcase_<year>`, the following durations are applied. <br> These values represent the maximum audio length for each DCASE dataset: <br> "dcase2020": 11.0, "dcase2021": 10.0, "dcase2022": 10.0 , "dcase2023": 18.0, "dcase2024": 12.0, "dcase2025": 12.0 |
 
-
+- Please also refer to `asdkit/utils/config_class` for the format of configuration files.
 
 
 ## Others
+- Tensorboard is supported.
 - You can modify recipe scripts to customize the process. For example, you can comment out certain commands to skip specific processes.
 ```bash
 asdkit_train experiments="${experiments_train}"
