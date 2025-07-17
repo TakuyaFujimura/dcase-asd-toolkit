@@ -192,6 +192,8 @@ Call scripts in `jobs/asd/call/` serve as wrappers for these recipes, allowing e
 <br>
 In the following, we explain the ASD methods supported by ASDKit and their processing pipelines within this four-step framework.
 
+<br>
+
 <details>
 <summary>Autoencoder</summary>
 <br>
