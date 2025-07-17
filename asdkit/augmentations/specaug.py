@@ -20,13 +20,13 @@ def spectrogram_augment(
 ) -> torch.Tensor:
     """
     Args:
-        X (torch.Tensor): Input spectrogram (B, F, T)
+        X (torch.Tensor): Input spectrogram (..., F, T)
         time_width (int): Width of time masking
         time_prob (float): Probability of applying time masking (0 <= time_prob <= 1)
         freq_width (int): Width of frequency masking
         freq_prob (float): Probability of applying frequency masking (0 <= freq_prob <= 1)
         iid (bool): Whether to use iid masks
-        is_tf (bool): Whether the input is in (B, T, F) format (True) or (B, F, T) format (False)
+        is_tf (bool): Whether the input is in (..., T, F) format (True) or (..., F, T) format (False)
     Returns:
         X (torch.Tensor): Augmented spectrogram with time and frequency masking applied (B, F, T)
     """
@@ -64,6 +64,10 @@ class SpecAug(nn.Module):
         target_keys: Optional[List[str]] = None,
     ):
         """
+        This class applies SpecAugment to the input data.
+        If the input is a waveform, STFT and iSTFT are used for the transformation.
+        For BEATsLoRA and EATLoRA, the SpecAugment parameters should be specified within their respective classes.
+
         Args:
             time_width (int): Width of time masking
             time_prob (float): Probability of applying time masking (0 <= time_prob <= 1)
@@ -117,7 +121,7 @@ class SpecAug(nn.Module):
             data_aug = self.istft(
                 aug=spectrograms_aug, org=spectrograms_org, length=data.shape[-1]
             )
-        elif len(data.shape) == 3:
+        elif len(data.shape) > 2:
             data_aug = spectrogram_augment(
                 X=data,
                 time_width=self.time_width,

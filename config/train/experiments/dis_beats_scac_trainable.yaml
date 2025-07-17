@@ -17,10 +17,12 @@ datamodule:
   batch_size: 8
 
 frontend:
+  save_only_trainable: true
   model_cfg:
     extractor_cfg:
       model_cfg:
         ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+        specaug: false
     loss_cfg:
       tgt_class: asdkit.losses.SCAdaCos
       n_subclusters: 16

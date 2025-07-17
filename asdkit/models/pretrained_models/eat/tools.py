@@ -48,7 +48,7 @@ def preprocess(
         source (torch.Tensor): (B, L)
 
     Returns:
-        fbank (torch.Tensor): (B, T, F)
+        fbank (torch.Tensor): (B, 1, T, F)
     """
     fbanks = []
     source = source - source.mean(dim=-1, keepdim=True)  # (B, L)

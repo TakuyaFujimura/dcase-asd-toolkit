@@ -54,8 +54,9 @@ def restore_plfrontend(
     class_name = past_cfg.frontend["tgt_class"].split(".")[-1]
     module = importlib.import_module(module_name)
     frontend_cls = getattr(module, class_name)
+    strict = not past_cfg.frontend.get("save_only_trainable", False)
     frontend = frontend_cls.load_from_checkpoint(
-        ckpt_path, map_location=cfg.device, strict=True
+        ckpt_path, map_location=cfg.device, strict=strict
     )
     frontend.eval()
     logger.info("Model was successfully loaded from the ckpt_path")
