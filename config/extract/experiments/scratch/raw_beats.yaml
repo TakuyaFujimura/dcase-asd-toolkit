@@ -5,7 +5,7 @@ infer_ver: null
 
 
 scratch_frontend:
-  tgt_class: asdkit.frontends.BEATsFrozenModel
+  tgt_class: asdkit.frontends.pretrained_feature.beats.BEATsFrozenModel
   model_cfg:
     ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
 

@@ -4,5 +4,4 @@ from .base import BaseFrontend
 from .base_plmodel import BasePLFrontend
 from .discriminative_model import BasicDisPLModel
 from .featex_model import FeatExPLModel
-from .pretrained_feature import BEATsFrozenModel, EATFrozenModel
 from .subspaceloss_model import SubspaceLossPLModel
