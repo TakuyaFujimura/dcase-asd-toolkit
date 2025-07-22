@@ -8,7 +8,6 @@ backend:
   - tgt_class: asdkit.backends.Kmeans
     n_clusters: 16
     metric: cosine
-    metric: cosine
   - tgt_class: asdkit.backends.Knn
     n_neighbors_so: 1
     n_neighbors_ta: 1
