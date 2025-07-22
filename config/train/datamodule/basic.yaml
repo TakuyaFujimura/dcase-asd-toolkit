@@ -2,7 +2,7 @@
 batch_size: 64
 sr: 16000
 sec: ${dcase}
-num_workers: 4
+num_workers: 0
 
 train:
   dataloader:

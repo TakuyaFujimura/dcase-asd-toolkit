@@ -1,7 +1,7 @@
 
 batch_size: 256
 sr: 16000
-num_workers: 4
+num_workers: 0
 
 
 train:
