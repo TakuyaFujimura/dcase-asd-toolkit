@@ -31,7 +31,12 @@ def get_table_df(
     # init
     evaluate_df_list = []
     machine_list = MACHINE_DICT[f"{dcase}-{split}"]
-    if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
+    if dcase in ["dcase2020"]:
+        # does NOT have a concept of domains
+        if(metric in ["t_auc", "mix_auc"]):
+            return
+        metric = f"{split}_{metric}"
+    elif dcase in ["dcase2021", "dcase2022"]:
         metric = f"{split}_{metric}"
     elif dcase in ["dcase2023", "dcase2024"]:
         metric = f"0_{metric}"
