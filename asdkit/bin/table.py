@@ -31,7 +31,12 @@ def get_table_df(
     # init
     evaluate_df_list = []
     machine_list = MACHINE_DICT[f"{dcase}-{split}"]
-    if dcase in ["dcase2020", "dcase2021", "dcase2022"]:
+    if dcase in ["dcase2020"]:
+        # does NOT have a concept of domains
+        if metric in ["t_auc", "t_pauc", "smix_auc", "tmix_auc", "mix_auc", "mix_pauc"]:
+            return None
+        metric = f"{split}_{metric}"
+    elif dcase in ["dcase2021", "dcase2022"]:
         metric = f"{split}_{metric}"
     elif dcase in ["dcase2023", "dcase2024"]:
         metric = f"0_{metric}"
@@ -41,6 +46,12 @@ def get_table_df(
     # Loop of machines
     for i, m in enumerate(machine_list):
         evaluate_df = pd.read_csv(output_dir / m / "test_evaluate.csv")
+        if metric not in evaluate_df:
+            logger.warning(
+                f"Metric {metric} not found in {output_dir / m / 'test_evaluate.csv'}. This metric will be skipped."
+            )
+            return None
+
         # check backend
         if i == 0:
             backend_array = evaluate_df.backend.values
