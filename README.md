@@ -171,7 +171,7 @@ ASDKit automatically computes the official evaluation scores according to the re
 |---------------|-------------|
 | s_auc / s_pauc | AUC / pAUC computed using normal and anomalous sounds in the source domain. |
 | t_auc / t_pauc | AUC / pAUC computed using normal and anomalous sounds in the target domain. |
-| mix_auc / pauc | AUC / pAUC computed using normal and anomalous sounds from both the source and target domains. |
+| mix_auc / mix_pauc | AUC / pAUC computed using normal and anomalous sounds from both the source and target domains. |
 | smix_auc       | AUC computed using normal and anomalous sounds in the source domain and anomalous sounds in the target domain. |
 | tmix_auc       | AUC computed using normal and anomalous sounds in the target domain and anomalous sounds in the source domain. |
 | official20-24  | Official evaluation score for DCASE 2020-2024 Challenge Task2. These are computed combining the above metrics. |
