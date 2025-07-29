@@ -80,10 +80,10 @@ class BasicDisPLModel(BasePLFrontend):
         loss_dict = {"main": 0.0}
 
         for label_name, weight in self.label_to_lossweight_dict.items():
-            loss_dict[label_name] = self.head_dict[label_name](
+            loss_dict[f"dis_{label_name}"] = self.head_dict[label_name](
                 embed, batch[f"onehot_{label_name}"]
             )
-            loss_dict["main"] += loss_dict[label_name] * weight
+            loss_dict["main"] += loss_dict[f"dis_{label_name}"] * weight
         return loss_dict
 
     def training_step(self, batch, batch_idx):
