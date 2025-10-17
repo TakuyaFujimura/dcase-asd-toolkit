@@ -332,10 +332,15 @@ Kevin Wilkinghoff, Aalborg University and Pioneer Centre for Artificial Intellig
 
 ### Citation
 ```
-@article{fujimura2025asdkit,
-    title={{ASDKit}: A Toolkit for Comprehensive Evaluation of Anomalous Sound Detection Methods}, 
-    author={Fujimura, Takuya and Wilkinghoff, Kevin and Imoto, Keisuke and Toda, Tomoki},
-    journal={arXiv preprint arXiv:2507.10264},
-    year={2025}
+@inproceedings{fujimura2025asdkit,
+    author = "Fujimura, Takuya and Wilkinghoff, Kevin and Imoto, Keisuke and Toda, Tomoki",
+    title = "{ASDKit}: A Toolkit for Comprehensive Evaluation of Anomalous Sound Detection Methods",
+    booktitle = "Proceedings of the 10th Workshop on Detection and Classification of Acoustic Scenes and Events (DCASE 2025)",
+    address = "Barcelona, Spain",
+    month = "October",
+    year = "2025",
+    pages = "40--44",
+    isbn = "978-84-09-77652-8",
+    doi = "10.5281/zenodo.17251589"
 }
 ```
