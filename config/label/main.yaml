@@ -1,0 +1,22 @@
+defaults:
+  - _self_
+  - experiments: null
+
+# -------------------------------------------------------- #
+
+
+
+data_dir: "../data" # data directory from dcase-asd-toolkit
+dcase: null
+
+
+# -------------------------------------------------------- #
+name: null
+save_path: "labels/${dcase}/${name}.json"
+path_selector_list:
+  - "${data_dir}/formatted/${dcase}/raw/*/train/*.wav"
+  - "${data_dir}/formatted/${dcase}/raw/*/test/*.wav"
+
+hydra:
+  run:
+    dir: "labels/${dcase}/logs/${name}"

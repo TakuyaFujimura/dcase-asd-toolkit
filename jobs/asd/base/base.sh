@@ -23,12 +23,7 @@ collect_args() {
     local args=()
 
     for var in "${vars[@]}"; do
-        if [[ -z $var ]]; then
-            echo "Error: $var is required but not defined"
-            exit 1
-        elif [[ $var == experiments_* ]]; then 
-            args+=("experiments=${!var}")
-        else
+        if [[ -n $var ]]; then
             args+=("$var=${!var}")
         fi
     done
@@ -36,36 +31,36 @@ collect_args() {
     echo "${args[@]}"
 }
 
-asdit_train() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "experiments_train"))
+asdkit_train() {
+    local args=($(collect_args "name" "version" "dcase" "seed"))
     echo "${args[@]}"
-    python -m asdit.bin.train "${args[@]}" "$@"
+    python -m asdkit.bin.train "${args[@]}" "$@"
 }
 
-asdit_extract() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine" "experiments_extract"))
-    python -m asdit.bin.extract "${args[@]}" "$@"
-}
-
-asdit_score() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine" "experiments_score"))
-    python -m asdit.bin.score "${args[@]}" "$@"
-}
-
-asdit_evaluate() {
+asdkit_extract() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.evaluate "${args[@]}" "$@"
+    python -m asdkit.bin.extract "${args[@]}" "$@"
 }
 
-asdit_umap() {
+asdkit_score() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdit.bin.umap "${args[@]}" "$@"
+    python -m asdkit.bin.score "${args[@]}" "$@"
+}
+
+asdkit_evaluate() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
+    python -m asdkit.bin.evaluate "${args[@]}" "$@"
+}
+
+asdkit_visualize() {
+    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
+    python -m asdkit.bin.visualize "${args[@]}" "$@"
 }
 
 
-asdit_table() {
+asdkit_table() {
     local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver"))
-    python -m asdit.bin.table "${args[@]}" "$@"
+    python -m asdkit.bin.table "${args[@]}" "$@"
 }
 
 # get machines
@@ -79,9 +74,3 @@ echo "machines: $machines"
 # change directory to project root
 cd ../../..
 
-# activate virtual environment
-if [ ! -d "venv" ]; then
-    echo "venv not found in $(pwd). Did you run it from 'jobs/asd/base'?"
-    exit 1
-fi
-source "venv/bin/activate"

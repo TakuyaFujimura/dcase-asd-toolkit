@@ -1,0 +1,25 @@
+defaults:
+  - _self_
+  - datamodule: null
+  - frontend: null
+  - trainer: null
+  - callback: default
+  - experiments: null
+
+
+seed: null
+dcase: null
+name: null
+version: null
+result_dir: "./results"
+data_dir: "../data"
+
+label_dict_path: {}
+
+machine: null
+model_ver: null
+
+
+hydra:
+  run:
+    dir: ${result_dir}/${name}/${dcase}/${version}/${seed}/model/${model_ver}
