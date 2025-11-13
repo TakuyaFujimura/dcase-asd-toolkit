@@ -1,0 +1,19 @@
+dcase: null
+results_root_dir: ../../results/recipe
+labels_root_dir: ../../labels
+recipe_dir: raw_eat/0/output/last
+output_label_name: raw_eat_kmeans_8
+machinewise: true
+model:
+  tgt_class: models.KMeansModel
+  num_class: 8
+
+
+hydra:
+  output_subdir: .hydra_${output_label_name}
+  run:
+    dir: ${labels_root_dir}/${dcase}
+  job_logging:
+    handlers:
+      file:
+        filename: ${hydra.run.dir}/${output_label_name}.log
