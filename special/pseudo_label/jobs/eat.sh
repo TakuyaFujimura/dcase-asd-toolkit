@@ -1,3 +1,7 @@
+# This script requires that the embeddings have already been extracted by jobs/asd/call/raw_eat.sh
+
+source ../../../venv/bin/activate
+
 cd ..
 
 config_name=raw_eat_kmeans_8
