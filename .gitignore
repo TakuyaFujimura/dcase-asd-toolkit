@@ -7,6 +7,10 @@ labels/*/logs
 *.out
 analysis/
 fairseq/
+.github/
+.hydra*
+*.json
+jobs/asd/pseudo_label
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
