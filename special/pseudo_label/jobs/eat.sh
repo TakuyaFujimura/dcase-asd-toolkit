@@ -4,8 +4,10 @@ source ../../../venv/bin/activate
 
 cd ..
 
-config_name=raw_eat_kmeans_8
-for dcase in dcase2023; do
-    python main.py --config-name=${config_name} dcase=${dcase}
-    python main.py --config-name=${config_name} dcase=${dcase} machinewise=false output_label_name=${config_name}_all
+feature=raw_eat
+config_name=kmeans_8
+for dcase in dcase2023 dcase2024; do
+    recipe_dir=${feature}/0/output/last
+    python main.py --config-name=${config_name} dcase=${dcase} recipe_dir=${recipe_dir} output_label_name=${feature}_${config_name}
+    python main.py --config-name=${config_name} dcase=${dcase} recipe_dir=${recipe_dir} output_label_name=${feature}_${config_name}_all machinewise=false 
 done
