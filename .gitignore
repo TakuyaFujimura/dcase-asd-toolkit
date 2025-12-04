@@ -7,6 +7,9 @@ labels/*/logs
 *.out
 analysis/
 fairseq/
+.github/
+.hydra*
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
