@@ -1,0 +1,10 @@
+# @package _global_
+dcase: dcase2025
+name: "${machine}_main"
+labeler:
+  tgt_class: asdkit.labelers.BasicInfoLabeler
+  label_name: "machine_section_attr_domain"
+
+path_selector_list:
+  - "${data_dir}/formatted/${dcase}/raw/${machine}/train/*.wav"
+  - "${data_dir}/formatted/${dcase}/raw/${machine}/test/*.wav"

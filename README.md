@@ -31,7 +31,7 @@ ASDKit provides recipes for various ASD methods and supports evaluation on the D
 **How to**
 - Specify both `data_dir` and `dcase` in `jobs/download/run.sh`.
 - `data_dir`: The directory where the dataset will be stored. By default, it is set to the parent directory of this repository. If you change this, make sure to update `data_dir` in the other scripts accordingly.
-- `dcase`: The name of the dataset. Available options are: `dcase2021`, `dcase2022`, `dcase2023`, and `dcase2024`.
+- `dcase`: The name of the dataset. Available options are: `dcase2021`, `dcase2022`, `dcase2023`, `dcase2024`, and `dcase2025`.
 
 ```bash
 [dcase-asd-toolkit]$ cd jobs/download
