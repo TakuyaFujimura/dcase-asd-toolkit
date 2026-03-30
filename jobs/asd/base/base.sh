@@ -11,6 +11,8 @@ get_machines() {
         machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
     elif [ "$1" = "dcase2024" ]; then
         machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
+    elif [ "$1" = "dcase2025" ]; then
+        machines=("AutoTrash" "BandSealer" "bearing" "CoffeeGrinder" "fan" "gearbox" "HomeCamera" "Polisher" "ScrewFeeder" "slider" "ToyCar" "ToyPet" "ToyRCCar" "ToyTrain" "valve")
     else
         machines="InvalidDCASE"
     fi

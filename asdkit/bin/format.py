@@ -18,6 +18,8 @@ def main(dcase: str, data_dir: str, link_mode: str) -> None:
     src_dir = Path(data_dir) / "original" / dcase
     check_src_dir(src_dir=src_dir, dcase=dcase)
     dst_dir = Path(data_dir) / "formatted" / dcase
+    if dst_dir.exists():
+        raise FileExistsError(f"{dst_dir} already exists.")
 
     traintest_dir_dict = get_traintest_dir_dict(dcase=dcase)
     renamer = RenameTestPath(dcase=dcase)

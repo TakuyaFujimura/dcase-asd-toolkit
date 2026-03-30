@@ -14,7 +14,7 @@
 | Item        | Type             | Description |
 |-------------|------------------|-------------|
 | `seed`      | `int`            | Random seed. |
-| `dcase`     | `str`            | DCASE challenge year. One of: `"dcase2020"`, ..., `"dcase2024"`. |
+| `dcase`     | `str`            | DCASE challenge year. One of: `"dcase2020"`, ..., `"dcase2025"`. |
 | `name`      | `str`            | Arbitrary string to identify the name. |
 | `version`   | `str`            | Arbitrary string to identify the version. |
 | `infer_ver` | `str`            | Arbitrary string to identify the inference version (e.g. epoch). |

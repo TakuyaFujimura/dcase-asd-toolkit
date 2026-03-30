@@ -89,4 +89,23 @@ MACHINE_DICT = {
         "ToothBrush",
         "ToyCircuit",
     ],
+    "dcase2025-dev": [
+        "bearing",
+        "fan",
+        "gearbox",
+        "slider",
+        "ToyCar",
+        "ToyTrain",
+        "valve",
+    ],
+    "dcase2025-eval": [
+        "AutoTrash",
+        "BandSealer",
+        "CoffeeGrinder",
+        "HomeCamera",
+        "Polisher",
+        "ScrewFeeder",
+        "ToyPet",
+        "ToyRCCar",
+    ],
 }

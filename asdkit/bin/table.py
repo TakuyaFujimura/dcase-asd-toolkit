@@ -38,7 +38,7 @@ def get_table_df(
         metric = f"{split}_{metric}"
     elif dcase in ["dcase2021", "dcase2022"]:
         metric = f"{split}_{metric}"
-    elif dcase in ["dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
         metric = f"0_{metric}"
     else:
         raise ValueError(f"Unknown dcase: {dcase}")

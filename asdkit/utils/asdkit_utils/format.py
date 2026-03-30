@@ -8,7 +8,13 @@ from asdkit.utils.dcase_utils import MACHINE_DICT
 
 def get_traintest_dir_dict(dcase: str) -> Dict[str, list]:
     """Return expected subdirectories"""
-    if dcase in ["dcase2020", "dcase2022", "dcase2023", "dcase2024"]:
+    if dcase in ["dcase2025"]:
+        traintest_dir_dict = {
+            "train": ["train"],
+            "test": ["test"],
+            "supplemental": ["supplemental"],
+        }
+    elif dcase in ["dcase2020", "dcase2022", "dcase2023", "dcase2024"]:
         traintest_dir_dict = {"train": ["train"], "test": ["test"]}
     elif dcase in ["dcase2021"]:
         traintest_dir_dict = {
@@ -97,7 +103,7 @@ class RenameTestPath:
         split_de = wav_path.parents[3].name
 
         # check train/test
-        if split_tt == "train":
+        if split_tt in ["train", "supplemental"]:
             return self.postprocess(wav_path)
         elif split_tt not in ["test", "source_test", "target_test"]:
             raise ValueError(f"Unknown split_tt: {split_tt}.")

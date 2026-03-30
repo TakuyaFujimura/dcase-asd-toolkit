@@ -1,5 +1,5 @@
 data_dir="../../../data" # relative path from this script or absolute path
-dcase="dcase2023"
+dcase="dcase2025"
 link_mode="symlink" # or "mv"
 
 absolute_data_dir=$(cd "$(dirname ${data_dir})" && pwd)/$(basename ${data_dir})

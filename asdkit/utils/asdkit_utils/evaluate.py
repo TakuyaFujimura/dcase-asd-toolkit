@@ -76,7 +76,7 @@ def get_official_domain_auc_list(dcase: str) -> List[str]:
         return ["s_auc", "s_pauc"]
     elif dcase == "dcase2021":
         return ["s_auc", "t_auc", "s_pauc", "t_pauc"]
-    elif dcase in ["dcase2022", "dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2022", "dcase2023", "dcase2024", "dcase2025"]:
         return ["smix_auc", "tmix_auc", "mix_pauc"]
     else:
         raise NotImplementedError()
@@ -103,7 +103,7 @@ def get_official_section_list(
             return [3, 4, 5]
         else:
             raise NotImplementedError()
-    elif dcase in ["dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
         return [0]
     else:
         raise NotImplementedError()
@@ -157,7 +157,7 @@ def add_official(
                 sub_auc_list=sub_auc_list,
                 sub_section_list=sub_section_list,
             )
-    elif dcase in ["dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
         metric_name = f"0_official{dcase[-2:]}"
         sub_section_list = get_official_section_list(dcase=dcase)
         mix_auc_and_section(
@@ -193,7 +193,7 @@ def add_split_total(
                 sub_auc_list=sub_auc_list,
                 sub_section_list=sub_section_list,
             )
-    elif dcase in ["dcase2023", "dcase2024"]:
+    elif dcase in ["dcase2023", "dcase2024", "dcase2025"]:
         # Only one section
         return evaluate_df
     else:
