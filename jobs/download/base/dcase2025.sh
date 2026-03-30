@@ -25,7 +25,7 @@ for machine_type in \
     CoffeeGrinder \
 ; do
 curl -L -O "https://zenodo.org/records/15392814/files/eval_data_${machine_type}_train.zip"
-unzip "eval_data_${machine_type}.zip"
+unzip "eval_data_${machine_type}_train.zip"
 curl -L -O "https://zenodo.org/records/15519362/files/eval_data_${machine_type}_test.zip"
 unzip "eval_data_${machine_type}_test.zip"
 done
