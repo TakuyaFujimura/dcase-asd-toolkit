@@ -7,6 +7,16 @@ ASDKit is a toolkit for anomalous sound detection (ASD) task.
 ASDKit provides recipes for various ASD methods and supports evaluation on the DCASE 2020-2024 Task 2 datasets.
 
 
+<details>
+<summary>Update History</summary>
+<br>
+
+#### July 21, 2025: Added pseudo labeling
+- [Details](./special/pseudo_label/README.md)
+- arxiv...
+
+</details>
+
 ## 🚀 Easy Start
 
 <details>
@@ -286,6 +296,18 @@ for machine in $machines; do
     asdkit_evaluate
 done
 ```
+</details>
+
+
+<details>
+<summary>Pseudo labels</summary>
+<br>
+
+- Description: This method generates pseudo-labels for training the discriminative feature extractor.
+- Call Script: `jobs/asd/pseudo_label/example.sh`
+
+[Other details](./special/pseudo_label/README.md)
+
 </details>
 
 ## 📊 Results

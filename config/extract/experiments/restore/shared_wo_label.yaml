@@ -1,0 +1,16 @@
+# @package _global_
+restore_or_scratch: restore
+restore_model_ver: "all"
+restore_ckpt_ver: ${infer_ver}
+infer_ver: null
+
+datamodule:
+  train:
+    collator:
+      tgt_class: "asdkit.datasets.DCASEWaveCollator"
+      label_dict_path: {} # removed for test
+      sec: ${dcase}
+      sr: 16000
+      shuffle: false
+  test:
+    collator: ${datamodule.train.collator}
