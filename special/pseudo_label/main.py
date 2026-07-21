@@ -4,14 +4,19 @@ from typing import Any, Dict, List, Tuple
 
 import hydra
 import numpy as np
+from common import (
+    get_all_machine_list,
+    get_output_json_path,
+    get_teacher_dir,
+    load_extract,
+    write_pseudo_label_json,
+)
 from models import PseudoLabelModel
 from omegaconf import DictConfig
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from asdkit.datasets.collators import get_relative_dcase_path
-from asdkit.utils.common import instantiate_tgt, write_json
-from asdkit.utils.dcase_utils import MACHINE_DICT
+from asdkit.utils.common import instantiate_tgt
 
 logger = logging.getLogger(__name__)
 
@@ -20,23 +25,14 @@ class Config(BaseModel):
     dcase: str
     results_root_dir: Path
     labels_root_dir: Path
-    recipe_dir: Path
+    teacher_dir: Path
     output_label_name: str
     machinewise: bool = True
     model: Dict[str, Any]
 
 
-def generate_pseudo_labels(
-    idx_array: np.ndarray, path_list: List[str]
-) -> Dict[str, Any]:
-    label_dict = {"num_class": len(set(idx_array)), "path2idx_dict": {}}
-    for path, idx in zip(path_list, idx_array):
-        label_dict["path2idx_dict"][get_relative_dcase_path(path)] = int(idx)
-    return label_dict
-
-
 def process_machinewise_clustering(
-    all_machine_list: List[str], recipe_dir: Path, model_config: Dict[str, Any]
+    all_machine_list: List[str], teacher_dir: Path, model_config: Dict[str, Any]
 ) -> Tuple[np.ndarray, List[str]]:
     """Perform clustering for each machine separately"""
     path_list: List[str] = []
@@ -45,11 +41,12 @@ def process_machinewise_clustering(
 
     for machine in tqdm(all_machine_list):
         model: PseudoLabelModel = instantiate_tgt(model_config)
-        with np.load(recipe_dir / machine / "train_extract.npz") as npz:
-            embed = npz["embed"]
-            path_list.extend(npz["path"].tolist())
+        extract = load_extract(teacher_dir=teacher_dir, machine=machine)
+        embed = extract.embed
+        path = extract.path
+        path_list.extend(path)
 
-        idx_array_tmp = model.fit_predict(embed=embed)
+        idx_array_tmp = model.fit_predict(embed=embed, path=path)
         idx_array_list.append(idx_array_tmp + idx_offset)
         idx_offset += len(set(idx_array_tmp))
 
@@ -58,7 +55,7 @@ def process_machinewise_clustering(
 
 
 def process_unified_clustering(
-    all_machine_list: List[str], recipe_dir: Path, model_config: Dict[str, Any]
+    all_machine_list: List[str], teacher_dir: Path, model_config: Dict[str, Any]
 ) -> Tuple[np.ndarray, List[str]]:
     """Perform clustering for all machines together"""
     model: PseudoLabelModel = instantiate_tgt(model_config)
@@ -66,11 +63,11 @@ def process_unified_clustering(
     path_list: List[str] = []
 
     for machine in tqdm(all_machine_list):
-        with np.load(recipe_dir / machine / "train_extract.npz") as npz:
-            embed_list.append(npz["embed"])
-            path_list.extend(npz["path"].tolist())
+        extract = load_extract(teacher_dir=teacher_dir, machine=machine)
+        embed_list.append(extract.embed)
+        path_list.extend(extract.path)
 
-    idx_array = model.fit_predict(embed=np.vstack(embed_list))
+    idx_array = model.fit_predict(embed=np.vstack(embed_list), path=path_list)
     return idx_array, path_list
 
 
@@ -78,36 +75,42 @@ def process_unified_clustering(
 def main(hydra_cfg: DictConfig) -> None:
     cfg: Config = Config(**hydra_cfg)
 
-    json_path: Path = cfg.labels_root_dir / cfg.dcase / f"{cfg.output_label_name}.json"
-    if json_path.exists():
-        raise FileExistsError(f"{json_path} already exists.")
-
-    all_machine_list: List[str] = list(
-        set(MACHINE_DICT[f"{cfg.dcase}-dev"] + MACHINE_DICT[f"{cfg.dcase}-eval"])
+    json_path = get_output_json_path(
+        labels_root_dir=cfg.labels_root_dir,
+        dcase=cfg.dcase,
+        output_label_name=cfg.output_label_name,
     )
-    all_machine_list.sort()
-    recipe_dir: Path = cfg.results_root_dir / cfg.dcase / cfg.recipe_dir
+    all_machine_list = get_all_machine_list(dcase=cfg.dcase)
+    teacher_dir = get_teacher_dir(
+        results_root_dir=cfg.results_root_dir,
+        dcase=cfg.dcase,
+        teacher_dir=cfg.teacher_dir,
+    )
 
     # Create mutable copy of model config
     model_config: Dict[str, Any] = dict(cfg.model)
 
     if cfg.machinewise:
         idx_array, path_list = process_machinewise_clustering(
-            all_machine_list, recipe_dir, model_config
+            all_machine_list, teacher_dir, model_config
         )
     else:
-        logger.info(
-            "Note that the number of classes will be multiplied by the number of machines."
-        )
-        model_config["num_class"] *= len(all_machine_list)
+        if "num_class" in model_config:
+            model_config["num_class"] *= len(all_machine_list)
+            logger.info(
+                "Note that the number of classes will be multiplied by the number of machines."
+            )
+        else:
+            logger.info("ratio-based clustering will be performed")
+            assert "ratio" in model_config
 
         idx_array, path_list = process_unified_clustering(
-            all_machine_list, recipe_dir, model_config
+            all_machine_list, teacher_dir, model_config
         )
 
-    pseudo_labels: Dict[str, Any] = generate_pseudo_labels(idx_array, path_list)
-    json_path.parent.mkdir(parents=True, exist_ok=True)
-    write_json(json_path=json_path, data=pseudo_labels)
+    write_pseudo_label_json(
+        json_path=json_path, idx_array=idx_array, path_list=path_list
+    )
 
 
 if __name__ == "__main__":

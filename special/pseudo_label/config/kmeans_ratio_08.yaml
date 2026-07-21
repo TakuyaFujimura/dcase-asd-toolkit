@@ -1,13 +1,14 @@
+name: null
 dcase: null
-recipe_dir: null #raw_eat/0/output/last
+teacher_dir: null #raw_eat/0/output/last
 output_label_name: null #raw_eat_kmeans_8
 
-results_root_dir: ../../results/recipe
-labels_root_dir: ../../labels
+results_root_dir: ../../results/${name}
+labels_root_dir: ../../labels/${name}
 machinewise: true
 model:
-  tgt_class: models.KMeansModel
-  num_class: 8
+  tgt_class: models.KMeansRatioModel
+  ratio: 0.008
 
 
 hydra:
