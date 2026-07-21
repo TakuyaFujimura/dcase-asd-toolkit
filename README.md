@@ -13,7 +13,7 @@ ASDKit provides recipes for various ASD methods and supports evaluation on the D
 
 #### July 21, 2025: Added pseudo labeling
 - [Details](./special/pseudo_label/README.md)
-- arxiv...
+- https://arxiv.org/abs/2607.16678
 
 </details>
 

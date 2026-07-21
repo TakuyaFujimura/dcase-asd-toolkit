@@ -9,6 +9,10 @@ You can run the entire pseudo-label distillation process using:
 bash jobs/asd/pseudo_label/example.sh
 ```
 
+Related papers:
+
+- [Pseudo-label distillation for discriminative anomalous sound detection](https://arxiv.org/abs/2607.16678)
+- [Improvements of Discriminative Feature Space Training for Anomalous Sound Detection in Unlabeled Conditions](https://ieeexplore.ieee.org/document/10890020)
 
 ## Main Programs
 
