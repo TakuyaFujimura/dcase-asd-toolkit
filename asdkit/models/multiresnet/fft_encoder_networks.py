@@ -1,7 +1,7 @@
 import logging
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
-from torch import nn
+from torch import Tensor, nn
 
 from asdkit.models.modules import SEBlock, calc_filtered_size_1d
 
@@ -14,10 +14,21 @@ class Conv1dEncoderLayer(nn.Module):
         input_size: int,
         use_bias: bool,
         emb_base_size: int,
-        conv_param_list: Optional[List[dict]] = None,
+        conv_param_list: Optional[List[Dict[str, int]]] = None,
         aggregate: Literal["mlp", "gap"] = "mlp",
-    ):
+    ) -> None:
+        """Build a fixed-width network for FFT magnitudes.
+
+        Args:
+            input_size: Number of FFT bins, excluding batch and channel axes.
+            use_bias: Enable Conv/Linear biases and BatchNorm affine together.
+                SEBlock retains its own internal bias policy.
+            emb_base_size: Internal channel/hidden width and output vector width.
+            conv_param_list: Three convolution settings with k, s and optional d.
+            aggregate: Flatten fixed-size bins (mlp) or average remaining bins (gap).
+        """
         super().__init__()
+        self.embedding_dim = emb_base_size
         if conv_param_list is None:
             conv_param_list = [
                 {"k": 256, "s": 64},
@@ -38,38 +49,23 @@ class Conv1dEncoderLayer(nn.Module):
             logger.info(f"{i}th: [{input_size}]")
         logger.info("===============================")
 
-        self.conv1d_layer = nn.Sequential(
-            nn.Conv1d(
-                in_channels=1,
-                out_channels=emb_base_size,
-                kernel_size=conv_param_list[0]["k"],
-                stride=conv_param_list[0]["s"],
-                dilation=conv_param_list[0].get("d", 1),
-                bias=use_bias,
-            ),
-            nn.ReLU(),
-            SEBlock(emb_base_size, ratio=16),
-            nn.Conv1d(
-                in_channels=emb_base_size,
-                out_channels=emb_base_size,
-                kernel_size=conv_param_list[1]["k"],
-                stride=conv_param_list[1]["s"],
-                dilation=conv_param_list[1].get("d", 1),
-                bias=use_bias,
-            ),
-            nn.ReLU(),
-            SEBlock(emb_base_size, ratio=16),
-            nn.Conv1d(
-                in_channels=emb_base_size,
-                out_channels=emb_base_size,
-                kernel_size=conv_param_list[2]["k"],
-                stride=conv_param_list[2]["s"],
-                dilation=conv_param_list[2].get("d", 1),
-                bias=use_bias,
-            ),
-            nn.ReLU(),
-            SEBlock(num_channels=emb_base_size, ratio=16),
-        )
+        conv_layers: List[nn.Module] = []
+        for index, params in enumerate(conv_param_list):
+            conv_layers.extend(
+                [
+                    nn.Conv1d(
+                        in_channels=1 if index == 0 else emb_base_size,
+                        out_channels=emb_base_size,
+                        kernel_size=params["k"],
+                        stride=params["s"],
+                        dilation=params.get("d", 1),
+                        bias=use_bias,
+                    ),
+                    nn.ReLU(),
+                    SEBlock(num_channels=emb_base_size, ratio=16),
+                ]
+            )
+        self.conv1d_layer = nn.Sequential(*conv_layers)
 
         if aggregate == "mlp":
             self.aggregate_layer = nn.Sequential(
@@ -107,9 +103,13 @@ class Conv1dEncoderLayer(nn.Module):
             nn.Linear(emb_base_size, emb_base_size, bias=use_bias),
         )
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         """
-        x: (B, C, L)
+        Args:
+            x: FFT magnitudes shaped (B, 1, input_size).
+
+        Returns:
+            Vectors shaped (B, emb_base_size).
         """
         x = self.conv1d_layer(x)
         x = self.aggregate_layer(x)

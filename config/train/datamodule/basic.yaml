@@ -2,7 +2,7 @@
 batch_size: 64
 sr: 16000
 sec: ${dcase}
-num_workers: 0
+num_workers: 6
 
 train:
   dataloader:
@@ -11,12 +11,12 @@ train:
     pin_memory: true
     shuffle: true
   dataset:
-    tgt_class: asdkit.datasets.WaveDataset
+    _target_: asdkit.datasets.WaveDataset
     path_selector_list:
       - "${data_dir}/formatted/${dcase}/raw/*/train/*.wav"
   batch_sampler: null
   collator:
-    tgt_class: asdkit.datasets.DCASEWaveCollator
+    _target_: asdkit.datasets.DCASEWaveCollator
     sr: ${datamodule.sr}
     sec: ${datamodule.sec}
     shuffle: true

@@ -1,20 +1,13 @@
 # @package _global_
 backend:
-  - tgt_class: asdkit.backends.Knn
-    n_neighbors_so: 1
-    n_neighbors_ta: 1
-    smote_ratio: 0.0
-    smote_neighbors: 0
-  - tgt_class: asdkit.backends.Kmeans
-    n_clusters: 16
-    metric: cosine
-  - tgt_class: asdkit.backends.Knn
-    n_neighbors_so: 1
-    n_neighbors_ta: 1
+  - _target_: asdkit.backends.KnnBackend
+    n_neighbors: 1
+  - _target_: asdkit.backends.KnnSMOTEBackend
+    n_neighbors: 1
     smote_ratio: 0.2
     smote_neighbors: 2
     metric: cosine
-  - tgt_class: asdkit.backends.KnnRescale
+  - _target_: asdkit.backends.KnnRescaleBackend
     n_neighbors: 1
     k_ref_normalize: 4
     metric: cosine

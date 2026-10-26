@@ -1,18 +1,20 @@
-import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, final
 
-import torch
 from torch import Tensor
 
-from asdkit.utils.common import instantiate_tgt
+from asdkit.utils.common import instantiate
 
-from .base_plmodel import BasePLFrontend
+from .base_discriminative import (
+    BaseDisPLFrontend,
+    classification_anomaly_scores,
+    classification_losses,
+)
 
-logger = logging.getLogger(__name__)
 
+class BasicDisPLFrontend(BaseDisPLFrontend):
+    """Train label-specific classification heads on waveform embeddings."""
 
-class BasicDisPLModel(BasePLFrontend):
     def __init__(
         self,
         model_cfg: Dict[str, Any],
@@ -20,85 +22,79 @@ class BasicDisPLModel(BasePLFrontend):
         lrscheduler_cfg: Optional[Dict[str, Any]] = None,
         label_dict_path: Optional[Dict[str, Path]] = None,
         save_only_trainable: bool = False,
-    ):
-        """
-        Args:
-            model_cfg (Dict[str, Any]): Configuration for the model. Parameters in this dictionary are used in `self.construct_model`.
-            optim_cfg (Dict[str, Any]): Configuration for the optimizer.
-            lrscheduler_cfg (Optional[Dict[str, Any]]): Configuration for the learning rate scheduler.
-            label_dict_path (Optional[Dict[str, Path]]): Dictionary for label_dict paths.
-            save_only_trainable (bool): If True, only trainable parameters are saved.
-        """
+        optimizer_log_options: Optional[Dict[str, bool]] = None,
+    ) -> None:
         super().__init__(
             model_cfg=model_cfg,
             optim_cfg=optim_cfg,
             lrscheduler_cfg=lrscheduler_cfg,
             label_dict_path=label_dict_path,
             save_only_trainable=save_only_trainable,
+            optimizer_log_options=optimizer_log_options,
         )
+        self.construct_model(**model_cfg)
+        if self.save_only_trainable:
+            self.save_state_names = self.collect_trainable_state_names()
+            self.save_state_names.update(self.head_dict.state_dict(prefix="head_dict."))
 
-    def set_head_dict(self, label_to_lossweight_dict: Dict[str, float]):
-        self.head_dict = torch.nn.ModuleDict({})
-        for label_name in label_to_lossweight_dict:
-            loss_cfg = {
-                "n_classes": self.num_class_dict[label_name],
-                "embed_size": self.embed_size,
-                **self.loss_cfg,
-            }
-            self.head_dict[label_name] = instantiate_tgt(loss_cfg)
+    def compute_outputs(self, batch: Dict[str, Tensor]) -> Dict[str, Tensor]:
+        """
+        Args:
+            batch: Input with wave shaped (B, T).
 
-    def set_augmentations(self, augmentation_cfg_list: List[Dict[str, Any]]):
-        self.augmentations = torch.nn.ModuleList([])
-        for cfg in augmentation_cfg_list:
-            self.augmentations.append(instantiate_tgt(cfg))
+        Returns:
+            Dictionary containing embed shaped (B, D).
+        """
+        return {"embed": self.extractor(batch["wave"])}
 
+    def get_metadata(self) -> Dict[str, Any]:
+        return {"embeddings": {"embed": {"representation": "vector"}}}
+
+    @final
     def construct_model(
         self,
         extractor_cfg: Dict[str, Any],
         loss_cfg: Dict[str, Any],
-        label_to_lossweight_dict: Dict[str, float],
+        label_loss_weight_dict: Dict[str, float],
         augmentation_cfg_list: Optional[List[Dict[str, Any]]] = None,
-        use_compile: bool = False,
+        anomaly_score_type: Optional[List[str]] = None,
     ) -> None:
-        if augmentation_cfg_list is None:
-            augmentation_cfg_list = []
-        self.extractor = instantiate_tgt(extractor_cfg)
-        if use_compile:
-            self.extractor = torch.compile(self.extractor)  # type: ignore
+        """
+        Args:
+            extractor_cfg: Extractor returning (B, D) embeddings and embedding_dim.
+            loss_cfg: Classification loss configuration shared by all heads.
+            label_loss_weight_dict: Label names mapped to objective weights.
+            augmentation_cfg_list: Optional batch augmentation configurations.
+            anomaly_score_type: Inference score names. Defaults to both
+                one_minus_prob and neg_log_odds. Does not change loss.
+        """
+        if loss_cfg.get("reduction") == "none":
+            raise ValueError("Scalar training losses require reduction='mean' or 'sum'")
+        self.set_anomaly_score_type(anomaly_score_type)
+        self.extractor = instantiate(extractor_cfg)
         self.loss_cfg = loss_cfg
-        self.embed_size = self.extractor.embed_size
-        self.label_to_lossweight_dict = label_to_lossweight_dict
-        self.set_head_dict(self.label_to_lossweight_dict)
-        self.set_augmentations(augmentation_cfg_list)
+        self.embedding_dim = self.extractor.embedding_dim
+        self.label_loss_weight_dict = label_loss_weight_dict
+        self.set_head_dict(self.label_loss_weight_dict)
+        self.set_augmentations(augmentation_cfg_list or [])
 
-    def forward(self, batch: dict) -> Dict[str, Any]:
-        embed = self.extractor(batch["wave"])  # (B, D)
-        return {"embed": embed}
+    def compute_losses(self, batch: Dict[str, Tensor]) -> Dict[str, Tensor]:
+        """Compute the weighted classification objective using concrete embeddings."""
+        outputs = self.compute_outputs(batch)
+        return classification_losses(
+            embedding=outputs["embed"],
+            heads=self.head_dict,
+            batch=batch,
+            weights=self.label_loss_weight_dict,
+        )
 
-    def wave2loss(self, wave: Tensor, batch: Dict[str, Tensor]) -> Dict[str, Any]:
-        embed = self.extractor(wave)
-        loss_dict = {"main": 0.0}
-
-        for label_name, weight in self.label_to_lossweight_dict.items():
-            loss_dict[f"dis_{label_name}"] = self.head_dict[label_name](
-                embed, batch[f"onehot_{label_name}"]
-            )
-            loss_dict["main"] += loss_dict[f"dis_{label_name}"] * weight
-        return loss_dict
-
-    def training_step(self, batch, batch_idx):
-        for aug_func in self.augmentations:
-            batch = aug_func(batch)
-        wave = batch.pop("wave")
-        loss_dict = self.wave2loss(wave, batch)
-        self.log_loss(torch.tensor(len(wave)).float(), "train/batch_size", 1)
-        for key_, val_ in loss_dict.items():
-            self.log_loss(val_, f"train/{key_}", len(wave))
-        return loss_dict["main"]
-
-    def validation_step(self, batch, batch_idx):
-        wave = batch.pop("wave")
-        loss_dict = self.wave2loss(wave, batch)
-        self.log_loss(torch.tensor(len(wave)).float(), "valid/batch_size", 1)
-        for key_, val_ in loss_dict.items():
-            self.log_loss(val_, f"valid/{key_}", len(wave))
+    def forward(self, batch: Dict[str, Tensor]) -> Dict[str, Tensor]:
+        """Return embeddings and available GT scores from one model evaluation."""
+        outputs = self.compute_outputs(batch)
+        scores = classification_anomaly_scores(
+            embedding=outputs["embed"],
+            heads=self.head_dict,
+            batch=batch,
+            score_types=self.anomaly_score_type,
+        )
+        return {**outputs, **scores}

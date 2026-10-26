@@ -15,13 +15,14 @@ class AUROC:
         self.y_target.append(target)
 
     def compute(self) -> Optional[float]:
+        if len(self.y_score) == 0 or len(self.y_target) == 0:
+            return None
+
         y_score = torch.cat(self.y_score).detach().cpu().numpy()
         y_target = torch.cat(self.y_target).detach().cpu().numpy()
         # y_target is normal / anomaly labels
 
-        if len(y_score) == 0 or len(y_target) == 0:
-            return None
-        elif np.unique(y_target).size == 1:
+        if np.unique(y_target).size < 2:
             return None
         else:
             return roc_auc_score(y_true=y_target, y_score=y_score)  # type: ignore
@@ -32,4 +33,4 @@ class AUROC:
 
 
 # We don't use torchmetrics.AUROC because it applies sigmoid to anomaly scores.
-# If anomaly scores are large, sigmoid will return 1.0, which is unsuitable for AUC calculation.
+# For large anomaly scores, sigmoid saturates at 1.0, making it unsuitable for AUC calculation.

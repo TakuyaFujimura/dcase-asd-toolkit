@@ -1,15 +1,15 @@
 from typing import Dict, List, Optional
 
 import torch
-from torch import nn
 
 from asdkit.utils.common import re_match_any
 
+from .base import BaseBatchAugmentation
 from .utils import get_dec, get_rand_perm
 
 
-class Mixup(nn.Module):
-    def __init__(self, prob: float, target_keys: Optional[List[str]] = None):
+class Mixup(BaseBatchAugmentation):
+    def __init__(self, prob: float, target_keys: Optional[List[str]] = None) -> None:
         """
         Args:
             prob (float): Probability of applying mixup.

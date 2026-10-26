@@ -1,78 +1,113 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)" || return 1
 
 get_machines() {
-    if [ "$1" = "dcase2020" ]; then
-        machines=("fan"  "pump"  "slider"  "ToyCar"  "ToyConveyor"  "valve")
-    elif [ "$1" = "dcase2021" ]; then
-        machines=("fan"  "gearbox"  "pump"  "slider"  "ToyCar"  "ToyTrain"  "valve")
-    elif [ "$1" = "dcase2022" ]; then
-        machines=("bearing"  "fan"  "gearbox"  "slider"  "ToyCar"  "ToyTrain"  "valve")
-    elif [ "$1" = "dcase2023" ]; then
-        machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain"  "Vacuum" "valve")
-    elif [ "$1" = "dcase2024" ]; then
-        machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
-    elif [ "$1" = "dcase2025" ]; then
-        machines=("AutoTrash" "BandSealer" "bearing" "CoffeeGrinder" "fan" "gearbox" "HomeCamera" "Polisher" "ScrewFeeder" "slider" "ToyCar" "ToyPet" "ToyRCCar" "ToyTrain" "valve")
-    else
-        machines="InvalidDCASE"
-    fi
-
-    echo "${machines[@]}"
+    case "$1" in
+        dcase2020)
+            machines=("fan" "pump" "slider" "ToyCar" "ToyConveyor" "valve")
+            ;;
+        dcase2021)
+            machines=("fan" "gearbox" "pump" "slider" "ToyCar" "ToyTrain" "valve")
+            ;;
+        dcase2022)
+            machines=("bearing" "fan" "gearbox" "slider" "ToyCar" "ToyTrain" "valve")
+            ;;
+        dcase2023)
+            machines=("bandsaw" "bearing" "fan" "gearbox" "grinder" "shaker" "slider" "ToyCar" "ToyDrone" "ToyNscale" "ToyTank" "ToyTrain" "Vacuum" "valve")
+            ;;
+        dcase2024)
+            machines=("3DPrinter" "AirCompressor" "bearing" "BrushlessMotor" "fan" "gearbox" "HairDryer" "HoveringDrone" "RoboticArm" "Scanner" "slider" "ToothBrush" "ToyCar" "ToyCircuit" "ToyTrain" "valve")
+            ;;
+        dcase2025)
+            machines=("AutoTrash" "BandSealer" "bearing" "CoffeeGrinder" "fan" "gearbox" "HomeCamera" "Polisher" "ScrewFeeder" "slider" "ToyCar" "ToyPet" "ToyRCCar" "ToyTrain" "valve")
+            ;;
+        dcase2026)
+            machines=("bearingEmu" "BlowerDustCollector" "fan" "gearboxEmu" "Sander" "SewingMachine" "sliderEmu" "ToothBrush" "ToyCar" "ToyCarEmu" "ToyDrone" "valveEmu")
+            ;;
+        *)
+            echo "Error: Invalid DCASE: $1" >&2
+            return 1
+            ;;
+    esac
 }
 
-collect_args() {
-    local vars=("$@")
-    local args=()
+asdkit_train() (
+    cd "${repo_root}" || exit 1
+    source "${repo_root}/jobs/activate.sh" || exit 1
+    python -m asdkit.bin.train \
+        "name=${name}" \
+        "version=${version}" \
+        "dcase=${dcase}" \
+        "seed=${seed}" \
+        "$@"
+)
 
-    for var in "${vars[@]}"; do
-        if [[ -n $var ]]; then
-            args+=("$var=${!var}")
-        fi
-    done
+asdkit_extract() (
+    cd "${repo_root}" || exit 1
+    source "${repo_root}/jobs/activate.sh" || exit 1
+    python -m asdkit.bin.extract \
+        "name=${name}" \
+        "version=${version}" \
+        "dcase=${dcase}" \
+        "seed=${seed}" \
+        "infer_ver=${infer_ver}" \
+        "machine=${machine}" \
+        "$@"
+)
 
-    echo "${args[@]}"
-}
+asdkit_score() (
+    cd "${repo_root}" || exit 1
+    source "${repo_root}/jobs/activate.sh" || exit 1
+    python -m asdkit.bin.score \
+        "name=${name}" \
+        "version=${version}" \
+        "dcase=${dcase}" \
+        "seed=${seed}" \
+        "infer_ver=${infer_ver}" \
+        "machine=${machine}" \
+        "$@"
+)
 
-asdkit_train() {
-    local args=($(collect_args "name" "version" "dcase" "seed"))
-    echo "${args[@]}"
-    python -m asdkit.bin.train "${args[@]}" "$@"
-}
+asdkit_evaluate() (
+    cd "${repo_root}" || exit 1
+    source "${repo_root}/jobs/activate.sh" || exit 1
+    python -m asdkit.bin.evaluate \
+        "name=${name}" \
+        "version=${version}" \
+        "dcase=${dcase}" \
+        "seed=${seed}" \
+        "infer_ver=${infer_ver}" \
+        "machine=${machine}" \
+        "$@"
+)
 
-asdkit_extract() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdkit.bin.extract "${args[@]}" "$@"
-}
-
-asdkit_score() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdkit.bin.score "${args[@]}" "$@"
-}
-
-asdkit_evaluate() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdkit.bin.evaluate "${args[@]}" "$@"
-}
-
-asdkit_visualize() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver" "machine"))
-    python -m asdkit.bin.visualize "${args[@]}" "$@"
-}
+asdkit_visualize() (
+    cd "${repo_root}" || exit 1
+    source "${repo_root}/jobs/activate.sh" || exit 1
+    python -m asdkit.bin.visualize \
+        "name=${name}" \
+        "version=${version}" \
+        "dcase=${dcase}" \
+        "seed=${seed}" \
+        "infer_ver=${infer_ver}" \
+        "machine=${machine}" \
+        "$@"
+)
 
 
-asdkit_table() {
-    local args=($(collect_args "name" "version" "dcase" "seed" "infer_ver"))
-    python -m asdkit.bin.table "${args[@]}" "$@"
-}
+asdkit_table() (
+    cd "${repo_root}" || exit 1
+    source "${repo_root}/jobs/activate.sh" || exit 1
+    python -m asdkit.bin.table \
+        "name=${name}" \
+        "version=${version}" \
+        "dcase=${dcase}" \
+        "seed=${seed}" \
+        "infer_ver=${infer_ver}" \
+        "$@"
+)
 
-# get machines
-machines=$(get_machines "${dcase}")
-if [ "$machines" = "InvalidDCASE" ]; then
-    echo "Error: Invalid DCASE"
-    exit 1
-fi
-echo "machines: $machines"
 
-# change directory to project root
-cd ../../..
-
+get_machines "${dcase}" || exit 1
+echo "machines: ${machines[*]}"

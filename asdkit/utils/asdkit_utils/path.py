@@ -26,7 +26,7 @@ def check_file_exists(dir_path: Path, file_name: str, overwrite: bool) -> None:
             f"{dir_path}/{file_name} already exists. "
             + "Set overwrite=True to overwrite it."
         )
-        sys.exit(1)
+        sys.exit(0)
 
 
 def make_output_dir(cfg, check_file_name: str) -> Path:
@@ -36,3 +36,8 @@ def make_output_dir(cfg, check_file_name: str) -> Path:
         dir_path=output_dir, file_name=check_file_name, overwrite=cfg.overwrite
     )
     return output_dir
+
+
+def get_extraction_marker(extraction_dir: Path) -> Path:
+    """Keep the completion marker alongside the extracted arrays."""
+    return extraction_dir / ".done"

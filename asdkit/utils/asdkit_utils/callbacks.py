@@ -32,7 +32,7 @@ class ModelCheckpoint(PLModelCheckpoint):
         elif trainer.current_epoch != self.skip_epoch:
             super().on_validation_end(trainer, pl_module)
         else:
-            return  # skip saving
+            return  # Skip the restored epoch
 
 
 class NaNCheckCallback(Callback):

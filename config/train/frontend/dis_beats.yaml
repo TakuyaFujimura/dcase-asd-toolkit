@@ -1,7 +1,7 @@
-tgt_class: asdkit.frontends.BasicDisPLModel
+_target_: asdkit.frontends.PretrainedDisPLFrontend
 
 optim_cfg:
-  tgt_class: torch.optim.AdamW
+  _target_: torch.optim.AdamW
   lr: 1.0e-4
 
 lrscheduler_cfg: null
@@ -10,17 +10,22 @@ label_dict_path: ${label_dict_path}
 
 model_cfg:
   extractor_cfg:
-    tgt_class: asdkit.models.pretrained_models.beats.BEATsLoRA
-    lora_cfg:
-      r: 64
-      target_modules: ["q_proj", "v_proj"]
-    embed_size: 256
-    projection_type: "attn_stat_pool"
+    _target_: asdkit.models.pretrained_models.wrapper.PretrainedWrapper
     model_cfg:
-      ckpt_path: "pretrained_models/beats/BEATs_iter3.pt"
+      _target_: asdkit.models.pretrained_models.beats.BEATsSSLModel
+      model_id: "BEATs_iter3"
       sr: ${datamodule.sr}
-      specaug: false
+      spectrogram_augmentation_cfg: null
+    adaptation_cfg:
+      _target_: asdkit.models.pretrained_models.adaptation.LoRA
+      lora_cfg:
+        r: 64
+        target_modules: ["q_proj", "v_proj"]
+  embedding_head_cfg:
+    _target_: asdkit.models.pretrained_models.heads.AttnStatPoolHead
+    embedding_dim: 256
+  head_input_mode: seq
   loss_cfg: {}
-  label_to_lossweight_dict:
+  label_loss_weight_dict:
     main: 1
   augmentation_cfg_list: []

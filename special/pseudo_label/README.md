@@ -1,12 +1,13 @@
 # Pseudo Label
 
 This directory contains experimental scripts for generating pseudo-label JSON files from DCASE training embeddings.
-The input files are located at `<results_root_dir> / <dcase> / <teacher_dir> / <machine>/train_extract.npz`.
+Inputs are located at `<results_root_dir>/<dcase>/<teacher_dir>/<machine>/`.
 
-You can run the entire pseudo-label distillation process using:
+After extracting EAT embeddings with `jobs/asd/run/raw_eat.sh`, generate
+machinewise and unified pseudo labels for DCASE 2023 and 2024 using:
 
 ```bash
-bash jobs/asd/pseudo_label/example.sh
+bash special/pseudo_label/jobs/eat.sh
 ```
 
 Related papers:
@@ -18,7 +19,7 @@ Related papers:
 
 #### `main.py`
 This conceals the attribute labels for all machines and generates pseudo-labels instead.
-The `--config-name` option specifies the configuration file to use. Configuration files are located in `configs/`.
+The `--config-name` option specifies a file in `config/` (default: `kmeans_ratio_08`).
 
 
 * `machinewise=true`: Performs clustering separately for each machine.
@@ -27,17 +28,18 @@ The `--config-name` option specifies the configuration file to use. Configuratio
 Example:
 
 ```bash
+cd special/pseudo_label
 python main.py \
   --config-name=kmeans_ratio_08 \
   name=recipe \
   dcase=dcase2023 \
-  teacher_dir=raw_beats/0/output/last \
-  output_label_name=raw_beats_kmeans_ratio_08
+  teacher_dir=raw_eat/0/output/default \
+  output_label_name=raw_eat_kmeans_ratio_08
 ```
 
 #### `main_partial_attribute.py`
 
-This is used for the DCASE 2024 and 2025 datasets, in which some machines have attribute information while others do not.
+This is used for the DCASE 2024–2026 datasets, in which some machines have attribute information while others do not.
 It uses existing labels for machines with attribute information and generates pseudo-labels only for machines without attribute information.
 
 

@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - /experiments/from_checkpoint/shared_ssl_preprocessed
+  - _self_
+
+# EAT supplies a CLS token; BEATs uses shared_ssl_preprocessed instead.
+frontend_config:
+  postprocessing:
+    embed_cls:
+      source_key: embed
+      view_name: cls

@@ -1,1 +1,1 @@
-from .mlp import AE_MLP
+from .dcase_mlp import DCASEMLPDecoder, DCASEMLPEncoder

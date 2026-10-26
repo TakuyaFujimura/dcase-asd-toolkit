@@ -1,3 +1,3 @@
 from .base import BaseAudioFeature
-from .flattenstft import FlattenSTFT
-from .stft import FFT, STFT
+from .consecutive_stft_frames import ConsecutiveStftFrames
+from .stft import FFTMagnitude, Spectrogram

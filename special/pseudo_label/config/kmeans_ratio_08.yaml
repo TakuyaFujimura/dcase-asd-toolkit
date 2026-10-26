@@ -1,15 +1,22 @@
 name: null
 dcase: null
-teacher_dir: null #raw_eat/0/output/last
-output_label_name: null #raw_eat_kmeans_8
+teacher_dir: null # Example: raw_eat/0/output/default
+output_label_name: null # Example: raw_eat_kmeans_ratio_08
 
 results_root_dir: ../../results/${name}
 labels_root_dir: ../../labels/${name}
 machinewise: true
+org_label_name: main # Used only by main_partial_attribute.py
+org_labels_root_dir: ../../labels
+# EAT CLS vector from raw_eat_preprocessed. For legacy CLS saved as embed,
+# explicitly override with embed_key=embed.
+embed_key: embed_cls
 model:
-  tgt_class: models.KMeansRatioModel
+  _target_: models.KMeansRatioModel
   ratio: 0.008
-
+  ratio_target: null
+  num_class_target: null
+  split_by_domain: false
 
 hydra:
   output_subdir: .hydra_${output_label_name}

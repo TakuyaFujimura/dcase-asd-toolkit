@@ -1,0 +1,36 @@
+# @package _global_
+# Global features, EAT's CLS vector, mean BEAM and RDP BEAM.
+backend:
+  - _target_: asdkit.backends.TransformWrapper
+    embed_key: embed_global
+    backend_cfg: &knn
+      _target_: asdkit.backends.KnnBackend
+      n_neighbors: 1
+      metric: cosine
+  - _target_: asdkit.backends.TransformWrapper
+    embed_key: embed_global
+    backend_cfg: &smote
+      _target_: asdkit.backends.KnnSMOTEBackend
+      n_neighbors: 1
+      metric: cosine
+      smote_ratio: 0.2
+      smote_neighbors: 2
+  - _target_: asdkit.backends.TransformWrapper
+    embed_key: embed_global
+    backend_cfg: &rescale
+      _target_: asdkit.backends.KnnRescaleBackend
+      n_neighbors: 1
+      metric: cosine
+      k_ref_normalize: 4
+  - _target_: asdkit.backends.TransformWrapper
+    embed_key: embed_cls
+    backend_cfg: *rescale
+  # Equivalent to BEAM: score each precomputed frequency band and average.
+  - _target_: asdkit.backends.TransformWrapper
+    embed_key: embed
+    score_aggregation_name: mean
+    backend_cfg: *rescale
+  - _target_: asdkit.backends.TransformWrapper
+    embed_key: embed_rdp
+    score_aggregation_name: mean
+    backend_cfg: *rescale

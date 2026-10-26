@@ -1,17 +1,25 @@
 import logging
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Union
 
 import torch
 
-from .BEATs import BEATs, BEATsConfig
+from .original.BEATs import BEATs, BEATsConfig
 
 logger = logging.getLogger(__name__)
 
 
 def restore(
-    ckpt_path: Path | str, update_cfg: Optional[dict] = None
+    ckpt_path: Union[Path, str], update_cfg: Optional[Dict[str, Any]] = None
 ) -> Tuple[torch.nn.Module, int]:
+    """
+    Args:
+        ckpt_path: Local BEATs checkpoint.
+        update_cfg: Overrides for the checkpoint configuration.
+
+    Returns:
+        Restored backbone and its encoder embedding dimension.
+    """
     ckpt_path = Path(ckpt_path)
     if not ckpt_path.exists():
         raise FileNotFoundError(
@@ -27,4 +35,4 @@ def restore(
     if "finetuned" in ckpt_path.name:
         logger.info("Removing predictor from the finetuned BEATs model")
         model.predictor = None
-    return model, 768
+    return model, cfg.encoder_embed_dim

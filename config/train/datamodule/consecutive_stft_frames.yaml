@@ -1,0 +1,40 @@
+batch_size: 256
+sr: 16000
+num_workers: 0
+
+train:
+  dataloader:
+    batch_size: ${datamodule.batch_size}
+    num_workers: ${datamodule.num_workers}
+    pin_memory: true
+    shuffle: true
+  dataset:
+    _target_: asdkit.datasets.ConsecutiveStftFramesDataset
+    path_selector_list:
+      - "${data_dir}/formatted/${dcase}/raw/${machine}/train/*.wav"
+    stft_cfg: ${frontend.model_cfg.stft_cfg}
+    n_frames: ${frontend.model_cfg.n_frames}
+    frame_shift: ${frontend.model_cfg.frame_shift}
+  batch_sampler: null
+  collator:
+    _target_: asdkit.datasets.DCASEAudioFeatCollator
+    shuffle: true
+    label_dict_path: ${label_dict_path}
+
+valid:
+  dataloader:
+    batch_size: ${datamodule.batch_size}
+    num_workers: ${datamodule.num_workers}
+    pin_memory: true
+    shuffle: false
+  dataset:
+    _target_: asdkit.datasets.WaveDataset
+    path_selector_list:
+      - "${data_dir}/formatted/${dcase}/raw/${machine}/test/*.wav"
+  batch_sampler: null
+  collator:
+    _target_: asdkit.datasets.DCASEWaveCollator
+    sr: ${datamodule.sr}
+    sec: ${dcase}_${machine}
+    shuffle: false
+    label_dict_path: ${label_dict_path}

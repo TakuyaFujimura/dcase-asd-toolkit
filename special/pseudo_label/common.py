@@ -1,9 +1,12 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
+
+from asdkit.datasets.collators import get_dcase_path
+from asdkit.utils.asdkit_utils.extract import load_extract_data
 
 
 @dataclass(frozen=True)
@@ -36,31 +39,47 @@ def get_output_json_path(
 
 
 def load_extract(
-    teacher_dir: Path, machine: str, filename: str = "train_extract.npz"
+    teacher_dir: Path,
+    machine: str,
+    embed_key: str,
 ) -> ExtractData:
-    with np.load(teacher_dir / machine / filename) as npz:
-        return ExtractData(embed=npz["embed"], path=npz["path"].tolist())
+    embed, paths = load_clustering_features(teacher_dir / machine, embed_key)
+    return ExtractData(embed=embed, path=paths)
 
 
-def load_embed(teacher_dir: Path, machine: str, filename: str) -> np.ndarray:
-    with np.load(teacher_dir / machine / filename) as npz:
-        return npz["embed"]
-
-
-def _get_relative_dcase_path(path: str) -> str:
-    path_split = path.split("/")
-    assert path_split[-2] in ["train", "test", "supplemental"]
-    assert path_split[-4] == "raw"
-    assert path_split[-5].startswith("dcase202")
-    return "/".join(path_split[-5:])
+def load_clustering_features(
+    output_dir: Path, embed_key: str
+) -> Tuple[np.ndarray, List[str]]:
+    """Read a selected feature from completed NPY training extraction."""
+    data = load_extract_data(output_dir, "train").extract_dict
+    embed, paths = data[embed_key], data["path"].tolist()
+    if embed.ndim == 3 and embed.shape[1] == 1:
+        embed = embed[:, 0, :]
+    if embed.ndim != 2 or len(embed) == 0:
+        raise ValueError(
+            f"Clustering requires nonempty (samples, features), got {embed.shape} "
+            f"for {embed_key!r} in {output_dir}"
+        )
+    if len(embed) != len(paths) or not all(isinstance(p, str) for p in paths):
+        raise ValueError(f"Feature rows and string paths must agree in {output_dir}")
+    return embed, paths
 
 
 def generate_pseudo_labels(
     idx_array: np.ndarray, path_list: List[str]
 ) -> Dict[str, Any]:
+    if len(idx_array) != len(path_list):
+        raise ValueError("Labels and paths must have the same length")
+    if len(idx_array) == 0 or not np.isfinite(idx_array).all():
+        raise ValueError("Labels must be nonempty and finite")
+    if not np.array_equal(np.unique(idx_array), np.arange(len(np.unique(idx_array)))):
+        raise ValueError("Labels must be consecutive integers starting at zero")
     label_dict = {"num_class": len(set(idx_array)), "path2idx_dict": {}}
     for path, idx in zip(path_list, idx_array):
-        label_dict["path2idx_dict"][_get_relative_dcase_path(path)] = int(idx)
+        key = get_dcase_path(path)
+        if key in label_dict["path2idx_dict"]:
+            raise ValueError(f"Duplicate training path: {key}")
+        label_dict["path2idx_dict"][key] = int(idx)
     return label_dict
 
 

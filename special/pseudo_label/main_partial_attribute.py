@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 
-from asdkit.utils.common import instantiate_tgt, read_json
+from asdkit.utils.common import hydra_to_pydantic, instantiate, read_json
 from asdkit.utils.dcase_utils import MACHINE_DICT
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,8 @@ class Config(BaseModel):
     output_label_name: str
     model: Dict[str, Any]
     org_label_name: str
+    org_labels_root_dir: Path = Path("../../labels")
+    embed_key: str = "embed_cls"
 
 
 def get_org_label(
@@ -48,10 +50,15 @@ def get_org_label(
 
 
 def get_pseudo_label(
-    teacher_dir: Path, machine: str, model_config: Dict[str, Any]
+    teacher_dir: Path,
+    machine: str,
+    model_config: Dict[str, Any],
+    embed_key: str = "embed_cls",
 ) -> Tuple[np.ndarray, List[str]]:
-    model: PseudoLabelModel = instantiate_tgt(model_config)
-    extract = load_extract(teacher_dir=teacher_dir, machine=machine)
+    model: PseudoLabelModel = instantiate(model_config)
+    extract = load_extract(
+        teacher_dir=teacher_dir, machine=machine, embed_key=embed_key
+    )
     embed = extract.embed
     path = extract.path
 
@@ -74,6 +81,7 @@ def process_machinewise_labels(
     model_config: Dict[str, Any],
     org_path2idx_dict: Dict[str, int],
     wo_attr_machine_list: List[str],
+    embed_key: str = "embed_cls",
 ) -> Tuple[np.ndarray, List[str]]:
     idx_array_list: List[np.ndarray] = []
     path_list: List[str] = []
@@ -82,7 +90,10 @@ def process_machinewise_labels(
     for machine in tqdm(all_machine_list):
         if machine in wo_attr_machine_set:
             idx_array, path_list_tmp = get_pseudo_label(
-                teacher_dir=teacher_dir, machine=machine, model_config=model_config
+                teacher_dir=teacher_dir,
+                machine=machine,
+                model_config=model_config,
+                embed_key=embed_key,
             )
             logger.info(f"{machine} no attr: {len(np.unique(idx_array))} clusters")
         else:
@@ -90,6 +101,8 @@ def process_machinewise_labels(
                 org_path2idx_dict=org_path2idx_dict, machine=machine
             )
             logger.info(f"{machine} org attr: {len(np.unique(idx_array))} clusters")
+        if len(idx_array) == 0:
+            raise ValueError(f"No training labels found for {machine}")
         idx_array_list.append(idx_array)
         path_list.extend(path_list_tmp)
 
@@ -98,9 +111,9 @@ def process_machinewise_labels(
     return idx_array, path_list
 
 
-@hydra.main(version_base=None, config_path="config", config_name="config")
+@hydra.main(version_base=None, config_path="config", config_name="kmeans_ratio_08")
 def main(hydra_cfg: DictConfig) -> None:
-    cfg: Config = Config(**hydra_cfg)
+    cfg = hydra_to_pydantic(hydra_cfg, Config)
 
     json_path = get_output_json_path(
         labels_root_dir=cfg.labels_root_dir,
@@ -115,8 +128,10 @@ def main(hydra_cfg: DictConfig) -> None:
     )
     model_config: Dict[str, Any] = dict(cfg.model)
     org_path2idx_dict: Dict[str, int] = read_json(
-        f"../../labels/{cfg.dcase}/{cfg.org_label_name}.json"
-    )["path2idx_dict"]  # type: ignore
+        cfg.org_labels_root_dir / cfg.dcase / f"{cfg.org_label_name}.json"
+    )[
+        "path2idx_dict"
+    ]  # type: ignore
     wo_attr_machine_list: List[str] = MACHINE_DICT[f"{cfg.dcase}-wo-attr"]
 
     idx_array, path_list = process_machinewise_labels(
@@ -125,6 +140,7 @@ def main(hydra_cfg: DictConfig) -> None:
         model_config=model_config,
         org_path2idx_dict=org_path2idx_dict,
         wo_attr_machine_list=wo_attr_machine_list,
+        embed_key=cfg.embed_key,
     )
 
     write_pseudo_label_json(

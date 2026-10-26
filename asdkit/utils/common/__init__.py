@@ -1,4 +1,4 @@
-from .instantiate_util import instantiate_tgt
+from .hydra import hydra_to_pydantic, instantiate
 from .json_util import read_json, write_json
 from .logging_util import set_logging
 from .match import re_match_any

@@ -1,37 +1,34 @@
 import logging
-from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from asdkit.utils.common import instantiate_tgt
+from asdkit.utils.common import instantiate
 from asdkit.utils.config_class import DMConfig, DMSplitConfig
 
 logger = logging.getLogger(__name__)
 
 
 class PLDataModule(pl.LightningDataModule):
-    def __init__(self, dm_cfg: DMSplitConfig):
+    def __init__(self, dm_cfg: DMSplitConfig) -> None:
         super().__init__()
         self.dm_cfg = dm_cfg
 
     @staticmethod
-    def get_loader(dm_config: Optional[DMConfig]) -> DataLoader | None:
+    def get_loader(dm_config: Optional[DMConfig]) -> Optional[DataLoader]:
 
         if dm_config is None:
             return None
 
-        dataset = instantiate_tgt(dm_config.dataset)
+        dataset = instantiate(dm_config.dataset)
 
         if dm_config.batch_sampler is None:
             batch_sampler = None
         else:
-            batch_sampler = instantiate_tgt(
-                {"dataset": dataset, **dm_config.batch_sampler}
-            )
+            batch_sampler = instantiate(cfg=dm_config.batch_sampler, dataset=dataset)
 
-        collator = instantiate_tgt(dm_config.collator)
+        collator = instantiate(dm_config.collator)
         return DataLoader(
             dataset=dataset,
             batch_sampler=batch_sampler,
@@ -39,12 +36,12 @@ class PLDataModule(pl.LightningDataModule):
             **dm_config.dataloader,
         )
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> Optional[DataLoader]:
         return self.get_loader(dm_config=self.dm_cfg.train)
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> Optional[DataLoader]:
         if self.dm_cfg.valid is not None:
-            # check validation configuration
+            # Check validation configuration
             if self.dm_cfg.valid.dataloader.get("shuffle", True):
                 logger.warning(
                     "Validation dataloader set shuffle=True, which is not recommended"
@@ -60,5 +57,5 @@ class PLDataModule(pl.LightningDataModule):
 
         return self.get_loader(dm_config=self.dm_cfg.valid)
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> None:
         return None

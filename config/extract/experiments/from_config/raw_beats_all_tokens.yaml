@@ -1,0 +1,15 @@
+# @package _global_
+# Full token output for explicit extraction; run recipes use raw_beats_preprocessed.
+frontend_source_type: config
+
+sec: ${dcase}_${machine}
+
+frontend_config:
+  _target_: asdkit.frontends.ModelFrontend
+  model_cfg:
+    _target_: asdkit.models.pretrained_models.wrapper.PretrainedWrapper
+    model_cfg:
+      _target_: asdkit.models.pretrained_models.beats.BEATsSSLModel
+      model_id: "BEATs_iter3"
+    adaptation_cfg:
+      _target_: asdkit.models.pretrained_models.adaptation.Frozen

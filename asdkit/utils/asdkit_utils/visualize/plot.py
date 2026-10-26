@@ -10,25 +10,25 @@ logger = logging.getLogger(__name__)
 def get_u_idx(
     is_test: np.ndarray, is_target: np.ndarray, is_normal: np.ndarray, label: str
 ) -> np.ndarray:
-    label_split = label.split("_")
+    label_parts = label.split("_")
     # train/test
-    if label_split[0] == "train":
+    if label_parts[0] == "train":
         u_idx = is_test == 0
-    elif label_split[0] == "test":
+    elif label_parts[0] == "test":
         u_idx = is_test == 1
     else:
         raise ValueError(f"Unexpected label: {label}")
     # source/target
-    if label_split[1] == "source":
+    if label_parts[1] == "source":
         u_idx = u_idx & (is_target == 0)
-    elif label_split[1] == "target":
+    elif label_parts[1] == "target":
         u_idx = u_idx & (is_target == 1)
     else:
         raise ValueError(f"Unexpected label: {label}")
     # normal/anomaly
-    if label_split[2] == "normal":
+    if label_parts[2] == "normal":
         u_idx = u_idx & (is_normal == 1)
-    elif label_split[2] == "anomaly":
+    elif label_parts[2] == "anomaly":
         u_idx = u_idx & (is_normal == 0)
     else:
         raise ValueError(f"Unexpected label: {label}")
@@ -43,7 +43,7 @@ def get_cfg_list_of_dict(
     s = 70
     linewidths = 2
     cfg_list_of_dict: List[dict] = [{}, {}]
-    # axes[0]
+    # axes[0]: training samples
     cfg_list_of_dict[0]["train_source_normal"] = {
         "marker": ",",
         "alpha": alpha,
@@ -60,7 +60,7 @@ def get_cfg_list_of_dict(
         "facecolor": "None",
         "linewidths": linewidths,
     }
-    # axes[1]
+    # axes[1]: training and test samples
     cfg_list_of_dict[1]["train_source_normal"] = {
         "marker": ",",
         "alpha": 0.2,
@@ -172,13 +172,13 @@ def plot_umap(visualize_dict: dict, save_dir, save_path_stem) -> None:
         save_path=f"{save_dir}/{save_path_stem}_sectionall.png",
         **lim_dict,
     )
-    for sec in np.unique(section):
-        idx = section == sec
+    for section_id in np.unique(section):
+        idx = section == section_id
         plot_and_save(
             umap_embed=umap_embed[idx],
             is_test=is_test[idx],
             is_target=is_target[idx],
             is_normal=is_normal[idx],
-            save_path=f"{save_dir}/{save_path_stem}_section{sec}.png",
+            save_path=f"{save_dir}/{save_path_stem}_section{section_id}.png",
             **lim_dict,
         )

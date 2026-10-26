@@ -1,26 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# This is a recipe for a discriminative ASD system
-# Frontend models are shared for all machine types
+# Train one discriminative frontend shared across machine types.
+# Arguments: DCASE SEED RECIPE [EXTRACT_CONFIG] [SCORE_CONFIG].
 
-# ---------------------------- #
 dcase=$1
 seed=$2
 name="recipe"
 version=$3
-infer_ver="last"
-# ---------------------------- #
+infer_ver="default"
+
 experiments_train="${version}"
-experiments_extract="restore/shared"
-experiments_score="default"
-# ---------------------------- #
-source ../base/base.sh
+experiments_extract="${4:-from_checkpoint/shared}"
+experiments_score="${5:-default}"
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${script_dir}/../base/base.sh"
 
 asdkit_train experiments="${experiments_train}"
-for machine in $machines; do
+for machine in "${machines[@]}"; do
     asdkit_extract experiments="${experiments_extract}"
     asdkit_score experiments="${experiments_score}"
     asdkit_evaluate
-    asdkit_visualize
 done
 asdkit_table

@@ -13,6 +13,6 @@ model_ver: "all"
 frontend:
   model_cfg:
     loss_cfg:
-      tgt_class: asdkit.losses.AdaCos
+      _target_: asdkit.losses.AdaCos
       dynamic: false
       trainable: false

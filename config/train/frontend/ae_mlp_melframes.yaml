@@ -1,0 +1,32 @@
+_target_: asdkit.frontends.Ae1DStftFramesPLFrontend
+
+optim_cfg:
+  _target_: torch.optim.AdamW
+  lr: 1.0e-3
+
+lrscheduler_cfg: null
+
+label_dict_path: ${label_dict_path}
+
+model_cfg:
+  encoder_model_cfg:
+    _target_: asdkit.models.autoencoder.DCASEMLPEncoder
+    h_dim: 128
+    z_dim: 8
+  decoder_model_cfg:
+    _target_: asdkit.models.autoencoder.DCASEMLPDecoder
+    h_dim: ${frontend.model_cfg.encoder_model_cfg.h_dim}
+    z_dim: ${frontend.model_cfg.encoder_model_cfg.z_dim}
+  stft_cfg:
+    sr: ${datamodule.sr}
+    n_fft: 1024
+    hop_length: 512
+    n_mels: 128
+    power: 1.0
+    f_min: 0.0
+    f_max: 8000.0
+    use_log: true
+    temporal_norm: false
+  n_frames: 5
+  loss_cfg:
+    _target_: torch.nn.MSELoss
