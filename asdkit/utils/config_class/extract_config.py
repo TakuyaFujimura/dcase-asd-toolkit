@@ -4,12 +4,13 @@ from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, field_validator
 
 from .cast_utils import cast_str, check_dcase
-from .train_config import DMConfig
 
 
-class ExtractDMSplitConfig(BaseModel):
-    train: DMConfig
-    test: DMConfig
+class ExtractDMConfig(BaseModel):
+    dataloader: Dict[str, Any]
+    dataset: Dict[str, Any]
+    batch_sampler: Optional[Dict[str, Any]] = None
+    collator: Dict[str, Any]
 
 
 class MainExtractConfig(BaseModel):
@@ -19,17 +20,17 @@ class MainExtractConfig(BaseModel):
     name: str
     version: str
 
-    restore_or_scratch: Literal["restore", "scratch"]
+    frontend_source_type: Literal["checkpoint", "config"]
 
-    scratch_frontend: Optional[Dict[str, Any]] = None
-    restore_model_ver: Optional[str] = None
-    restore_ckpt_ver: Optional[str] = None
+    frontend_config: Optional[Dict[str, Any]] = None
+    frontend_checkpoint: Optional[str] = None
+    model_ver: Optional[str] = None
 
     result_dir: Path
     infer_ver: str
 
     data_dir: str
-    datamodule: ExtractDMSplitConfig
+    datamodule: Dict[str, ExtractDMConfig] = Field(min_length=1)
 
     machine: str
 

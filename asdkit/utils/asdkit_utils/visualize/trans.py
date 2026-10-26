@@ -3,12 +3,11 @@ from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
-import umap
 
+from asdkit.utils.asdkit_utils.extract import load_extract_data
 from asdkit.utils.common.match import re_match_any
 from asdkit.utils.common.np_util import normalize_vector
-
-from .utils import load_npz_dict
+from asdkit.utils.common.optional_dependencies import require_optional
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +26,7 @@ def get_visualize_dict(
     train_dict: dict, test_dict: dict, extract_items: List[str]
 ) -> dict:
     if set(train_dict.keys()) != set(test_dict.keys()):
-        raise ValueError(
-            "train_extract.npz and test_extract.npz must have the same keys."
-        )
+        raise ValueError("Train and test extraction results must have the same keys.")
 
     visualize_dict = {}
     for key in train_dict.keys():
@@ -51,9 +48,10 @@ def trans_umap(
     save_path: Path,
     extract_items: List[str],
 ) -> None:
+    umap = require_optional("umap", "umap-learn", "visualize", "UMAP visualization")
     # Load data
-    train_dict = load_npz_dict(output_dir / "train_extract.npz")
-    test_dict = load_npz_dict(output_dir / "test_extract.npz")
+    train_dict = load_extract_data(output_dir, "train").extract_dict
+    test_dict = load_extract_data(output_dir, "test").extract_dict
     embed, is_test = get_embed_is_test(
         train_dict=train_dict, test_dict=test_dict, embed_key=embed_key
     )
@@ -61,7 +59,7 @@ def trans_umap(
         train_dict=train_dict, test_dict=test_dict, extract_items=extract_items
     )
 
-    # accept "euclid" as an alias for "euclidean"
+    # Accept "euclid" as an alias for "euclidean"
     if metric == "euclid":
         metric = "euclidean"
     if metric == "cosine":

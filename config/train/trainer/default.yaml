@@ -1,4 +1,4 @@
-tgt_class: lightning.pytorch.Trainer
+_target_: lightning.pytorch.Trainer
 max_epochs: 16
 min_epochs: null
 accelerator: "gpu"

@@ -1,20 +1,23 @@
 import logging
 from typing import Any, Dict
 
-from asdkit.models.audio_feature.stft import STFT
+from torch import nn
+
+from asdkit.models.audio_feature.stft import Spectrogram
 
 from ..base import BaseFrontend
 
 logger = logging.getLogger(__name__)
 
 
-class STFTPoolModel(BaseFrontend):
+class STFTPoolFrontend(nn.Module, BaseFrontend):
     def __init__(self, stft_cfg: Dict[str, Any], pool: str):
         """
         Args:
             stft_cfg (Dict[str, Any]): Configuration for the STFT.
             pool (str): Pooling method in the form of '<axis>_<agg>', where <axis> is 'freq' or 'time' and <agg> is 'mean' or 'max'.
         """
+        super().__init__()
         if len(pool.split("_")) != 2:
             raise ValueError(
                 f"Invalid pool: {pool}. Must be in the form of '<axis>_<pool>'"
@@ -31,9 +34,12 @@ class STFTPoolModel(BaseFrontend):
             raise ValueError(f"Invalid agg: {agg}")
         self.agg = agg
 
-        self.stft = STFT(**stft_cfg)
+        self.stft = Spectrogram(**stft_cfg)
 
-    def extract(self, batch: dict) -> Dict[str, Any]:
+    def get_metadata(self) -> Dict[str, Any]:
+        return {"embeddings": {"embed": {"representation": "vector"}}}
+
+    def extract(self, batch: Dict[str, Any]) -> Dict[str, Any]:
         spectrogram = self.stft(batch["wave"])  # B, F, T
         if self.agg == "mean":
             embed = spectrogram.mean(dim=self.axis)

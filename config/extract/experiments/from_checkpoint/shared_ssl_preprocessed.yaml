@@ -1,0 +1,25 @@
+# @package _global_
+defaults:
+  - /experiments/from_checkpoint/shared
+  - _self_
+
+# Pool the adapted checkpoint's tokens during extraction, not during scoring.
+frontend_source_type: config
+
+frontend_config:
+  _target_: asdkit.frontends.EmbeddingViewWrapperFrontend
+  frontend_source_type: checkpoint
+  frontend_checkpoint: ${result_dir}/${name}/${dcase}/${version}/${seed}/model/${model_ver}/checkpoints/${frontend_checkpoint}.ckpt
+  postprocessing:
+    embed:
+      source_key: embed
+      view_name: freq_grouped_time_pooled
+      pooling_name: mean
+    embed_rdp:
+      source_key: embed
+      view_name: freq_grouped_time_pooled
+      pooling_name: rdp_4
+    embed_global:
+      source_key: embed
+      view_name: global_pooled
+      pooling_name: mean

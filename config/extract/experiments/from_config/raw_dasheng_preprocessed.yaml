@@ -1,0 +1,30 @@
+# @package _global_
+frontend_source_type: config
+
+sec: ${dcase}_${machine}
+
+frontend_config:
+  _target_: asdkit.frontends.EmbeddingViewWrapperFrontend
+  frontend_source_type: config
+  postprocessing:
+    embed:
+      source_key: embed
+      view_name: freq_grouped_time_pooled
+      pooling_name: mean
+    embed_rdp:
+      source_key: embed
+      view_name: freq_grouped_time_pooled
+      pooling_name: rdp_4
+    embed_global:
+      source_key: embed
+      view_name: global_pooled
+      pooling_name: mean
+  frontend_config:
+    _target_: asdkit.frontends.ModelFrontend
+    model_cfg:
+      _target_: asdkit.models.pretrained_models.wrapper.PretrainedWrapper
+      model_cfg:
+        _target_: asdkit.models.pretrained_models.dasheng.DashengSSLModel
+        model_id: "mispeech/dasheng-base"
+      adaptation_cfg:
+        _target_: asdkit.models.pretrained_models.adaptation.Frozen

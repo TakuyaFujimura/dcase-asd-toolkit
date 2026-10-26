@@ -1,7 +1,7 @@
-tgt_class: asdkit.frontends.BasicDisPLModel
+_target_: asdkit.frontends.PretrainedDisPLFrontend
 
 optim_cfg:
-  tgt_class: torch.optim.AdamW
+  _target_: torch.optim.AdamW
   lr: 1.0e-4
 
 lrscheduler_cfg: null
@@ -10,19 +10,22 @@ label_dict_path: ${label_dict_path}
 
 model_cfg:
   extractor_cfg:
-    tgt_class: asdkit.models.pretrained_models.eat.EATLoRA
-    lora_cfg:
-      r: 64
-      target_modules: ["qkv"]
-    embed_size: 256
-    projection_type: "linear"
+    _target_: asdkit.models.pretrained_models.wrapper.PretrainedWrapper
     model_cfg:
-      ckpt_path: "pretrained_models/eat/EAT-base_epoch10_pt.pt"
+      _target_: asdkit.models.pretrained_models.eat.EATSSLModel
+      model_id: "worstchan/EAT-base_epoch30_pretrain"
       sr: ${datamodule.sr}
-      sec: ${datamodule.sec}
-      prediction_mode: "cls"
-      specaug: false
+      spectrogram_augmentation_cfg: null
+    adaptation_cfg:
+      _target_: asdkit.models.pretrained_models.adaptation.LoRA
+      lora_cfg:
+        r: 64
+        target_modules: ["qkv"]
+  embedding_head_cfg:
+    _target_: asdkit.models.pretrained_models.heads.LinearHead
+    embedding_dim: 256
+  head_input_mode: cls
   loss_cfg: {}
-  label_to_lossweight_dict:
+  label_loss_weight_dict:
     main: 1
   augmentation_cfg_list: []

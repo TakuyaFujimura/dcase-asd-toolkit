@@ -5,23 +5,22 @@ train:
     num_workers: 0
     pin_memory: false
     shuffle: false
-  collator:
-    tgt_class: "asdkit.datasets.DCASEWaveCollator"
-    label_dict_path: {}
-    sec: null
-    sr: 16000
-    shuffle: false
   dataset:
-    tgt_class: "asdkit.datasets.WaveDataset"
+    _target_: asdkit.datasets.WaveDataset
     path_selector_list:
       - "${data_dir}/formatted/${dcase}/raw/${machine}/train/*.wav"
   batch_sampler: null
+  collator:
+    _target_: asdkit.datasets.DCASEWaveCollator
+    label_dict_path: {}
+    sec: ${sec}
+    sr: 16000
+    shuffle: false
 test:
   dataloader: ${datamodule.train.dataloader}
-  collator: ${datamodule.train.collator}
   dataset:
-    tgt_class: "asdkit.datasets.WaveDataset"
+    _target_: asdkit.datasets.WaveDataset
     path_selector_list:
       - "${data_dir}/formatted/${dcase}/raw/${machine}/test/*.wav"
   batch_sampler: null
-
+  collator: ${datamodule.train.collator}

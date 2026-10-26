@@ -12,6 +12,7 @@ dcase2sec_dict = {
     "dcase2023": 18.0,
     "dcase2024": 12.0,
     "dcase2025": 12.0,
+    "dcase2026": 16.0,
     "dcase2020_fan": 10.0,
     "dcase2020_pump": 10.0,
     "dcase2020_slider": 10.0,
@@ -77,6 +78,18 @@ dcase2sec_dict = {
     "dcase2025_ScrewFeeder": 10.0,
     "dcase2025_ToyPet": 10.0,
     "dcase2025_ToyRCCar": 7.0,
+    "dcase2026_fan": 10.0,
+    "dcase2026_sliderEmu": 10.0,
+    "dcase2026_ToyCar": 11.0,
+    "dcase2026_ToyCarEmu": 12.0,
+    "dcase2026_gearboxEmu": 10.0,
+    "dcase2026_valveEmu": 10.0,
+    "dcase2026_bearingEmu": 10.0,
+    "dcase2026_BlowerDustCollector": 10.0,
+    "dcase2026_Sander": 10.0,
+    "dcase2026_SewingMachine": 10.0,
+    "dcase2026_ToothBrush": 6.0,
+    "dcase2026_ToyDrone": 16.0,
 }
 
 

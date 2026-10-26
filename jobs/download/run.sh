@@ -1,8 +1,11 @@
-data_dir="../../../data" # relative path from this script or absolute path
-dcase="dcase2023"
+#!/usr/bin/env bash
+set -euo pipefail
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+data_dir="${script_dir}/../../../data" # absolute path to the data directory
+dcase="dcase2026"
 
-absolute_data_dir=$(cd "$(dirname ${data_dir})" && pwd)/$(basename ${data_dir})
-echo "absolute data_dir: ${absolute_data_dir}"
-cd base
-bash base.sh "${absolute_data_dir}" "${dcase}"
+case "$dcase" in
+    dcase202[0-6]) bash "${script_dir}/base/${dcase}.sh" "${data_dir}" ;;
+    *) echo "Unknown dcase: ${dcase}" >&2; exit 1 ;;
+esac

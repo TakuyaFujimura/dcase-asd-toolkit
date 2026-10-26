@@ -4,53 +4,67 @@ import logging
 
 import hydra
 import lightning.pytorch as pl
-import numpy as np
 from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 from asdkit.utils.asdkit_utils.extract import (
-    extraction_setup_restore,
-    extraction_setup_scratch,
-    loader2dict,
+    NpyExtractionWriter,
+    create_extraction_frontend,
+    create_extraction_loaders,
+    extract_batches,
+    get_num_samples,
 )
-from asdkit.utils.asdkit_utils.path import make_output_dir
+from asdkit.utils.asdkit_utils.path import get_extraction_marker, get_output_dir
+from asdkit.utils.common import write_json
+from asdkit.utils.common.hydra import hydra_to_pydantic
 from asdkit.utils.config_class import MainExtractConfig
 from asdkit.utils.dcase_utils import parse_sec_cfg
 
 logger = logging.getLogger(__name__)
 
 
-def hydra_to_pydantic(config: DictConfig) -> MainExtractConfig:
-    """Converts Hydra config to Pydantic config."""
-    config_dict = parse_sec_cfg(OmegaConf.to_object(config))
-    return MainExtractConfig(**config_dict)
-
-
 @hydra.main(version_base=None, config_path="../../config/extract", config_name="main")
 def main(hydra_cfg: DictConfig) -> None:
-    cfg = hydra_to_pydantic(hydra_cfg)
+    cfg: MainExtractConfig = hydra_to_pydantic(
+        hydra_cfg=hydra_cfg, cls=MainExtractConfig, transform=parse_sec_cfg
+    )
     logger.info(f"Start extraction: {HydraConfig().get().run.dir}")
     pl.seed_everything(seed=0, workers=True)
 
-    output_dir = make_output_dir(cfg, "*_extract.npz")
-    if cfg.restore_or_scratch == "restore":
-        frontend, dataloader_dict = extraction_setup_restore(cfg)
-    elif cfg.restore_or_scratch == "scratch":
-        frontend, dataloader_dict = extraction_setup_scratch(cfg)
-    else:
-        raise ValueError(f"Unexpected restore_or_scratch: {cfg.restore_or_scratch}")
+    output_dir = get_output_dir(cfg)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    pending_splits = {}
+    for split, dm_cfg in cfg.datamodule.items():
+        marker = get_extraction_marker(output_dir / f"{split}_extract")
+        if marker.is_file() and not cfg.overwrite:
+            logger.info(f"Already completed: {split}_extract")
+        else:
+            pending_splits[split] = dm_cfg
+    if not pending_splits:
+        return
+    frontend = create_extraction_frontend(cfg)
+    dataloader_dict = create_extraction_loaders(pending_splits)
 
-    for split in ["train", "test"]:
+    for split, dataloader in dataloader_dict.items():
         logger.info(f"Extracting {split} data now...")
-        extract_dict = loader2dict(
-            dataloader=dataloader_dict[split],
-            frontend=frontend,
-            device=cfg.device,
-            extract_items=cfg.extract_items,
+        writer = NpyExtractionWriter(
+            output_dir / f"{split}_extract",
+            num_samples=get_num_samples(dataloader),
         )
-        npz_path = output_dir / f"{split}_extract.npz"
-        np.savez(npz_path, **extract_dict)
-        logger.info(f"Saved extraction result to {npz_path}")
+        try:
+            extract_batches(
+                dataloader=dataloader,
+                frontend=frontend,
+                device=cfg.device,
+                extract_items=cfg.extract_items,
+                writer=writer,
+            )
+            metadata_path = output_dir / f"{split}_extract.metadata.json"
+            write_json(json_path=metadata_path, data=frontend.get_metadata())
+            writer.finish()
+            logger.info(f"Saved extraction result to {writer.directory}")
+        finally:
+            writer.close()
 
 
 if __name__ == "__main__":

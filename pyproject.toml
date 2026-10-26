@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asdkit"
+version = "1.0.0"
+description = "A toolkit for comprehensive evaluation of anomalous sound detection methods"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+authors = [
+    { name = "Takuya Fujimura", email = "fujimura.takuya@g.sp.m.is.nagoya-u.ac.jp" },
+]
+
+dependencies = [
+    "torch>=2.0",
+    "torchaudio",
+    "torchvision",
+    "soundfile",
+    "omegaconf>=2.1",
+    # version_base and implicit target resolution warn in Hydra 1.4;
+    # removal/errors are scheduled for Hydra 1.5.
+    "hydra-core>=1.2,<1.5",
+    "scikit-learn>=0.20",
+    "imbalanced-learn>=0.4",
+    "scipy",
+    "tqdm",
+    "lightning>=2.0",
+    "matplotlib",
+    "numpy>=1.10",
+    "pandas",
+    "tensorboard>=1.15",
+    "pydantic>=2.0.1",
+    "packaging",
+    "peft>=0.4",
+    "timm>=0.3.1",
+    "einops>=0.3",
+]
+
+[project.optional-dependencies]
+visualize = ["umap-learn"]
+# Remote model code and safetensors loading determine these ranges.
+eat = ["transformers>=4.23,<5"]
+dasheng = ["transformers>=4.23"]
+
+[tool.setuptools.packages.find]
+include = ["asdkit*"]
+
+[tool.setuptools.package-data]
+"*" = ["NOTICE.md"]
+"asdkit.models.pretrained_models.beats" = ["SOURCE_NOTES.md"]
+"asdkit.models.pretrained_models.beats.original" = ["LICENSE"]
+
+[tool.black]
+target-version = ["py310"]
+force-exclude = '^/asdkit/models/pretrained_models/beats/original/(BEATs|Tokenizers|backbone|modules|quantizer)\.py$'
+
+[tool.isort]
+profile = "black"
+py_version = 310
+known_first_party = ["asdkit"]
+extend_skip_glob = [
+    "**/asdkit/models/pretrained_models/beats/original/BEATs.py",
+    "**/asdkit/models/pretrained_models/beats/original/Tokenizers.py",
+    "**/asdkit/models/pretrained_models/beats/original/backbone.py",
+    "**/asdkit/models/pretrained_models/beats/original/modules.py",
+    "**/asdkit/models/pretrained_models/beats/original/quantizer.py",
+]
+filter_files = true
+
+# For another CUDA version or CPU builds, change this index URL as described in README.
+[tool.uv.sources]
+torch = { index = "pytorch", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }
+torchaudio = { index = "pytorch", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }
+torchvision = { index = "pytorch", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true

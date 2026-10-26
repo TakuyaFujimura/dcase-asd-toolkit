@@ -3,19 +3,17 @@ defaults:
   - datamodule: default
   - experiments: null
 
-
-
-device: cuda:0 #cpu #
+device: cuda:0 # cpu
 seed: null
 dcase: null
 name: null
 version: null
 
-restore_or_scratch: null
+frontend_source_type: null
 
-scratch_frontend: null
-restore_model_ver: null
-restore_ckpt_ver: null
+frontend_config: null
+model_ver: null
+frontend_checkpoint: null
 
 result_dir: "./results"
 infer_ver: null
@@ -31,7 +29,6 @@ extract_items:
   - "is_target"
   - "embed.*"
   - "AS.*"
-
 
 overwrite: false
 

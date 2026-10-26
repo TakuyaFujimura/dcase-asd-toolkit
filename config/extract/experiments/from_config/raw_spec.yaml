@@ -1,0 +1,17 @@
+# @package _global_
+frontend_source_type: config
+
+sec: ${dcase}_${machine}
+
+frontend_config:
+  _target_: asdkit.frontends.STFTPoolFrontend
+  stft_cfg:
+    sr: ${datamodule.train.collator.sr}
+    n_fft: 1024
+    hop_length: 512
+    n_mels: 128
+    power: 1.0
+    f_min: 0.0
+    f_max: 8000.0
+    temporal_norm: false
+  pool: time_mean

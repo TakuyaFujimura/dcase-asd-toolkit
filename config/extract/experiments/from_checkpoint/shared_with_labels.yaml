@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - /experiments/from_checkpoint/shared
+  - _self_
+
+# Shared classifiers require the global training dictionary, not machinewise IDs.
+datamodule:
+  train:
+    collator:
+      label_dict_path:
+        main: "labels/${dcase}/main.json"

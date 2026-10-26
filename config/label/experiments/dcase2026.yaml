@@ -1,0 +1,6 @@
+# @package _global_
+dcase: dcase2026
+name: "main"
+labeler:
+  _target_: asdkit.labelers.BasicInfoLabeler
+  label_name: "machine_section_attr_domain"

@@ -1,6 +1,6 @@
 # Copyright 2024 Takuya Fujimura
 import logging
-from typing import Literal
+from typing import Literal, Tuple
 
 import torch
 from torch import nn
@@ -13,16 +13,16 @@ logger = logging.getLogger(__name__)
 class Conv2dEncoderLayer_ResNetBlock(nn.Module):
     def __init__(
         self,
-        input_size: tuple,
+        input_size: Tuple[int, int, int],
         out_channel: int,
         kernel: int,
         stride: int,
         use_bias: bool,
         additional_layer: Literal["SEBlock", "none"],
-    ):
+    ) -> None:
         """
         Args
-            input_size: tuple ([C, H, W]) or int (C)
+            input_size: Feature-map shape (C, F, T), excluding batch.
         """
         super().__init__()
         self.out_channel = out_channel
@@ -78,7 +78,7 @@ class Conv2dEncoderLayer_ResNetBlock(nn.Module):
         else:
             raise NotImplementedError()
 
-    def calc_outsize(self, input_size: tuple) -> tuple:
+    def calc_outsize(self, input_size: Tuple[int, int, int]) -> Tuple[int, int, int]:
         intermediate_size = calc_filtered_size_3d(
             input_size=input_size, c=self.out_channel, p=1, k=self.kernel, s=self.stride
         )
@@ -106,7 +106,7 @@ class Conv2dEncoderLayer_FirstConv(nn.Module):
         kernel: int,
         stride: int,
         use_bias: bool,
-    ):
+    ) -> None:
         super().__init__()
         self.out_channel = out_channel
         self.kernel = kernel
@@ -128,33 +128,52 @@ class Conv2dEncoderLayer_FirstConv(nn.Module):
             nn.MaxPool2d(kernel_size=self.pool_kernel, stride=self.pool_stride),
         )
 
-    def calc_convsize(self, input_size: tuple) -> tuple:
+    def calc_convsize(self, input_size: Tuple[int, int, int]) -> Tuple[int, int, int]:
         return calc_filtered_size_3d(
-            input_size, self.out_channel, 0, self.kernel, self.stride
+            input_size=input_size, c=self.out_channel, p=0, k=self.kernel, s=self.stride
         )
 
-    def calc_poolsize(self, input_size: tuple) -> tuple:
+    def calc_poolsize(self, input_size: Tuple[int, int, int]) -> Tuple[int, int, int]:
         return calc_filtered_size_3d(
-            input_size, input_size[0], 0, self.pool_kernel, self.pool_stride
+            input_size=input_size,
+            c=input_size[0],
+            p=0,
+            k=self.pool_kernel,
+            s=self.pool_stride,
         )
 
-    def calc_output_size(self, input_size: tuple) -> tuple:
+    def calc_output_size(
+        self, input_size: Tuple[int, int, int]
+    ) -> Tuple[int, int, int]:
         return self.calc_poolsize(self.calc_convsize(input_size))
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.layer(x)
 
 
 class Conv2dEncoderLayer(nn.Module):
+    """Encode a spectrogram into a fixed-width vector.
+
+    Args:
+        input_size: Spectrogram shape (F, T), excluding batch and channel axes.
+        use_bias: Enable Conv/Linear biases and BatchNorm affine together.
+            SEBlock retains its own internal bias policy.
+        emb_base_size: Output width and final channel width. Earlier stages use
+            emb_base_size/8, /4 and /2. Must be divisible by eight.
+        resnet_additional_layer: Optional squeeze-and-excitation in residual blocks.
+        aggregate: Flatten frequency features (mlp) or average frequency (gap).
+    """
+
     def __init__(
         self,
-        input_size: tuple,
+        input_size: Tuple[int, int],
         use_bias: bool,
         emb_base_size: int,
         resnet_additional_layer: Literal["SEBlock", "none"] = "SEBlock",
         aggregate: Literal["mlp", "gap"] = "mlp",
-    ):
+    ) -> None:
         super().__init__()
+        self.embedding_dim = emb_base_size
         if emb_base_size % 8 != 0:
             raise ValueError("emb_base_size must be divisible by 8")
         if len(input_size) != 2:
@@ -207,8 +226,8 @@ class Conv2dEncoderLayer(nn.Module):
             raise ValueError(f"aggregate must be 'mlp' or 'gap', but got {aggregate}")
 
     def setup_first_layer(
-        self, input_size: tuple, emb_base_size: int, use_bias: bool
-    ) -> tuple:
+        self, input_size: Tuple[int, int], emb_base_size: int, use_bias: bool
+    ) -> Tuple[int, int, int]:
         layer = Conv2dEncoderLayer_FirstConv(
             in_channel=1,
             out_channel=emb_base_size // 8,
@@ -223,11 +242,11 @@ class Conv2dEncoderLayer(nn.Module):
 
     def setup_second_layer(
         self,
-        input_size: tuple,
+        input_size: Tuple[int, int, int],
         emb_base_size: int,
         use_bias: bool,
         resnet_additional_layer: Literal["SEBlock", "none"],
-    ) -> tuple:
+    ) -> Tuple[int, int, int]:
         res1 = Conv2dEncoderLayer_ResNetBlock(
             input_size=input_size,
             out_channel=emb_base_size // 8,
@@ -252,11 +271,11 @@ class Conv2dEncoderLayer(nn.Module):
 
     def setup_3_4_5th_layer(
         self,
-        input_size: tuple,
+        input_size: Tuple[int, int, int],
         emb_base_size: int,
         use_bias: bool,
         resnet_additional_layer: Literal["SEBlock", "none"],
-    ) -> tuple:
+    ) -> Tuple[int, int, int]:
         intermediate_size = input_size
         for i, c in enumerate(
             [
@@ -287,10 +306,13 @@ class Conv2dEncoderLayer(nn.Module):
             logger.info(f"{i+3}th: {intermediate_size}")
         return intermediate_size
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Args
-            x: spectrogram (B, F, T)
+        Args:
+            x: Spectrogram shaped (B, F, T).
+
+        Returns:
+            Vectors shaped (B, emb_base_size).
         """
         x = self.bn_freq(x).unsqueeze(1)  # B, 1, F, T
         for l in self.layers:

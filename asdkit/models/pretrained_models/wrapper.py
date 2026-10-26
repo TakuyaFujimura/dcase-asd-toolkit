@@ -1,89 +1,55 @@
-from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Callable, Dict
 
 import torch
 from torch import nn
 
-from ..modules import AttnStatPool, add_lora
+from asdkit.utils.common import instantiate
+from asdkit.utils.common.representation import EmbeddingRepresentation
+
+from .adaptation import Frozen, PretrainedAdaptation
 
 
-class BasePretrainedWrapper(nn.Module, ABC):
+class PretrainedWrapper(nn.Module):
+    """
+    Args:
+        model_cfg: SSL model configuration with _target_.
+        adaptation_cfg: Frozen, LoRA, or full fine-tuning configuration.
+
+    Attributes:
+        embedding_dim: Last dimension of the raw SSL features.
+        embedding_representation: Layout identifier for extraction metadata.
+        transform_features: Convert raw features using features and output_mode.
+    """
+
     def __init__(
-        self,
-        embed_size: int = 128,
-        projection_type: str = "linear",
-        model_cfg: Optional[dict] = None,
-    ):
-        """
-        Args:
-            embed_size (int): Size of the embedding.
-            projection_type (str): Type of projection layer. Options are "linear" or "attn_stat_pool".
-            model_cfg (Dict[str, Any]): Configuration for the pre-trained model. Parameters in this dictionary are used in `self.construct_model`, which is defined in subclasses.
-        """
+        self, model_cfg: Dict[str, Any], adaptation_cfg: Dict[str, Any]
+    ) -> None:
         super().__init__()
-        if model_cfg is None:
-            model_cfg = {}
-        self.projection_type = projection_type
-        self.model, feature_dim = self.construct_model(**model_cfg)
-        self.embed_size = embed_size
-        if self.projection_type == "linear":
-            self.projection_net = nn.Linear(feature_dim, self.embed_size)
-        elif self.projection_type == "attn_stat_pool":
-            self.projection_net = nn.Sequential(
-                AttnStatPool(embed_size=feature_dim),
-                nn.Linear(feature_dim, self.embed_size),
-            )
-        else:
-            raise NotImplementedError(
-                f"projection_type={self.projection_type} is not supported."
-            )
+        model = instantiate(model_cfg)
+        adaptation = instantiate(adaptation_cfg)
+        if not isinstance(adaptation, PretrainedAdaptation):
+            raise TypeError("adaptation_cfg must instantiate PretrainedAdaptation")
+        self.embedding_dim = model.embedding_dim  # type: ignore[attr-defined]
+        self.embedding_representation: EmbeddingRepresentation = (
+            model.embedding_representation
+        )
+        self.transform_features: Callable[..., torch.Tensor] = model.transform_features
+        self.is_frozen = isinstance(adaptation, Frozen)
+        self.model = adaptation.apply(backbone=model)
 
-    @abstractmethod
-    def construct_model(self, *args, **kwargs) -> tuple[nn.Module, int]:
+    def forward(self, x: torch.Tensor, **kwargs: object) -> torch.Tensor:
         """
         Args:
+            x: Waveforms with shape (B, samples).
+            **kwargs: Additional backbone arguments.
 
         Returns:
-            Pretrained Model[nn.Module]
-            feature dim [int]
+            Raw SSL features with the backbone-specific shape.
         """
-        pass
+        return self.model(x, **kwargs)
 
-    @abstractmethod
-    def extract_features(self, x) -> torch.Tensor:
-        pass
-
-    def forward(self, x):
-        """
-        Args
-            x: (B, L)
-        """
-        z = self.extract_features(x)
-
-        if self.projection_type == "linear":
-            z = torch.mean(z, dim=1)  # (B, L, D) -> (B, D)
-            z = self.projection_net(z)  # (B, D)
-        elif self.projection_type == "attn_stat_pool":
-            z = self.projection_net(z)  # (B, L, D) -> (B, D)
-        else:
-            raise NotImplementedError(
-                f"projection_type={self.projection_type} is not supported."
-            )
-
-        return z
-
-
-class BaseLoRA(BasePretrainedWrapper):
-    def __init__(
-        self,
-        lora_cfg: dict,
-        embed_size: int = 128,
-        projection_type: str = "linear",
-        model_cfg: Optional[dict] = None,
-    ):
-        super().__init__(
-            embed_size=embed_size,
-            projection_type=projection_type,
-            model_cfg=model_cfg,
-        )
-        self.model = add_lora(self.model, lora_cfg)
+    def train(self, mode: bool = True) -> "PretrainedWrapper":
+        super().train(mode)
+        if self.is_frozen:
+            self.model.eval()
+        return self

@@ -12,6 +12,9 @@ class MainScoreConfig(BaseModel):
     name: str
     version: str
 
+    skip_train_score: bool = False
+    overwrite_keep_existing: bool = False
+
     infer_ver: str
     result_dir: Path
 
